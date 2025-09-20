@@ -1,0 +1,14 @@
+bin/
+obj/
+
+ApplicationDbContextFactory.cs
+
+**/.microsoft/usersecrets/secrets.json
+
+Migrations/
+
+.vscode/
+
+*.suo
+*.user
+*.userosscache

@@ -1,11 +1,12 @@
 using backend.Data;
 using backend.Models;
+using backend.DTOs;
 using Microsoft.EntityFrameworkCore;
 
 public interface IJobApplicationService
 {
   Task<JobApplication> CreateApplication(int userId, JobApplicationCreateRequest request);
-  Task<List<JobApplication>> GetAllUserApplications(int userId);
+  Task<List<JobApplicationDto>> GetAllUserApplications(int userId);
   Task<JobApplication?> GetApplicationById(int applicationId, int userId);
   Task<JobApplication> UpdateApplication(int userId, JobApplicationUpdateRequest request);
   Task DeleteApplication(int applicationId, int userId);
@@ -51,11 +52,22 @@ public class JobApplicationService : IJobApplicationService
   }
 
   // Get all user's job applications
-  public Task<List<JobApplication>> GetAllUserApplications(int userId)
+  public async Task<List<JobApplicationDto>> GetAllUserApplications(int userId)
   {
-    return _dbContext.JobApplications
+    return await _dbContext.JobApplications
         .Where(a => a.UserId == userId)
-        .Include(a => a.StatusHistory)
+        .Select(a => new JobApplicationDto(
+            a.Id,
+            a.Company,
+            a.Role,
+            a.Status,
+            a.JobPostingURL,
+            a.Notes,
+            a.DateApplied,
+            a.StatusHistory
+                .Select(h => new JobStatusHistoryDto(h.Id, h.Status, h.ChangeDate))
+                .ToList()
+        ))
         .ToListAsync();
   }
 

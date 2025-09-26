@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using backend.DTOs;
 
 [Authorize] // JWT Auth
 [ApiController]
@@ -33,9 +34,9 @@ public class JobApplicationController : ControllerBase
     try
     {
       var userId = GetUserId();
-      var applications = await _jobApplicationService.GetAllUserApplications(userId);
+      var applicationDtos = await _jobApplicationService.GetAllUserApplications(userId);
 
-      return Ok(applications);
+      return Ok(applicationDtos);
     }
     catch (UnauthorizedAccessException ex)
     {
@@ -62,7 +63,9 @@ public class JobApplicationController : ControllerBase
       var userId = GetUserId();
       var newApplication = await _jobApplicationService.CreateApplication(userId, request);
 
-      return CreatedAtAction(nameof(GetAllUserApplications), new { id = newApplication.Id }, newApplication);
+      var newApplicationDto = JobApplicationDto.FromEntity(newApplication);
+
+      return CreatedAtAction(nameof(GetAllUserApplications), new { id = newApplicationDto.Id }, newApplicationDto);
     }
     catch (UnauthorizedAccessException ex)
     {
@@ -83,7 +86,9 @@ public class JobApplicationController : ControllerBase
       var userId = GetUserId();
       var updatedApplication = await _jobApplicationService.UpdateApplication(userId, request);
 
-      return Ok(updatedApplication);
+      var updatedApplicationDto = JobApplicationDto.FromEntity(updatedApplication);
+
+      return Ok(updatedApplicationDto);
     }
     catch (KeyNotFoundException)
     {

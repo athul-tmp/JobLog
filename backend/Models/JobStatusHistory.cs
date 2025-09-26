@@ -6,6 +6,6 @@ namespace backend.Models
     public required string Status { get; set; }
     public DateTime ChangeDate { get; set; } = DateTime.UtcNow;
     public required int JobApplicationId { get; set; }
-    public required JobApplication JobApplication { get; set; }
+    public JobApplication JobApplication { get; set; } = default!;
   }
 }

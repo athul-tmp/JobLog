@@ -1,8 +1,10 @@
-import axios, { AxiosInstance } from "axios";
+import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from "axios";
 import { LoginResponse } from "../types/types";
 
 // C# backend base URL
 const API_BASE_URL = "http://localhost:5264/api"; 
+
+const TOKEN_KEY = "joblog_jwt_token";
 
 const apiClient: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
@@ -10,6 +12,21 @@ const apiClient: AxiosInstance = axios.create({
     "Content-Type": "application/json",
   },
 });
+
+apiClient.interceptors.request.use(
+  (config: InternalAxiosRequestConfig) => {
+    // Retrieve token from localStorage
+    const token = localStorage.getItem(TOKEN_KEY);
+    // Attach it to the request header
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error: AxiosError) => {
+    return Promise.reject(error);
+  }
+);
 
 export const AuthService = {
   // Login method

@@ -1,115 +1,76 @@
-import Image from "next/image";
-import { Geist, Geist_Mono } from "next/font/google";
+import { useEffect } from "react";
+import { useRouter } from "next/router";
+import Head from "next/head";
+import Link from "next/link";
+import { ArrowRightIcon } from "lucide-react"; 
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+import { useAuth } from "@/context/AuthContext";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import { Button } from "@/components/ui/button";
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+export default function LandingPage() {
+  const { isAuthenticated, authLoading } = useAuth();
+  const router = useRouter();
 
-export default function Home() {
+  // Redirect Logic
+  useEffect(() => {
+    if (!authLoading && isAuthenticated) {
+      router.push("/dashboard");
+    }
+  }, [isAuthenticated, authLoading, router]);
+
+  if (authLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen bg-background text-foreground">
+        <p className="text-xl">Loading Session...</p>
+      </div>
+    );
+  }
+  
   return (
-    <div
-      className={`${geistSans.className} ${geistMono.className} font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20`}
-    >
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/pages/index.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+    <>
+      <Head>
+        <title>JobLog</title>
+      </Head>
+      
+      <div className="min-h-screen flex flex-col">
+        <Header />
+        
+        <main className="flex-1">
+          <section className="container mx-auto h-[calc(100vh-64px-64px)] flex items-center justify-center text-center p-6 bg-background">
+            <div className="max-w-4xl mx-auto">
+              <h1 className="text-6xl md:text-7xl lg:text-8xl font-extrabold tracking-tighter text-foreground leading-tight">
+                Stay Organised
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-pink-500 block">
+                  Throughout Your Job Hunt.
+                </span>
+              </h1>
+              
+              <p className="mt-6 text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
+                JobLog helps you stay organised and focused while you apply for jobs. 
+                Track every application, stay on top of interviews, and turn your job search into a clear, data-driven journey.
+              </p>
+              
+              <div className="mt-10 flex justify-center space-x-4">
+                <Link href="/register" passHref>
+                  <Button size="lg" className="h-12 text-lg px-8 shadow-lg transition duration-200">
+                    Get Started
+                  </Button>
+                </Link>
+                <Link href="/login" passHref>
+                  <Button size="lg" variant="outline" className="h-12 text-lg px-8 border-border transition duration-200">
+                    Log In
+                    <ArrowRightIcon className="ml-2 h-5 w-5" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </section>
+        </main>
+        
+        <Footer />
+      </div>
+    </>
   );
 }

@@ -104,7 +104,7 @@ export default function RegisterPage() {
             </Head>
             <Header/>
             <div className="flex justify-center items-center min-h-screen bg-background">
-                <Card className="w-[400px]" >
+                <Card className="w-[400px] shadow-2xl dark:ring-2 dark:ring-primary/40 dark:shadow-none" >
                     <CardHeader className="text-center">
                         <CardTitle className="text-3xl font-extrabold text-foreground">Create Your Account</CardTitle>
                         <CardDescription>

@@ -9,9 +9,9 @@ export default function Header() {
     <header className="sticky top-0 z-40 w-full border-b border-border/50 bg-background/95 backdrop-blur-sm">
       <div className="container mx-auto flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
       
-        <p className="text-3xl font-extrabold tracking-tight text-foreground">
+        <Link href="/" className="text-3xl font-extrabold tracking-tight text-foreground">
           JobLog 
-        </p>
+        </Link>
 
         {/* Navigation */}
         <nav className="flex items-center space-x-2">

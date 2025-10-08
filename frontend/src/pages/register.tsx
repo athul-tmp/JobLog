@@ -2,7 +2,7 @@ import React, { useState, useMemo } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { CheckCircle, XCircle, AlertTriangle } from "lucide-react"; // Added AlertTriangle icon
+import { CheckCircle, XCircle, AlertTriangle } from "lucide-react";
 
 import { AuthService } from "@/services/api";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
@@ -64,34 +64,20 @@ export default function RegisterPage() {
         setError(null);
         setIsLoading(true);
 
-        if (!isEmailValid || email.length === 0) {
-            setError("Please enter a valid email address.");
-            setIsLoading(false);
-            return;
-        }
-        
-        if (!passwordsMatch) {
-            setError("Passwords do not match.");
-            setIsLoading(false);
-            return;
-        }
-        
-        if (!isPasswordStrong) {
-            setError("Password does not meet all strength requirements.");
-            setIsLoading(false);
-            return;
-        }
-
         try {
             await AuthService.register(email, password);
             router.push("/login?success=registered");
 
         } catch (err) {
-            if (err instanceof Error) {
-                setError(err.message);
-            } else {
-                setError("An unexpected error occurred during registration.");
+            let errorMessage = "An unexpected error occurred during registration.";
+            
+            if (typeof err === 'string') {
+                errorMessage = err + " Please log in.";
+            } else if (err && typeof err === 'object' && 'message' in err) {
+                 errorMessage = (err as Error).message;
             }
+          
+            setError(errorMessage);
         } finally {
             setIsLoading(false);
         }

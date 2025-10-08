@@ -18,12 +18,7 @@ export default function Header() {
           {isAuthenticated ? (
             <>
               {/* Authenticated State */}
-              <Link href="/dashboard" passHref>
-                <Button variant="link" className="text-foreground/80 text-base"> 
-                  Dashboard
-                </Button>
-              </Link>
-              <Button onClick={logout} variant="secondary" className="text-base"> 
+              <Button onClick={logout} variant="link" className="text-foreground/80 text-base"> 
                 Log Out
               </Button>
             </>

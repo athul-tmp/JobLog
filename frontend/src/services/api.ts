@@ -37,9 +37,9 @@ export const AuthService = {
     } 
     catch (error) {
       if (axios.isAxiosError(error) && error.response) {
-        throw new Error(error.response.data.message || "Invalid credentials.");
+        return Promise.reject(error.response.data.message || "Invalid credentials.");
       }
-      throw new Error("An unexpected error occurred during login.");
+      return Promise.reject("An unexpected error occurred during login.");
     }
   },
 
@@ -49,9 +49,9 @@ export const AuthService = {
       await apiClient.post("/User/register", { email, password });
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
-        throw new Error(error.response.data.message || "Registration failed.");
+        return Promise.reject(error.response.data.message || "Registration failed.");
       }
-      throw new Error("An unexpected error occurred during registration.");
+      return Promise.reject("An unexpected error occurred during registration.");
     }
   },
 };

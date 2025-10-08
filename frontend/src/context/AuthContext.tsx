@@ -5,7 +5,7 @@ import { AuthService } from "@/services/api";
 interface AuthContextType {
   user: AuthUser | null;
   token: string | null;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<string | null>;
   logout: () => void;
   isAuthenticated: boolean;
   authLoading: boolean;
@@ -41,7 +41,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   // Login method to set session data
-  const login = async (email: string, password: string): Promise<void> => {
+  const login = async (email: string, password: string): Promise<string | null> => {
     setAuthLoading(true);
     try {
       const response: LoginResponse = await AuthService.login(email, password);
@@ -56,10 +56,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       setToken(response.token);
       setUser(userData);
+      
+      return null; 
 
     } catch (error) {
       console.error("Login attempt failed:", error);
-      throw error; 
+      
+      if (typeof error === 'string') {
+        return error; 
+      }
+      return "An unknown error occurred."; 
+      
     } finally {
       setAuthLoading(false);
     }

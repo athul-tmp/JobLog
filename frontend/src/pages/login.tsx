@@ -58,7 +58,7 @@ export default function LoginPage() {
             <Header/>
             <div className="flex justify-center items-center min-h-screen bg-background">
                 <Card 
-                    className="w-[400px] shadow-2xl dark:ring-4 dark:ring-primary/30 dark:border-primary/50"
+                    className="w-[400px] shadow-2xl ring-2 ring-primary/40 dark:shadow-none"
                 >
                     <CardHeader className="text-center">
                         <CardTitle className="text-3xl font-extrabold text-foreground">Welcome Back</CardTitle>

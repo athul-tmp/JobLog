@@ -5,31 +5,8 @@ import Head from "next/head";
 
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { DashboardNavigation } from "@/components/DashboardNavigation";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"; 
-
-// Component to handle navigation between Dashboard and JobBoard
-function DashboardNavigation({ currentPath }: { currentPath: string }) {
-    const router = useRouter();
-
-    const navigate = (value: string) => {
-        router.push(value === 'dashboard' ? '/dashboard' : '/tracker');
-    };
-
-    // Determine the current active tab based on the path
-    const activeTab = currentPath.includes('tracker') ? 'tracker' : 'dashboard';
-
-    return (
-        <div className="flex justify-center my-8">
-            <Tabs value={activeTab} onValueChange={navigate}>
-                <TabsList>
-                    <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-                    <TabsTrigger value="tracker">Tracker</TabsTrigger>
-                </TabsList>
-            </Tabs>
-        </div>
-    );
-}
 
 export default function DashboardPage() {
     const { isAuthenticated, authLoading } = useAuth();

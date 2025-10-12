@@ -7,6 +7,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { DashboardNavigation } from "@/components/DashboardNavigation";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"; 
+import { Spinner } from "@/components/ui/spinner"
 
 export default function DashboardPage() {
     const { isAuthenticated, authLoading } = useAuth();
@@ -19,11 +20,11 @@ export default function DashboardPage() {
         }
     }, [isAuthenticated, authLoading, router]);
     
-    // Show loading state or nothing while session check is pending
+    // Show loading state when logging out
     if (authLoading || !isAuthenticated) {
         return (
-            <div className="flex justify-center items-center h-screen bg-background text-foreground">
-                <p className="text-xl">Checking session...</p>
+            <div className="flex justify-center items-center h-screen bg-background">
+                <Spinner className="size-15"/>
             </div>
         );
     }

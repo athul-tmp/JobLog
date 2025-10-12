@@ -64,14 +64,14 @@ export default function Header() {
         {isAuthenticated ? (
           <>
             {/* Authenticated State */}
-            <span className="text-3xl font-extrabold tracking-tight text-foreground">
+            <span className="text-3xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-pink-500 block">
               JobLog 
             </span>
           </>
         ) : (
           <>
             {/* Unauthenticated State */}
-            <Link href="/" className="text-3xl font-extrabold tracking-tight text-foreground">
+            <Link href="/" className="text-3xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600 block">
               JobLog
             </Link>
           </>

@@ -85,8 +85,8 @@ export default function Header() {
               {ThemeToggleButton}
               
               <Button onClick={logout} variant="link" className="text-foreground/80 text-base hover:text-primary"> 
-                <LogOut className="mr-2 h-4 w-4" />
                 Log Out
+                <LogOut className="h-4 w-4" />
               </Button>
             </>
           ) : (

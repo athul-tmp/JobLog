@@ -1,5 +1,5 @@
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from "axios";
-import { LoginResponse } from "../types/types";
+import { LoginResponse, DashboardAnalytics } from "../types/types";
 
 // C# backend base URL
 const API_BASE_URL = "http://localhost:5264/api"; 
@@ -56,8 +56,21 @@ export const AuthService = {
   },
 };
 
-// TODO
 export const JobApplicationService = {
+  // Fetch dashboard analytics
+  getDashboardAnalytics: async (): Promise<DashboardAnalytics> => {
+    try {
+      const response = await apiClient.get<DashboardAnalytics>("/Analytics/summary");
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response && error.response.status === 401) {
+        throw new Error("Session expired. Please log in again.");
+      }
+      throw new Error("Failed to fetch dashboard data.");
+    }
+  },
+
+  // TODO: Job applications
 };
 
 export default apiClient;

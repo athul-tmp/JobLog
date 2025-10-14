@@ -26,3 +26,34 @@ export interface JobApplication {
   dateApplied: string;
   statusHistory: JobStatusHistory[];
 }
+
+export interface StatusBreakdown {
+  status: string;
+  count: number;
+}
+
+export interface InterviewBreakdown {
+  type: string;
+  count: number;
+}
+
+export interface MonthlyApplications {
+  monthYear: string;
+  count: number;
+}
+
+export interface DashboardAnalytics {
+  totalApplications: number;
+  totalOffers: number;
+  totalRejections: number;
+  totalPending: number;
+  totalInterviews: number;
+  totalGhosted: number;
+  
+  interviewedAndRejected: number;
+  interviewedAndGhosted: number;
+
+  stageBreakdown: StatusBreakdown[];
+  interviewTypeBreakdown: InterviewBreakdown[];
+  monthlyTrend: MonthlyApplications[];
+}

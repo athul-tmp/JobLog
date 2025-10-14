@@ -10,11 +10,11 @@ import Footer from "@/components/Footer";
 import { DashboardNavigation } from "@/components/DashboardNavigation";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner"
-import { ArrowUp, ArrowDown } from "lucide-react"; 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 import StageBreakdownChart from "@/components/charts/StageBreakdownChart";
-import MonthlyTrendChart from "@/components/charts/MonthlyTrendChart";
+import InterviewOutcomesChart from "@/components/charts/InterviewOutcomesChart";
+import InterviewTypesChart from "@/components/charts/InterviewTypesChart";
 
 // Fetch Data 
 function useDashboardData() {
@@ -100,96 +100,105 @@ export default function DashboardPage() {
 
                     {isReady && (
                         <div className="space-y-8">
-                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-6">
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 lg:grid-cols-6">
                                 
                                 {/* Total Applied Card */}
                                 <Card className="ring-1 ring-primary/40">
-                                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                        <CardTitle className="text-sm font-medium text-muted-foreground">Total Applications</CardTitle>
+                                    <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                                        <CardTitle>Total Applications</CardTitle>
                                     </CardHeader>
                                     <CardContent>
                                         <div className="text-2xl font-bold">{stats.totalApplications}</div>
-                                        <p className="text-xs text-muted-foreground mt-1">Total jobs applied to</p>
+                                        <p className="text-xs text-foreground mt-1">Total jobs applied to</p>
                                     </CardContent>
                                 </Card>
 
                                 {/* Total Pending Card */}
                                 <Card className="ring-1 ring-primary/40">
-                                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                        <CardTitle className="text-sm font-medium text-muted-foreground">Total Applied</CardTitle>
+                                    <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                                        <CardTitle>Total Applied</CardTitle>
                                     </CardHeader>
                                     <CardContent>
                                         <div className="text-2xl font-bold text-yellow-500">{stats.totalPending}</div>
-                                        <p className="text-xs text-muted-foreground mt-1">Applied but pending reply</p>
+                                        <p className="text-xs text-foreground mt-1">Applied but pending reply</p>
                                     </CardContent>
                                 </Card>
 
                                 {/* Total Interviews Card */}
                                 <Card className="ring-1 ring-primary/40">
-                                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                        <CardTitle className="text-sm font-medium text-muted-foreground">Total Interviews</CardTitle>
+                                    <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                                        <CardTitle>Total Interviews</CardTitle>
                                     </CardHeader>
                                     <CardContent>
                                         <div className="text-2xl font-bold text-primary">{stats.totalInterviews}</div>
-                                        <p className="text-xs text-muted-foreground mt-1">Interviews completed but pending reply</p>
+                                        <p className="text-xs text-foreground mt-1">Interviews completed but pending reply</p>
                                     </CardContent>
                                 </Card>
                                 
                                 {/* Total Offers Card */}
                                 <Card className="ring-1 ring-primary/40">
-                                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                        <CardTitle className="text-sm font-medium text-muted-foreground">Total Offers</CardTitle>
+                                    <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                                        <CardTitle>Total Offers</CardTitle>
                                     </CardHeader>
                                     <CardContent>
                                         <div className="text-2xl font-bold text-green-500">{stats.totalOffers}</div>
-                                        <p className="text-xs text-muted-foreground mt-1">Successful offers</p>
+                                        <p className="text-xs text-foreground mt-1">Successful offers</p>
                                     </CardContent>
                                 </Card>
 
                                 {/* Total Ghosted Card */}
                                 <Card className="ring-1 ring-primary/40">
-                                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                        <CardTitle className="text-sm font-medium text-muted-foreground">Total Ghosted</CardTitle>
+                                    <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                                        <CardTitle>Total Ghosted</CardTitle>
                                     </CardHeader>
                                     <CardContent>
                                         <div className="text-2xl font-bold text-gray-500">{stats.totalGhosted}</div>
-                                        <p className="text-xs text-muted-foreground mt-1">No response after application/interview</p>
+                                        <p className="text-xs text-foreground mt-1">No response after application/interview</p>
                                     </CardContent>
                                 </Card>
 
                                 {/* Total Rejections Card */}
                                 <Card className="ring-1 ring-primary/40">
-                                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                        <CardTitle className="text-sm font-medium text-muted-foreground">Total Rejections</CardTitle>
+                                    <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                                        <CardTitle>Total Rejections</CardTitle>
                                     </CardHeader>
                                     <CardContent>
                                         <div className="text-2xl font-bold text-red-500">{stats.totalRejections}</div>
-                                        <p className="text-xs text-muted-foreground mt-1">Rejected after application/interview</p>
+                                        <p className="text-xs text-foreground mt-1">Rejected after application/interview</p>
                                     </CardContent>
                                 </Card>
                                 
                             </div>
                             
-                            {/* Charts Section */}
+                            {/* Pie Charts Section */}
                             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                                
-                                {/* Application Breakdown Chart Placeholder */}
+                                {/* Application Breakdown Chart */}
                                 <Card className="lg:col-span-1 ring-1 ring-primary/40">
                                     <CardHeader>
-                                        <CardTitle>Application Stage Breakdown</CardTitle>
+                                        <CardTitle>Total Pipeline Stages</CardTitle>
                                     </CardHeader>
                                     <CardContent className="h-[300px] flex items-center justify-center">
-                                        <StageBreakdownChart data={stats.stageBreakdown} />
+                                        <StageBreakdownChart data={stats} />
                                     </CardContent>
                                 </Card>
 
-                                {/* Monthly Trend Chart Placeholder (Line Chart) */}
-                                <Card className="lg:col-span-2 ring-1 ring-primary/40">
+                                {/* Interview Outcomes Chart */}
+                                <Card className="lg:col-span-1 ring-1 ring-primary/40">
                                     <CardHeader>
-                                        <CardTitle>Application Trend (Last 2 Months)</CardTitle>
+                                        <CardTitle>Interview Final Outcomes</CardTitle>
                                     </CardHeader>
                                     <CardContent className="h-[300px] flex items-center justify-center">
-                                        <MonthlyTrendChart data={stats.monthlyTrend} />
+                                        <InterviewOutcomesChart data={stats} /> 
+                                    </CardContent>
+                                </Card>
+
+                                {/* Interview Types */}
+                                <Card className="lg:col-span-1 ring-1 ring-primary/40">
+                                    <CardHeader>
+                                        <CardTitle>Interview Types</CardTitle>
+                                    </CardHeader>
+                                    <CardContent className="h-[300px] flex items-center justify-center">
+                                        <InterviewTypesChart data={stats.interviewTypeBreakdown} /> 
                                     </CardContent>
                                 </Card>
                             </div>

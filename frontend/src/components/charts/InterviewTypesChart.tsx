@@ -1,17 +1,15 @@
 import React from 'react';
-import { Pie } from 'react-chartjs-2'; 
+import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, TooltipItem } from 'chart.js';
-import { DashboardAnalytics } from '@/types/types';
+import { InterviewBreakdown } from '@/types/types';
 import { useTheme } from '@/hooks/useTheme';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-const CHART_COLOURS = [
-    '#00c951', // Offer
-    '#7e22ce', // Interview
-    '#f0b100', // Applied
-    '#fb2c36', // Rejected
-    '#6a7282', // Ghosted
+const TYPE_COLOURS = [
+    '#9d4edd', // OA Interview
+    '#7400d3ff', // Mid-stage Interview
+    '#3e036fff', // Final Interview
 ];
 
 const THEME_COLOURS = {
@@ -23,34 +21,26 @@ const THEME_COLOURS = {
   },
 };
 
-interface StageBreakdownChartProps {
-    data: DashboardAnalytics;
+interface InterviewTypesChartProps {
+    data: InterviewBreakdown[];
 }
 
-export default function StageBreakdownChart({ data }: StageBreakdownChartProps) {
+export default function InterviewTypesChart({ data }: InterviewTypesChartProps) {
     const theme = useTheme();
     const themeColours = THEME_COLOURS[theme];
 
     const chartData = {
         labels: [
-            'Offers',
-            'Interviews',
-            'Applied',
-            'Rejections',
-            'Ghosted'
+            'OA',
+            'Mid-stage',
+            'Final'
         ],
         datasets: [
             {
-                label: 'Applications by Stage',
-                data: [
-                    data.totalOffers,
-                    data.totalInterviews,
-                    data.totalPending,
-                    data.totalRejections,
-                    data.totalGhosted
-                ],
-                backgroundColor: CHART_COLOURS,
-                borderColor: ['#000000'],
+                label: 'Interview Types',
+                data: data.map(item => item.count),
+                backgroundColor: TYPE_COLOURS,
+                borderColor: ['#000000'], 
                 borderWidth: 1,
             },
         ],
@@ -69,7 +59,7 @@ export default function StageBreakdownChart({ data }: StageBreakdownChartProps) 
             tooltip: {
                 callbacks: {
                     label: ({ label, raw }: TooltipItem<'pie'>) => {
-                        const count = raw as number; 
+                        const count = raw as number;
                         return `${label}: ${count} jobs`;
                     },
                 },

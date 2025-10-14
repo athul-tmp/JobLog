@@ -175,7 +175,7 @@ export default function DashboardPage() {
                                 {/* Application Breakdown Chart */}
                                 <Card className="lg:col-span-1 ring-1 ring-primary/40">
                                     <CardHeader>
-                                        <CardTitle>Total Pipeline Stages</CardTitle>
+                                        <CardTitle>Application Stages Breakdown</CardTitle>
                                     </CardHeader>
                                     <CardContent className="h-[300px] flex items-center justify-center">
                                         <StageBreakdownChart data={stats} />
@@ -185,7 +185,7 @@ export default function DashboardPage() {
                                 {/* Interview Outcomes Chart */}
                                 <Card className="lg:col-span-1 ring-1 ring-primary/40">
                                     <CardHeader>
-                                        <CardTitle>Interview Final Outcomes</CardTitle>
+                                        <CardTitle>Interview Outcomes</CardTitle>
                                     </CardHeader>
                                     <CardContent className="h-[300px] flex items-center justify-center">
                                         <InterviewOutcomesChart data={stats} /> 

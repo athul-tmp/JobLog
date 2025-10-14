@@ -8,6 +8,8 @@ import Footer from "@/components/Footer";
 import { DashboardNavigation } from "@/components/DashboardNavigation"; 
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner"
+import { Card, CardContent } from "@/components/ui/card";
+import { Search } from "lucide-react"; 
 
 export default function TrackerPage() {
     const { isAuthenticated, authLoading } = useAuth();
@@ -40,19 +42,23 @@ export default function TrackerPage() {
                 <DashboardNavigation currentPath={router.pathname} />
 
                 <div className="space-y-8">
-                    <div className="flex justify-between items-center">
-                        <h1 className="text-3xl font-extrabold tracking-tight">
+                    <div className="flex justify-between items-center mb-6">
+                        <h1 className="text-3xl font-extrabold tracking-tight text-foreground">
                             Application Tracker
                         </h1>
-                        <Button className="text-base">
+                        <Button className="text-base shadow-md">
                             + Add New Application
                         </Button>
                     </div>
 
                     {/* Placeholder for Table */}
-                    <div className="p-8 border border-border rounded-lg min-h-[300px] flex items-center justify-center ring-2 ring-primary/40 dark:bg-card">
-                        <p className="text-muted-foreground">Table goes here</p>
-                    </div>
+                    <Card className="ring-1 ring-primary/40">
+                        <CardContent className="pt-6">
+                            <div className="p-4 border border-border rounded-lg min-h-[300px] flex items-center justify-center dark:bg-card">
+                                <p className="text-muted-foreground">Table goes here</p>
+                            </div>
+                        </CardContent>
+                    </Card>
                 </div>
             </main>
 

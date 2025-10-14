@@ -28,7 +28,7 @@ public class AnalyticsService : IAnalyticsService
 
     if (!applications.Any())
     {
-      return new DashboardAnalyticsDto(0, 0, 0, 0, 0, 0, 0, 0, new List<StatusBreakdown>(), new List<MonthlyApplications>());
+      return new DashboardAnalyticsDto(0, 0, 0, 0, 0, 0, 0, 0, new List<StatusBreakdown>(), new List<MonthlyApplications>(), new List<InterviewBreakdown>());
     }
 
     // Analytics to show
@@ -57,6 +57,21 @@ public class AnalyticsService : IAnalyticsService
     var stageBreakdown = applications
         .GroupBy(a => a.Status)
         .Select(g => new StatusBreakdown(g.Key, g.Count()))
+        .ToList();
+
+    // Filter applications that are currently in any interview stage
+    var interviewApplications = applications.Where(a =>
+        a.Status == "OA Interview" ||
+        a.Status == "Interview" ||
+        a.Status == "Final Interview").ToList();
+
+    // Group these interviews by their specific status value
+    var interviewTypeBreakdown = interviewApplications
+        .GroupBy(a => a.Status)
+        .Select(g => new InterviewBreakdown(
+            Type: g.Key,
+            Count: g.Count()
+        ))
         .ToList();
 
     // Monthly Trend 
@@ -89,7 +104,8 @@ public class AnalyticsService : IAnalyticsService
         InterviewedAndRejected: interviewedAndRejected,
         InterviewedAndGhosted: interviewedAndGhosted,
         StageBreakdown: stageBreakdown,
-        MonthlyTrend: monthlyTrend
+        MonthlyTrend: monthlyTrend,
+        InterviewTypeBreakdown: interviewTypeBreakdown
     );
   }
 }

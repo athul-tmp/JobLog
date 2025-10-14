@@ -6,6 +6,12 @@ namespace backend.DTOs
       int Count
   );
 
+  // DTO for charting: Breakdown of interviews by type
+  public record InterviewBreakdown(
+      string Type,
+      int Count
+  );
+
   // DTO for charting: Monthly trend data
   public record MonthlyApplications(
       string MonthYear,
@@ -30,6 +36,7 @@ namespace backend.DTOs
 
       // Chart Data
       List<StatusBreakdown> StageBreakdown,
-      List<MonthlyApplications> MonthlyTrend
+      List<MonthlyApplications> MonthlyTrend,
+      List<InterviewBreakdown> InterviewTypeBreakdown
   );
 }

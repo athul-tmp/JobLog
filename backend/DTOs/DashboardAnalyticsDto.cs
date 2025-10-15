@@ -12,6 +12,12 @@ namespace backend.DTOs
         int Count
     );
 
+    // DTO for charting: Daily data
+    public record ApplicationsPerDay(
+        string Date,
+        int Count
+    );
+
     // DTO to hold all calculated statistics and chart data
     public record DashboardAnalyticsDto(
         // Direct Counts
@@ -23,6 +29,7 @@ namespace backend.DTOs
         int TotalPending,        // Status == "Applied"
         int TotalInterviews,     // Total of all interview stages
         int TotalGhosted,        // Status == "Ghosted"
+        int TotalPastInterviews, // Status history == "OA Interview" / "Interview" / "Final Interview"
 
         // Interview but Rejection/Ghosted Breakdown
         int InterviewedAndRejected,
@@ -30,6 +37,7 @@ namespace backend.DTOs
 
         // Chart Data
         List<MonthlyApplications> MonthlyTrend,
-        List<InterviewBreakdown> InterviewTypeBreakdown
+        List<InterviewBreakdown> InterviewTypeBreakdown,
+        List<ApplicationsPerDay> ApplicationsPerDay
     );
 }

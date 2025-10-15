@@ -11,10 +11,12 @@ import { DashboardNavigation } from "@/components/DashboardNavigation";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/spinner"
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { ArrowUp, ArrowDown } from "lucide-react";
 
 import StageBreakdownChart from "@/components/charts/StageBreakdownChart";
 import InterviewOutcomesChart from "@/components/charts/InterviewOutcomesChart";
 import InterviewTypesChart from "@/components/charts/InterviewTypesChart";
+import DailyTrendChart from "@/components/charts/DailyTrendChart";
 
 // Fetch Data 
 function useDashboardData() {
@@ -70,6 +72,27 @@ export default function DashboardPage() {
     }
     
     const isReady = !isDataLoading && stats;
+
+    // Variables for retrieving month data 
+    const monthlyTrendArray = stats?.monthlyTrend ?? [];
+    const monthlyTrendLength = monthlyTrendArray.length;
+
+    const currentMonthData = monthlyTrendLength > 0 ? monthlyTrendArray[monthlyTrendLength - 1] : null;
+    const previousMonthData = monthlyTrendLength > 1 ? monthlyTrendArray[monthlyTrendLength - 2] : null;
+
+    const currentMonthName = currentMonthData?.monthYear ?? 'Current Month';
+    const previousMonthName = previousMonthData?.monthYear ?? 'Previous Month';
+    const currentMonthCount = currentMonthData?.count ?? 0;
+    const previousMonthCount = previousMonthData?.count ?? 0;
+
+    // Monthly Increase Calculation 
+    const MonthlyIncrease = previousMonthCount > 0
+        ? ((currentMonthCount - previousMonthCount) / previousMonthCount) * 100
+        : currentMonthCount > 0 ? 100 : 0;
+
+    const MonthlyTrendIcon = MonthlyIncrease > 0 ? ArrowUp : ArrowDown;
+    const monthlyColor = MonthlyIncrease > 0 ? "text-green-600" : "text-red-600";
+    
 
     return (
         <>
@@ -199,6 +222,45 @@ export default function DashboardPage() {
                                     </CardHeader>
                                     <CardContent className="h-[300px] flex items-center justify-center">
                                         <InterviewTypesChart data={stats.interviewTypeBreakdown} /> 
+                                    </CardContent>
+                                </Card>
+                            </div>
+
+                            {/* Daily Trend Chart  */}
+                            <div className="grid grid-cols-1">
+                                <Card className="ring-1 ring-primary/40">
+                                    <CardHeader>
+                                        <CardTitle>Daily Application Trend ({currentMonthName})</CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="h-[300px] mb-4">
+                                            <DailyTrendChart 
+                                                data={stats.applicationsPerDay} 
+                                            />
+                                        </div>
+                                        
+                                        {/* Comparison Text Summary with Percentage --- */}
+                                        <div className="text-sm text-muted-foreground pt-2 border-t border-border flex flex-col gap-2">
+                                            
+                                            {/* Current Month Total & Percentage Change */}
+                                            <div className="flex justify-between items-baseline">
+                                                <p className="text-base font-medium">
+                                                    {currentMonthName} Total: 
+                                                    <span className="font-bold text-foreground ml-1">{currentMonthCount}</span> applications
+                                                </p>
+                                                
+                                                {/* Display the Monthly Increase/Decrease */}
+                                                <p className={`text-base font-semibold flex items-center ${monthlyColor}`}>
+                                                    <MonthlyTrendIcon className="w-4 h-4 mr-1" />
+                                                    {MonthlyIncrease.toFixed(0)}% vs. {previousMonthName}
+                                                </p>
+                                            </div>
+                                            
+                                            {/* Previous Month Total (for reference) */}
+                                            <p className="text-xs text-foreground/80">
+                                                {previousMonthName} Total: <span className="font-semibold">{previousMonthCount}</span> applications
+                                            </p>
+                                        </div>
                                     </CardContent>
                                 </Card>
                             </div>

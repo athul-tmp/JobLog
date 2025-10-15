@@ -36,6 +36,11 @@ export interface MonthlyApplications {
   count: number;
 }
 
+export interface ApplicationsPerDay {
+  date: string;
+  count: number;
+}
+
 export interface DashboardAnalytics {
   totalApplications: number;
   totalOffers: number;
@@ -43,10 +48,12 @@ export interface DashboardAnalytics {
   totalPending: number;
   totalInterviews: number;
   totalGhosted: number;
+  totalPastInterviews: number;
   
   interviewedAndRejected: number;
   interviewedAndGhosted: number;
 
   interviewTypeBreakdown: InterviewBreakdown[];
   monthlyTrend: MonthlyApplications[];
+  applicationsPerDay: ApplicationsPerDay[];
 }

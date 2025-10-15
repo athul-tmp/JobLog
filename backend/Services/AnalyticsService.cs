@@ -28,7 +28,7 @@ public class AnalyticsService : IAnalyticsService
 
         if (!applications.Any())
         {
-            return new DashboardAnalyticsDto(0, 0, 0, 0, 0, 0, 0, 0, new List<MonthlyApplications>(), new List<InterviewBreakdown>());
+            return new DashboardAnalyticsDto(0, 0, 0, 0, 0, 0, 0, 0, 0, new List<MonthlyApplications>(), new List<InterviewBreakdown>(), new List<ApplicationsPerDay>());
         }
 
         // Analytics to show
@@ -43,6 +43,13 @@ public class AnalyticsService : IAnalyticsService
             a.Status == "OA Interview" ||
             a.Status == "Interview" ||
             a.Status == "Final Interview");
+
+        // Total past interviews
+        var totalPastInterviews = await _dbContext.JobStatusHistories
+            .Where(h =>
+                h.JobApplication.UserId == userId &&
+                (h.Status == "OA Interview" || h.Status == "Interview" || h.Status == "Final Interview"))
+            .CountAsync();
 
         // Interviewed but Rejected/Ghosted 
         var interviewedAndRejected = applications
@@ -68,6 +75,7 @@ public class AnalyticsService : IAnalyticsService
             ))
             .ToList();
 
+
         // Monthly Trend 
         DateTime today = DateTime.Today;
         DateTime currentMonthStart = new DateTime(today.Year, today.Month, 1);
@@ -87,6 +95,22 @@ public class AnalyticsService : IAnalyticsService
             .OrderBy(m => DateTime.ParseExact(m.MonthYear, "MMM yyyy", null)) // Sort by date
             .ToList();
 
+        // Filter for current month's applications
+        var currentMonthApplications = applications
+            .Where(a => a.DateApplied >= currentMonthStart)
+            .ToList();
+
+        // Group by Day
+        var applicationsPerDay = currentMonthApplications
+            .GroupBy(a => a.DateApplied.Date)
+            .Select(g => new ApplicationsPerDay(
+                Date: g.Key.ToString("MMM dd"),
+                Count: g.Count()
+            ))
+            .OrderBy(d => DateTime.ParseExact(d.Date, "MMM dd", null))
+            .ToList();
+
+
         // Return Final DTO
         return new DashboardAnalyticsDto(
             TotalApplications: totalApplications,
@@ -95,10 +119,12 @@ public class AnalyticsService : IAnalyticsService
             TotalPending: totalPending,
             TotalInterviews: totalInterviews,
             TotalGhosted: totalGhosted,
+            TotalPastInterviews: totalPastInterviews,
             InterviewedAndRejected: interviewedAndRejected,
             InterviewedAndGhosted: interviewedAndGhosted,
             MonthlyTrend: monthlyTrend,
-            InterviewTypeBreakdown: interviewTypeBreakdown
+            InterviewTypeBreakdown: interviewTypeBreakdown,
+            ApplicationsPerDay: applicationsPerDay
         );
     }
 }

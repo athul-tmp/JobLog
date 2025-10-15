@@ -29,6 +29,18 @@ export default function InterviewTypesChart({ data }: InterviewTypesChartProps) 
     const theme = useTheme();
     const themeColors = THEME_COLORS[theme];
 
+    // Shows if no active interviews
+    const totalActiveInterviews = data.reduce((sum, item) => sum + item.count, 0);
+    if (totalActiveInterviews === 0) {
+        return (
+            <div className="flex items-center justify-center w-full h-full">
+                <p className="text-center text-muted-foreground">
+                    No active interviews to track.
+                </p>
+            </div>
+        );
+    }
+
     const chartData = {
         labels: [
             'OA',

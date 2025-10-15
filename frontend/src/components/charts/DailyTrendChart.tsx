@@ -43,6 +43,18 @@ export default function DailyTrendChart({ data }: DailyTrendChartProps) {
     const theme = useTheme();
     const themeColors = THEME_COLORS[theme];
 
+    // Shows if no applications this month
+    const totalApplicationsThisMonth = data.reduce((sum, item) => sum + item.count, 0);
+    if (totalApplicationsThisMonth === 0) {
+        return (
+            <div className="flex items-center justify-center w-full h-[300px]">
+                <p className="text-center text-muted-foreground">
+                    No applications submitted this month.
+                </p>
+            </div>
+        );
+    }
+
     const chartData = {
         labels: data.map(item => item.date), 
         datasets: [

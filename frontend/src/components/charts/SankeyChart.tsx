@@ -35,6 +35,18 @@ export default function SankeyChart({ data }: SankeyChartProps) {
     const rejectedNoInterview = data.totalRejections - data.interviewedAndRejected;
     const ghostedNoInterview = data.totalGhosted - data.interviewedAndGhosted;
 
+    // Check if there is any flow to visualise
+    const totalFlow = rejectedNoInterview + ghostedNoInterview + data.totalPastInterviews + data.totalOffers + data.interviewedAndRejected + data.interviewedAndGhosted;
+    if (totalFlow === 0) {
+        return (
+            <div className="flex items-center justify-center w-full h-[300px]">
+                <p className="text-center text-muted-foreground">
+                    Not enough data to visualise application flow. Apply to jobs to see the journey.
+                </p>
+            </div>
+        );
+    }
+
     // Data array
     const chartData = [
         ["From", "To", "Count"],

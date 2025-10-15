@@ -29,6 +29,18 @@ export default function InterviewOutcomesChart({ data }: InterviewOutcomesChartP
     const theme = useTheme();
     const themeColors = THEME_COLORS[theme];
 
+    // Shows if no interviews
+    const totalOutcomes = data.totalOffers + data.interviewedAndRejected + data.interviewedAndGhosted;
+    if (totalOutcomes === 0) {
+        return (
+            <div className="flex items-center justify-center w-full h-full">
+                <p className="text-center text-muted-foreground">
+                    No interview outcomes to show yet.
+                </p>
+            </div>
+        );
+    }
+
     const chartData = {
         labels: [
           'Offers',

@@ -31,6 +31,17 @@ export default function StageBreakdownChart({ data }: StageBreakdownChartProps) 
     const theme = useTheme();
     const themeColors = THEME_COLORS[theme];
 
+    // Shows if no applications
+    if (data.totalApplications === 0) {
+        return (
+            <div className="flex items-center justify-center w-full h-full">
+                <p className="text-center text-muted-foreground">
+                    No applications yet. Apply to jobs to see this breakdown.
+                </p>
+            </div>
+        ); 
+    }
+
     const chartData = {
         labels: [
             'Offers',

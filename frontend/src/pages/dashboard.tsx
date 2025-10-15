@@ -209,7 +209,7 @@ export default function DashboardPage() {
                                 {/* Interview Outcomes Chart */}
                                 <Card className="lg:col-span-1 ring-1 ring-primary/40">
                                     <CardHeader>
-                                        <CardTitle>Interview Outcomes</CardTitle>
+                                        <CardTitle>All Interview Outcomes</CardTitle>
                                     </CardHeader>
                                     <CardContent className="h-[300px] flex items-center justify-center">
                                         <InterviewOutcomesChart data={stats} /> 
@@ -219,7 +219,7 @@ export default function DashboardPage() {
                                 {/* Interview Types */}
                                 <Card className="lg:col-span-1 ring-1 ring-primary/40">
                                     <CardHeader>
-                                        <CardTitle>Interview Types</CardTitle>
+                                        <CardTitle>Active Interview Breakdown</CardTitle>
                                     </CardHeader>
                                     <CardContent className="h-[300px] flex items-center justify-center">
                                         <InterviewTypesChart data={stats.interviewTypeBreakdown} /> 
@@ -240,8 +240,9 @@ export default function DashboardPage() {
                                             />
                                         </div>
                                         
-                                        {/* Comparison Text Summary with Percentage --- */}
+                                        {/* Comparison Text Summary with Percentage  */}
                                         <div className="text-sm text-muted-foreground pt-2 border-t border-border flex flex-col gap-2">
+                                        
                                             
                                             {/* Current Month Total & Percentage Change */}
                                             <div className="flex justify-between items-baseline">
@@ -249,12 +250,13 @@ export default function DashboardPage() {
                                                     {currentMonthName} Total: 
                                                     <span className="font-bold text-foreground ml-1">{currentMonthCount}</span> applications
                                                 </p>
-                                                
-                                                {/* Display the Monthly Increase/Decrease */}
+                                                {/* Display the Monthly Increase/Decrease if theres enough data */}
+                                                {(currentMonthCount > 0 || previousMonthCount > 0) && (
                                                 <p className={`text-base font-semibold flex items-center ${monthlyColor}`}>
                                                     <MonthlyTrendIcon className="w-4 h-4 mr-1" />
                                                     {MonthlyIncrease.toFixed(0)}% vs. {previousMonthName}
                                                 </p>
+                                                )}
                                             </div>
                                             
                                             {/* Previous Month Total (for reference) */}

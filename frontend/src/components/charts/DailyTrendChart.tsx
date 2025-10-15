@@ -61,11 +61,9 @@ export default function DailyTrendChart({ data }: DailyTrendChartProps) {
             {
                 label: 'Applications Sent',
                 data: data.map(item => item.count),
-                borderColor: '#f53c8a',
-                backgroundColor: 'rgba(245, 60, 138, 0.2)', 
+                borderColor: '#7e22ce',
                 tension: 0.4, 
                 pointRadius: 5,
-                pointBackgroundColor: '#f53c8a',
                 fill: true,
             },
         ],

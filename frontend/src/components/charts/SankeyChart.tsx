@@ -5,13 +5,13 @@ import { useTheme } from '@/hooks/useTheme';
 
 // Outcome colors
 const NODE_COLORS = {
-    '1': '#9d4edd',
-    '2': '#dc3545', 
-    '3': '#ffc107', 
-    '4': '#17a2b8',       
-    '5': '#3c9a58',         
-    '6': '#dc3545',        
-    '7': '#ffc107',         
+    '1': '#7e22ce',
+    '2': '#e7000b', 
+    '3': '#4a5565', 
+    '4': '#155dfc',       
+    '5': '#00a63e',         
+    '6': '#e7000b',        
+    '7': '#4a5565',         
 };
 
 const THEME_COLORS = {

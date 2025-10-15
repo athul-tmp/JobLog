@@ -7,9 +7,9 @@ import { useTheme } from '@/hooks/useTheme';
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 const OUTCOME_COLORS = [
-    '#00c951', // Green (Offer)
-    '#fb2c36', // Red (Rejected)
-    '#6a7282', // Gray (Ghosted)
+    '#00a63e', // Green (Offer)
+    '#e7000b', // Red (Rejected)
+    '#4a5565', // Gray (Ghosted)
 ];
 
 const THEME_COLORS = {

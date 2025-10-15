@@ -7,9 +7,13 @@ import { useTheme } from '@/hooks/useTheme';
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 const TYPE_COLORS = [
-    '#9d4edd', // OA Interview
-    '#7400d3ff', // Mid-stage Interview
-    '#3e036fff', // Final Interview
+    // '#9d4edd', // OA Interview
+    // '#7400d3ff', // Mid-stage Interview
+    // '#3e036fff', // Final Interview
+    '#bedbff',
+    '#2b7fff',
+    '#1447e6',
+
 ];
 
 const THEME_COLORS = {

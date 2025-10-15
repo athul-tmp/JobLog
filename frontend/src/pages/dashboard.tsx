@@ -132,7 +132,7 @@ export default function DashboardPage() {
                                         <CardTitle>Total Applications</CardTitle>
                                     </CardHeader>
                                     <CardContent>
-                                        <div className="text-2xl font-bold">{stats.totalApplications}</div>
+                                        <div className="text-2xl font-bold text-primary">{stats.totalApplications}</div>
                                         <p className="text-xs text-foreground mt-1">Total jobs applied to</p>
                                     </CardContent>
                                 </Card>
@@ -143,7 +143,7 @@ export default function DashboardPage() {
                                         <CardTitle>Total Applied</CardTitle>
                                     </CardHeader>
                                     <CardContent>
-                                        <div className="text-2xl font-bold text-yellow-500">{stats.totalPending}</div>
+                                        <div className="text-2xl font-bold text-yellow-600">{stats.totalPending}</div>
                                         <p className="text-xs text-foreground mt-1">Applied but pending reply</p>
                                     </CardContent>
                                 </Card>
@@ -154,7 +154,7 @@ export default function DashboardPage() {
                                         <CardTitle>Total Interviews</CardTitle>
                                     </CardHeader>
                                     <CardContent>
-                                        <div className="text-2xl font-bold text-cyan-500">{stats.totalInterviews}</div>
+                                        <div className="text-2xl font-bold text-blue-600">{stats.totalInterviews}</div>
                                         <p className="text-xs text-foreground mt-1">Interviews completed but pending reply</p>
                                     </CardContent>
                                 </Card>
@@ -165,7 +165,7 @@ export default function DashboardPage() {
                                         <CardTitle>Total Offers</CardTitle>
                                     </CardHeader>
                                     <CardContent>
-                                        <div className="text-2xl font-bold text-green-500">{stats.totalOffers}</div>
+                                        <div className="text-2xl font-bold text-green-600">{stats.totalOffers}</div>
                                         <p className="text-xs text-foreground mt-1">Successful offers</p>
                                     </CardContent>
                                 </Card>
@@ -176,7 +176,7 @@ export default function DashboardPage() {
                                         <CardTitle>Total Ghosted</CardTitle>
                                     </CardHeader>
                                     <CardContent>
-                                        <div className="text-2xl font-bold text-gray-500">{stats.totalGhosted}</div>
+                                        <div className="text-2xl font-bold text-gray-600">{stats.totalGhosted}</div>
                                         <p className="text-xs text-foreground mt-1">No response after application/interview</p>
                                     </CardContent>
                                 </Card>
@@ -187,7 +187,7 @@ export default function DashboardPage() {
                                         <CardTitle>Total Rejections</CardTitle>
                                     </CardHeader>
                                     <CardContent>
-                                        <div className="text-2xl font-bold text-red-500">{stats.totalRejections}</div>
+                                        <div className="text-2xl font-bold text-red-600">{stats.totalRejections}</div>
                                         <p className="text-xs text-foreground mt-1">Rejected after application/interview</p>
                                     </CardContent>
                                 </Card>

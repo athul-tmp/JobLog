@@ -23,14 +23,14 @@ ChartJS.register(
     Legend
 );
 
-const THEME_COLOURS = {
+const THEME_COLORS = {
   light: {
     textColor: '#000000',
     gridColor: '#494949ff'
     
   },
   dark: {
-    textColor: '#f4f4f4',
+    textColor: '#ffffff',
     gridColor: '#585858ff'
   },
 };
@@ -41,7 +41,7 @@ interface DailyTrendChartProps {
 
 export default function DailyTrendChart({ data }: DailyTrendChartProps) {    
     const theme = useTheme();
-    const themeColours = THEME_COLOURS[theme];
+    const themeColors = THEME_COLORS[theme];
 
     const chartData = {
         labels: data.map(item => item.date), 
@@ -65,12 +65,12 @@ export default function DailyTrendChart({ data }: DailyTrendChartProps) {
         scales: {
             y: {
                 beginAtZero: true,
-                ticks: { stepSize: 1, color: themeColours.textColor, },
-                grid: { color: themeColours.gridColor, },
+                ticks: { stepSize: 1, color: themeColors.textColor, },
+                grid: { color: themeColors.gridColor, },
             },
             x: {
-                ticks: { color: themeColours.textColor, },
-                grid: { color: themeColours.gridColor, },
+                ticks: { color: themeColors.textColor, },
+                grid: { color: themeColors.gridColor, },
             }
         },
         plugins: {

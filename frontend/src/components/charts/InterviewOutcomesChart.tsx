@@ -6,18 +6,18 @@ import { useTheme } from '@/hooks/useTheme';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-const OUTCOME_COLOURS = [
+const OUTCOME_COLORS = [
     '#00c951', // Green (Offer)
     '#fb2c36', // Red (Rejected)
     '#6a7282', // Gray (Ghosted)
 ];
 
-const THEME_COLOURS = {
+const THEME_COLORS = {
   light: {
     textColor: '#000000',
   },
   dark: {
-    textColor: '#f4f4f4',
+    textColor: '#ffffff',
   },
 };
 
@@ -27,7 +27,7 @@ interface InterviewOutcomesChartProps {
 
 export default function InterviewOutcomesChart({ data }: InterviewOutcomesChartProps) {
     const theme = useTheme();
-    const themeColours = THEME_COLOURS[theme];
+    const themeColors = THEME_COLORS[theme];
 
     const chartData = {
         labels: [
@@ -43,7 +43,7 @@ export default function InterviewOutcomesChart({ data }: InterviewOutcomesChartP
                   data.interviewedAndRejected,
                   data.interviewedAndGhosted,
                 ],
-                backgroundColor: OUTCOME_COLOURS,
+                backgroundColor: OUTCOME_COLORS,
                 borderColor: ['#000000'], 
                 borderWidth: 1,
             },
@@ -57,7 +57,7 @@ export default function InterviewOutcomesChart({ data }: InterviewOutcomesChartP
             legend: {
                 position: 'right' as const,
                 labels: {
-                    color: themeColours.textColor,
+                    color: themeColors.textColor,
                 },
             },
             tooltip: {

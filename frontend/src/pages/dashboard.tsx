@@ -17,6 +17,7 @@ import StageBreakdownChart from "@/components/charts/StageBreakdownChart";
 import InterviewOutcomesChart from "@/components/charts/InterviewOutcomesChart";
 import InterviewTypesChart from "@/components/charts/InterviewTypesChart";
 import DailyTrendChart from "@/components/charts/DailyTrendChart";
+import SankeyChart from "@/components/charts/SankeyChart";
 
 // Fetch Data 
 function useDashboardData() {
@@ -261,6 +262,18 @@ export default function DashboardPage() {
                                                 {previousMonthName} Total: <span className="font-semibold">{previousMonthCount}</span> applications
                                             </p>
                                         </div>
+                                    </CardContent>
+                                </Card>
+                            </div>
+
+                            {/* All Outcomes Sankey Chart */}
+                            <div className="grid grid-cols-1">
+                                <Card className="ring-1 ring-primary/40">
+                                    <CardHeader>
+                                        <CardTitle>All Past Applications Flow</CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <SankeyChart data={stats} />
                                     </CardContent>
                                 </Card>
                             </div>

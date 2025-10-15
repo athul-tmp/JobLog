@@ -154,7 +154,7 @@ export default function DashboardPage() {
                                         <CardTitle>Total Interviews</CardTitle>
                                     </CardHeader>
                                     <CardContent>
-                                        <div className="text-2xl font-bold text-primary">{stats.totalInterviews}</div>
+                                        <div className="text-2xl font-bold text-cyan-500">{stats.totalInterviews}</div>
                                         <p className="text-xs text-foreground mt-1">Interviews completed but pending reply</p>
                                     </CardContent>
                                 </Card>

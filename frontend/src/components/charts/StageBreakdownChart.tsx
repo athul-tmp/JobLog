@@ -8,7 +8,7 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 
 const CHART_COLORS = [
     '#00c951', // Offer
-    '#7e22ce', // Interview
+    '#17a2b8', // Interview
     '#f0b100', // Applied
     '#fb2c36', // Rejected
     '#6a7282', // Ghosted

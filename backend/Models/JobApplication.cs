@@ -6,7 +6,7 @@ namespace backend.Models
     public required string Company { get; set; }
     public required string Role { get; set; }
     public required string Status { get; set; }
-    public required string JobPostingURL { get; set; }
+    public string? JobPostingURL { get; set; }
     public string? Notes { get; set; }
     public required DateTime DateApplied { get; set; }
     public required int UserId { get; set; }

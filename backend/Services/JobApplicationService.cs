@@ -29,7 +29,7 @@ public class JobApplicationService : IJobApplicationService
       UserId = userId,
       Company = request.Company,
       Role = request.Role,
-      Status = request.Status,
+      Status = "Applied",
       JobPostingURL = request.JobPostingURL,
       Notes = request.Notes,
       DateApplied = DateTime.UtcNow
@@ -93,7 +93,19 @@ public class JobApplicationService : IJobApplicationService
     // Check if the status has changed
     var statusChanged = request.Status != null && application.Status != request.Status;
 
-    // Update properties
+    // Update all editable properties if provided 
+    if (request.Company != null)
+    {
+      application.Company = request.Company;
+    }
+    if (request.Role != null)
+    {
+      application.Role = request.Role;
+    }
+    if (request.JobPostingURL != null)
+    {
+      application.JobPostingURL = request.JobPostingURL;
+    }
     if (request.Notes != null)
     {
       application.Notes = request.Notes;
@@ -138,14 +150,16 @@ public class JobApplicationService : IJobApplicationService
 public record JobApplicationCreateRequest(
     string Company,
     string Role,
-    string Status,
-    string JobPostingURL,
+    string? JobPostingURL,
     string? Notes
 );
 
 // Used for updating an existing job application
 public record JobApplicationUpdateRequest(
     int Id,
+    string? Company,
+    string? Role,
+    string? JobPostingURL,
     string? Status,
     string? Notes
 );

@@ -7,13 +7,13 @@ namespace backend.DTOs
       string Company,
       string Role,
       string Status,
-      string JobPostingURL,
+      string? JobPostingURL,
       string? Notes,
       DateTime DateApplied,
       List<JobStatusHistoryDto> StatusHistory
   )
   {
-    
+
     public static JobApplicationDto FromEntity(JobApplication application)
     {
       return new JobApplicationDto(

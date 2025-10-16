@@ -18,6 +18,7 @@ export interface JobStatusHistory {
 
 export interface JobApplication {
   id: number;
+  applicationNo: number;
   company: string;
   role: string;
   status: string;

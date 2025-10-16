@@ -4,6 +4,7 @@ namespace backend.DTOs
 {
   public record JobApplicationDto(
       int Id,
+      int ApplicationNo,
       string Company,
       string Role,
       string Status,
@@ -18,6 +19,7 @@ namespace backend.DTOs
     {
       return new JobApplicationDto(
           application.Id,
+          application.ApplicationNo,
           application.Company,
           application.Role,
           application.Status,

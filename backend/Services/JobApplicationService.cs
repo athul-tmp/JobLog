@@ -20,10 +20,15 @@ public class JobApplicationService : IJobApplicationService
   {
     _dbContext = dbContext;
   }
-
   // Create job application
   public async Task<JobApplication> CreateApplication(int userId, JobApplicationCreateRequest request)
   {
+    // Calculate next application number
+    var currentApplicationCount = await _dbContext.JobApplications
+        .CountAsync(a => a.UserId == userId);
+
+    var nextApplicationNo = currentApplicationCount + 1;
+
     var application = new JobApplication
     {
       UserId = userId,
@@ -32,7 +37,8 @@ public class JobApplicationService : IJobApplicationService
       Status = "Applied",
       JobPostingURL = request.JobPostingURL,
       Notes = request.Notes,
-      DateApplied = DateTime.UtcNow
+      DateApplied = DateTime.UtcNow,
+      ApplicationNo = nextApplicationNo
     };
 
     _dbContext.JobApplications.Add(application);
@@ -58,6 +64,7 @@ public class JobApplicationService : IJobApplicationService
         .Where(a => a.UserId == userId)
         .Select(a => new JobApplicationDto(
             a.Id,
+            a.ApplicationNo,
             a.Company,
             a.Role,
             a.Status,

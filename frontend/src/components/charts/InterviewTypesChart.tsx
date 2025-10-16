@@ -7,13 +7,9 @@ import { useTheme } from '@/hooks/useTheme';
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 const TYPE_COLORS = [
-    // '#9d4edd', // OA Interview
-    // '#7400d3ff', // Mid-stage Interview
-    // '#3e036fff', // Final Interview
     '#bedbff',
     '#2b7fff',
     '#1447e6',
-
 ];
 
 const THEME_COLORS = {
@@ -45,16 +41,27 @@ export default function InterviewTypesChart({ data }: InterviewTypesChartProps) 
         );
     }
 
+    const interviewMap = new Map<string, number>();
+        data.forEach(item => {
+            interviewMap.set(item.type, item.count);
+    });
+
+    const properOrder = [
+        { key: 'OA Interview', label: 'OA' },
+        { key: 'Mid-stage Interview', label: 'Mid-stage' },
+        { key: 'Final Interview', label: 'Final' },
+    ];
+
+    const properCount = properOrder.map(p => {
+        return interviewMap.get(p.key) || 0;
+    });
+
     const chartData = {
-        labels: [
-            'OA',
-            'Mid-stage',
-            'Final'
-        ],
+        labels: properOrder.map(p => p.label),
         datasets: [
             {
                 label: 'Interview Types',
-                data: data.map(item => item.count),
+                data: properCount,
                 backgroundColor: TYPE_COLORS,
                 borderColor: ['#000000'], 
                 borderWidth: 1,

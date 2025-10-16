@@ -28,7 +28,7 @@ public class JobApplicationController : ControllerBase
   }
 
   // Get all job applications | Route: GET /api/JobApplication
-  [HttpGet]
+  [HttpGet("all")]
   public async Task<IActionResult> GetAllUserApplications()
   {
     try

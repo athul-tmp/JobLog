@@ -41,14 +41,14 @@ public class AnalyticsService : IAnalyticsService
         // Interview count = sum of all specific interview stages
         var totalInterviews = applications.Count(a =>
             a.Status == "OA Interview" ||
-            a.Status == "Interview" ||
+            a.Status == "Mid-stage Interview" ||
             a.Status == "Final Interview");
 
         // Total past interviews
         var totalPastInterviews = await _dbContext.JobStatusHistories
             .Where(h =>
                 h.JobApplication.UserId == userId &&
-                (h.Status == "OA Interview" || h.Status == "Interview" || h.Status == "Final Interview"))
+                (h.Status == "OA Interview" || h.Status == "Mid-stage Interview" || h.Status == "Final Interview"))
             .CountAsync();
 
         // Interviewed but Rejected/Ghosted 
@@ -63,7 +63,7 @@ public class AnalyticsService : IAnalyticsService
         // Filter applications that are currently in any interview stage
         var interviewApplications = applications.Where(a =>
             a.Status == "OA Interview" ||
-            a.Status == "Interview" ||
+            a.Status == "Mid-stage Interview" ||
             a.Status == "Final Interview").ToList();
 
         // Group these interviews by their specific status value

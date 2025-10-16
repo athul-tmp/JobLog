@@ -26,6 +26,15 @@ export interface JobApplication {
   dateApplied: string;
   statusHistory: JobStatusHistory[];
 }
+
+export interface CreateJobApplicationRequest {
+  company: string;
+  role: string;
+  jobPostingURL: string;
+  notes: string; 
+}
+
+// Dashbooard page
 export interface InterviewBreakdown {
   type: string;
   count: number;

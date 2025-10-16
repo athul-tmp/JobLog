@@ -1,5 +1,5 @@
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from "axios";
-import { LoginResponse, DashboardAnalytics } from "../types/types";
+import { LoginResponse, DashboardAnalytics, JobApplication, CreateJobApplicationRequest  } from "../types/types";
 
 // C# backend base URL
 const API_BASE_URL = "http://localhost:5264/api"; 
@@ -70,7 +70,31 @@ export const JobApplicationService = {
     }
   },
 
-  // TODO: Job applications
+  // Create new job application
+  addJobApplication: async (jobData: CreateJobApplicationRequest): Promise<JobApplication> => {
+    try {
+      const response = await apiClient.post<JobApplication>("/JobApplication", jobData);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        return Promise.reject(error.response.data.message || "Failed to add job application.");
+      }
+      return Promise.reject("An unexpected error occurred while adding the job.");
+    }
+  },
+
+  // Fetch all job applications
+  getAllJobApplications: async (): Promise<JobApplication[]> => {
+    try {
+        const response = await apiClient.get<JobApplication[]>("/JobApplication/all");
+        return response.data;
+    } catch (error) {
+        if (axios.isAxiosError(error) && error.response && error.response.status === 401) {
+            throw new Error("Session expired. Please log in again.");
+        }
+        throw new Error("Failed to fetch job applications.");
+    }
+  }
 };
 
 export default apiClient;

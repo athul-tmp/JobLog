@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using backend.DTOs;
+using backend.Models;
 
 [Authorize] // JWT Auth
 [ApiController]
@@ -77,7 +78,7 @@ public class JobApplicationController : ControllerBase
     }
   }
 
-  // Update job application | Route: PUT /api/JobApplication
+  // Update job application | Route: PUT /api/JobApplication (FIXED)
   [HttpPut]
   public async Task<IActionResult> UpdateApplication([FromBody] JobApplicationUpdateRequest request)
   {
@@ -93,6 +94,10 @@ public class JobApplicationController : ControllerBase
     catch (KeyNotFoundException)
     {
       return NotFound(new { message = "Job Application not found or access denied." });
+    }
+    catch (InvalidOperationException ex)
+    {
+      return BadRequest(new { message = ex.Message });
     }
     catch (UnauthorizedAccessException ex)
     {
@@ -139,7 +144,10 @@ public class JobApplicationController : ControllerBase
     try
     {
       var updatedApplication = await _jobApplicationService.UndoLastStatusChange(id, userId);
-      return Ok(updatedApplication);
+
+      var updatedApplicationDto = JobApplicationDto.FromEntity(updatedApplication);
+
+      return Ok(updatedApplicationDto);
     }
     catch (KeyNotFoundException)
     {

@@ -20,13 +20,8 @@ public class JobApplicationService : IJobApplicationService
   // Application stages ranking for validation
   private static readonly Dictionary<string, int> StatusRank = new()
   {
-      { "Applied", 1 },
-      { "OA Interview", 2 },
-      { "Mid-stage Interview", 3 },
-      { "Final Interview", 4 },
-      { "Offer", 5 },
-      { "Rejected", 6 },
-      { "Ghosted", 7 }
+      { "Applied", 1 }, { "OA Interview", 2 }, { "Mid-stage Interview", 3 },
+      { "Final Interview", 4 }, { "Offer", 5 }, { "Rejected", 6 }, { "Ghosted", 7 }
   };
   private static readonly List<string> ProgressionStates = new() { "OA Interview", "Mid-stage Interview", "Final Interview" };
   private static readonly List<string> DefinitiveEndStates = new() { "Offer", "Rejected" };
@@ -35,14 +30,31 @@ public class JobApplicationService : IJobApplicationService
   {
     _dbContext = dbContext;
   }
+
+  // Helper to map Entity to DTO 
+  private JobApplicationDto MapToDto(JobApplication entity)
+  {
+    return new JobApplicationDto(
+        entity.Id,
+        entity.ApplicationNo,
+        entity.Company,
+        entity.Role,
+        entity.Status,
+        entity.JobPostingURL,
+        entity.Notes,
+        entity.DateApplied,
+        entity.StatusHistory
+            .Select(h => new JobStatusHistoryDto(h.Id, h.Status, h.ChangeDate))
+            .OrderBy(h => h.ChangeDate)
+            .ToList()
+    );
+  }
+
   // Create job application
   public async Task<JobApplication> CreateApplication(int userId, JobApplicationCreateRequest request)
   {
     // Calculate next application number
-    var currentApplicationCount = await _dbContext.JobApplications
-        .CountAsync(a => a.UserId == userId);
-
-    var nextApplicationNo = currentApplicationCount + 1;
+    var currentApplicationCount = await _dbContext.JobApplications.CountAsync(a => a.UserId == userId);
 
     var application = new JobApplication
     {
@@ -53,7 +65,7 @@ public class JobApplicationService : IJobApplicationService
       JobPostingURL = request.JobPostingURL,
       Notes = request.Notes,
       DateApplied = DateTime.UtcNow,
-      ApplicationNo = nextApplicationNo
+      ApplicationNo = currentApplicationCount + 1
     };
 
     _dbContext.JobApplications.Add(application);
@@ -69,28 +81,18 @@ public class JobApplicationService : IJobApplicationService
     _dbContext.JobStatusHistories.Add(initialHistory);
     await _dbContext.SaveChangesAsync();
 
-    return application;
+    return (await GetApplicationById(application.Id, userId))!;
   }
 
   // Get all user's job applications
   public async Task<List<JobApplicationDto>> GetAllUserApplications(int userId)
   {
-    return await _dbContext.JobApplications
+    var applications = await _dbContext.JobApplications
         .Where(a => a.UserId == userId)
-        .Select(a => new JobApplicationDto(
-            a.Id,
-            a.ApplicationNo,
-            a.Company,
-            a.Role,
-            a.Status,
-            a.JobPostingURL,
-            a.Notes,
-            a.DateApplied,
-            a.StatusHistory
-                .Select(h => new JobStatusHistoryDto(h.Id, h.Status, h.ChangeDate))
-                .ToList()
-        ))
+        .Include(a => a.StatusHistory)
         .ToListAsync();
+
+    return applications.Select(a => MapToDto(a)).ToList();
   }
 
   // Get a single application
@@ -134,7 +136,6 @@ public class JobApplicationService : IJobApplicationService
       // Block status movement out of end states (Offer / Rejected)
       if (DefinitiveEndStates.Contains(currentStatus))
       {
-        // Allow transition only between Offer <-> Rejected
         if (!DefinitiveEndStates.Contains(newStatus))
         {
           throw new InvalidOperationException($"Cannot move application out of definitive end state: {currentStatus}. Only transition between Offer and Rejected is allowed.");
@@ -153,31 +154,15 @@ public class JobApplicationService : IJobApplicationService
         }
       }
 
-      // If all checks pass, the status change is valid
       statusChanged = true;
     }
 
-    // Update all editable properties if provided 
-    if (request.Company != null)
-    {
-      application.Company = request.Company;
-    }
-    if (request.Role != null)
-    {
-      application.Role = request.Role;
-    }
-    if (request.JobPostingURL != null)
-    {
-      application.JobPostingURL = request.JobPostingURL;
-    }
-    if (request.Notes != null)
-    {
-      application.Notes = request.Notes;
-    }
-    if (request.Status != null)
-    {
-      application.Status = request.Status;
-    }
+    // Update all editable properties
+    if (request.Company != null) application.Company = request.Company;
+    if (request.Role != null) application.Role = request.Role;
+    if (request.JobPostingURL != null) application.JobPostingURL = request.JobPostingURL;
+    if (request.Notes != null) application.Notes = request.Notes;
+
 
     // Log status change
     if (statusChanged)
@@ -194,7 +179,8 @@ public class JobApplicationService : IJobApplicationService
     }
 
     await _dbContext.SaveChangesAsync();
-    return application;
+
+    return (await GetApplicationById(application.Id, userId))!;
   }
 
   // Delete all job application
@@ -206,8 +192,6 @@ public class JobApplicationService : IJobApplicationService
 
     if (applicationsToDelete.Any())
     {
-      // RemoveRange handles cascading deletion of JobStatusHistory records 
-      // if configured in your DB context.
       _dbContext.JobApplications.RemoveRange(applicationsToDelete);
       await _dbContext.SaveChangesAsync();
     }
@@ -223,7 +207,6 @@ public class JobApplicationService : IJobApplicationService
       throw new KeyNotFoundException("Job Application not found or does not belong to user.");
     }
 
-    // Load history ordered by date (newest last)
     var history = application.StatusHistory.OrderByDescending(h => h.ChangeDate).ToList();
 
     if (history.Count <= 1)
@@ -231,19 +214,15 @@ public class JobApplicationService : IJobApplicationService
       throw new InvalidOperationException("Cannot undo the status change. This is the application's initial status.");
     }
 
-    // Get the most recent status history entry and the preceding status
     var lastHistoryEntry = history.First();
     var precedingStatus = history.Skip(1).First().Status;
 
-    // Delete the last status history entry
     _dbContext.JobStatusHistories.Remove(lastHistoryEntry);
-
-    // Revert the JobApplication's current Status
     application.Status = precedingStatus;
 
     await _dbContext.SaveChangesAsync();
 
-    return (await GetApplicationById(applicationId, userId))!;
+    return (await GetApplicationById(application.Id, userId))!;
   }
 }
 

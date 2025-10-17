@@ -6,17 +6,18 @@ import Head from "next/head";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { DashboardNavigation } from "@/components/DashboardNavigation"; 
-import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner"
 import { Card, CardContent } from "@/components/ui/card";
 import { Search } from "lucide-react"; 
 import { Alert, AlertDescription } from "@/components/ui/alert"; 
 
 import AddJobApplicationDialog from "@/components/AddJobApplicationDialog"; 
+import EditJobApplicationDialog from "@/components/EditJobApplicationDialog";
 import { JobApplicationService } from "@/services/api"; 
 import { JobApplication } from "@/types/types"; 
 
 import { JobApplicationTable } from "@/components/JobApplicationTable"; 
+import { toast } from "sonner";
 
 // To fetch and manage application data
 function useApplicationData() {
@@ -58,14 +59,53 @@ function useApplicationData() {
         setApplications(prev => [newJob, ...prev]);
     }, []);
 
-    return { applications, isLoading, error, handleJobAdded, fetchApplications };
+    const handleJobUpdated = useCallback((updatedJob: JobApplication) => {
+        setApplications(prev => prev.map(job => 
+            job.id === updatedJob.id ? updatedJob : job
+        ).sort((a, b) => new Date(b.dateApplied).getTime() - new Date(a.dateApplied).getTime())); // Re-sort to maintain order
+    }, []);
+
+    const handleUndoStatusChange = useCallback(async (jobId: number) => {
+        try {
+            const updatedJob = await JobApplicationService.undoStatusChange(jobId);
+            handleJobUpdated(updatedJob);
+            
+            toast.success("Status Reverted", {
+                description: `Application #${updatedJob.applicationNo} reverted to ${updatedJob.status}.`,
+            });
+        } catch (error) {
+            const errorMessage = (error instanceof Error) 
+                ? error.message 
+                : typeof error === 'string' ? error : "Could not undo last status change.";
+            
+            toast.error("Undo Failed", {
+                description: errorMessage,
+            });
+        }
+    }, [handleJobUpdated]);
+
+    return { applications, isLoading, error, handleJobAdded, handleJobUpdated, handleUndoStatusChange, fetchApplications };
 }
 
 
 export default function TrackerPage() {
     const { isAuthenticated, authLoading } = useAuth();
     const router = useRouter();
-    const { applications, isLoading: isDataLoading, error: dataError, handleJobAdded } = useApplicationData();
+    const { applications, isLoading: isDataLoading, error: dataError, handleJobAdded,handleJobUpdated, handleUndoStatusChange } = useApplicationData();
+
+    // State for managing the Edit Modal
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [selectedJobToEdit, setSelectedJobToEdit] = useState<JobApplication | null>(null);
+
+    const handleOpenEditModal = useCallback((job: JobApplication) => {
+        setSelectedJobToEdit(job);
+        setIsEditModalOpen(true);
+    }, []);
+
+    const handleCloseEditModal = useCallback(() => {
+        setIsEditModalOpen(false);
+        setSelectedJobToEdit(null);
+    }, []);
 
     // Redirect to login if not authenticated
     useEffect(() => {
@@ -120,7 +160,12 @@ export default function TrackerPage() {
                         <Card className="ring-1 ring-primary/40">
                             <CardContent>
                                 {applications.length > 0 ? (
-                                    <JobApplicationTable data={applications} />
+                                    <JobApplicationTable 
+                                        data={applications} 
+                                        onJobUpdated={handleJobUpdated} 
+                                        onUndoStatusChange={handleUndoStatusChange}
+                                        onOpenEditModal={handleOpenEditModal} 
+                                    />
                                 ) : (
                                     <div className="p-10 border border-border rounded-lg flex flex-col items-center justify-center dark:bg-card">
                                         <Search className="w-8 h-8 text-muted-foreground mx-auto mb-4"/>
@@ -137,6 +182,16 @@ export default function TrackerPage() {
             </main>
 
             <Footer />
+
+            {/* NEW: Edit Job Application Modal (FUTURE IMPLEMENTATION) */}
+            {isEditModalOpen && selectedJobToEdit && (
+                <EditJobApplicationDialog
+                    job={selectedJobToEdit}
+                    isOpen={isEditModalOpen}
+                    onClose={handleCloseEditModal}
+                    onJobUpdated={handleJobUpdated}
+                />
+            )}
         </>
     );
 }

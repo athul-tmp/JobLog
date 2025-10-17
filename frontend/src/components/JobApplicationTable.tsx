@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { JobApplication } from "@/types/types";
+import { JobApplication, UpdateJobApplicationRequest } from "@/types/types";
 import { format } from "date-fns";
-import { ArrowUpDown, MoreHorizontal, Eye, Link as LinkIcon, Trash2, ChevronsRight, ChevronsLeft, Search, ListFilter } from "lucide-react";
+import { ArrowUpDown, MoreHorizontal, Eye, Link as LinkIcon, ChevronsRight, ChevronsLeft, Search, ListFilter, RotateCcw } from "lucide-react";
 
 import {
   ColumnDef,
@@ -22,6 +22,12 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { JobApplicationService } from "@/services/api";
+import { toast } from 'sonner';
+// Assuming this is imported from '@/hooks/useStatusValidation'
+import { useStatusValidation } from "@/hooks/useStatusValidation"; 
+
 
 // List of all statuses
 const ALL_STATUSES = [
@@ -55,6 +61,138 @@ const getStatusVariant = (status: string): 'applied' | 'offer' | 'interview' | '
       return 'outline';
   }
 };
+
+// Reusable component to display status with color
+const StatusDisplay = ({ status }: { status: string }) => (
+    <Badge variant={getStatusVariant(status)} className="capitalize min-w-[100px] justify-center">
+        {status}
+    </Badge>
+);
+
+// --- NEW INTERFACES FOR CUSTOM CELLS ---
+interface StatusSelectCellProps {
+    job: JobApplication;
+    onJobUpdated: (updatedJob: JobApplication) => void;
+}
+
+interface ActionsCellProps {
+    job: JobApplication;
+    onUndoStatusChange: (jobId: number) => Promise<void>;
+    onOpenEditModal: (job: JobApplication) => void;
+}
+// ----------------------------------------
+
+
+// --- NEW COMPONENT: Status Select Cell (Hooks are safe here) ---
+const StatusSelectCell: React.FC<StatusSelectCellProps> = ({ job, onJobUpdated }) => {
+    // Hook call is now safe inside this functional component
+    const { getValidNextStatuses } = useStatusValidation(); 
+    const status = job.status;
+    
+    // Get the list of statuses the user is allowed to move to
+    const validStatuses = getValidNextStatuses(status); 
+
+    // Handle status change via the inline dropdown
+    const handleSelectChange = async (newStatus: string) => {
+        if (newStatus === status) return;
+
+        try {
+          const updateData: UpdateJobApplicationRequest = {
+            id: job.id,
+            status: newStatus,
+          };
+          
+          const updatedJob = await JobApplicationService.updateJobApplication(updateData);
+          onJobUpdated(updatedJob);
+
+          toast.success("Status Updated", {
+            description: `${job.company} status changed to ${newStatus}.`,
+          });
+
+        } catch (error) {
+          // If backend validation fails, catch the error and show toast
+          const errorMessage = (error instanceof Error) 
+            ? error.message 
+            : typeof error === 'string' ? error : "Status change blocked by progression rules.";
+          
+          toast.error("Status Change Blocked", {
+            description: errorMessage,
+          });
+        }
+      };
+      
+    return (
+        <Select value={status} onValueChange={handleSelectChange}>
+          <SelectTrigger className="w-[140px] h-8 text-xs capitalize p-0 border-none shadow-none focus:ring-0">
+            <StatusDisplay status={status} />
+          </SelectTrigger>
+          <SelectContent>
+            {/* RENDER ONLY VALID NEXT STATUSES */}
+            {validStatuses.map(s => ( 
+              <SelectItem 
+                  key={s} 
+                  value={s} 
+                  className="p-1 m-1 hover:bg-muted focus:bg-muted cursor-pointer"
+              >
+                <StatusDisplay status={s} />
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+    );
+};
+
+// --- NEW COMPONENT: Actions Dropdown Cell ---
+const ActionsCell: React.FC<ActionsCellProps> = ({ job, onUndoStatusChange, onOpenEditModal }) => {
+    const hasUrl = !!job.jobPostingURL;
+    
+    const handleUndo = () => {
+        onUndoStatusChange(job.id);
+    };
+    
+    // Can undo if there's more than the initial status
+    const canUndo = job.statusHistory.length > 1; 
+
+    return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 w-8 p-0">
+              <span className="sr-only">Open menu</span>
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            
+            <DropdownMenuItem
+                onClick={() => onOpenEditModal(job)}
+                className="cursor-pointer"
+            >
+              <Eye className="w-4 h-4 mr-2"/> View/Edit Details
+            </DropdownMenuItem>
+            
+            <DropdownMenuItem
+                onClick={handleUndo}
+                disabled={!canUndo}
+                className={`cursor-pointer ${canUndo ? 'text-orange-500' : 'text-muted-foreground/50'}`}
+            >
+              <RotateCcw className="w-4 h-4 mr-2"/> Undo Last Status
+            </DropdownMenuItem>
+
+            {hasUrl && (
+                <DropdownMenuItem asChild>
+                    <a href={job.jobPostingURL} target="_blank" rel="noopener noreferrer" className="cursor-pointer">
+                      <LinkIcon className="w-4 h-4 mr-2"/> View Job Post
+                    </a>
+                </DropdownMenuItem>
+            )}
+
+            <DropdownMenuSeparator />
+          </DropdownMenuContent>
+        </DropdownMenu>
+    );
+};
+
 
 // Column definitions
 export const columns: ColumnDef<JobApplication>[] = [
@@ -121,16 +259,23 @@ export const columns: ColumnDef<JobApplication>[] = [
     enableHiding: true,
   },
 
-  // Status 
+  // Status (Renders the new component)
   {
     accessorKey: "status",
     header: "Status",
-    cell: ({ row }) => {
-      const status = row.getValue("status") as string;
+    cell: ({ row, table }) => {
+      const job = row.original;
+      // Define the expected meta type locally
+      type TableMeta = {
+          onJobUpdated: (updatedJob: JobApplication) => void;
+      }
+      const { onJobUpdated } = table.options.meta as TableMeta;
+
       return (
-        <Badge variant={getStatusVariant(status)} className="capitalize min-w-[80px] justify-center">
-            {status}
-        </Badge>
+        <StatusSelectCell 
+            job={job} 
+            onJobUpdated={onJobUpdated}
+        />
       );
     },
     filterFn: (row, columnId, filterValue: string[]) => {
@@ -166,45 +311,25 @@ export const columns: ColumnDef<JobApplication>[] = [
     enableHiding: true, 
   },
 
-  // Actions Column 
+  // Actions Column (Renders the new component)
   {
     id: "actions",
     enableHiding: false,
-    cell: ({ row }) => {
+    cell: ({ row, table }) => {
       const job = row.original;
-      const hasUrl = !!job.jobPostingURL;
+      // Define the expected meta type locally
+      type TableMeta = {
+          onUndoStatusChange: (jobId: number) => Promise<void>;
+          onOpenEditModal: (job: JobApplication) => void;
+      }
+      const { onUndoStatusChange, onOpenEditModal } = table.options.meta as TableMeta;
 
       return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            
-            {/* TODO: Action to view details/edit */}
-            <DropdownMenuItem
-                onClick={() => console.log(`Viewing/Editing job ID: ${job.id}`)}
-                className="cursor-pointer"
-            >
-              <Eye className="w-4 h-4 mr-2"/> View/Edit Details
-            </DropdownMenuItem>
-
-            {/* Action to open URL */}
-            {hasUrl && (
-                <DropdownMenuItem asChild>
-                    <a href={job.jobPostingURL} target="_blank" rel="noopener noreferrer" className="cursor-pointer">
-                      <LinkIcon className="w-4 h-4 mr-2"/> View Job Post
-                    </a>
-                </DropdownMenuItem>
-            )}
-
-            <DropdownMenuSeparator />
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <ActionsCell
+            job={job}
+            onUndoStatusChange={onUndoStatusChange}
+            onOpenEditModal={onOpenEditModal}
+        />
       );
     },
   },
@@ -213,9 +338,12 @@ export const columns: ColumnDef<JobApplication>[] = [
 // Main table component
 interface JobApplicationTableProps {
     data: JobApplication[];
+    onJobUpdated: (updatedJob: JobApplication) => void; 
+    onOpenEditModal: (job: JobApplication) => void; 
+    onUndoStatusChange: (jobId: number) => Promise<void>;
 }
 
-export function JobApplicationTable({ data }: JobApplicationTableProps) {
+export function JobApplicationTable({ data, onJobUpdated, onOpenEditModal, onUndoStatusChange }: JobApplicationTableProps) {
   const [sorting, setSorting] = useState<SortingState>([{ id: 'dateApplied', desc: true }]); // Default sort by date desc
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -235,6 +363,11 @@ export function JobApplicationTable({ data }: JobApplicationTableProps) {
       sorting,
       columnFilters,
       columnVisibility,
+    },
+    meta: {
+        onJobUpdated,
+        onUndoStatusChange,
+        onOpenEditModal,
     },
     initialState: {
         pagination: {
@@ -285,7 +418,7 @@ export function JobApplicationTable({ data }: JobApplicationTableProps) {
                   placeholder="Search company or role..."
                   value={globalFilterValue}
                   onChange={(event) => handleGlobalFilterChange(event.target.value)}
-                  className="w-full max-w-sm pl-9"
+                  className="w-full pl-9"
                 />
             </div>
 

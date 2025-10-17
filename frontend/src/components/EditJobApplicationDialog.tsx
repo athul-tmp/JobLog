@@ -17,27 +17,14 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { format } from "date-fns";
-
 import { JobApplicationService } from "@/services/api";
 import { JobApplication, UpdateJobApplicationRequest } from "@/types/types";
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-
-// List of all statuses (Must match the list in JobApplicationTable for consistency)
-const ALL_STATUSES = [
-  'Applied', 
-  'Offer', 
-  'Mid-stage Interview', 
-  'Rejected', 
-  'Ghosted',
-  'OA Interview', 
-  'Final Interview'
-];
 
 // Schema for validation
 const formSchema = z.object({
@@ -55,9 +42,6 @@ const formSchema = z.object({
   notes: z.string().max(500, {
     message: "Notes must be less than 500 characters."
   }).optional(),
-  status: z.string().min(1, {
-      message: "Please select the current status."
-  })
 });
 
 interface EditJobApplicationDialogProps {
@@ -72,15 +56,13 @@ type FormValues = z.infer<typeof formSchema>;
 
 export default function EditJobApplicationDialog({ job, isOpen, onClose, onJobUpdated }: EditJobApplicationDialogProps) {
     const [isLoading, setIsLoading] = useState(false);
-
     const form = useForm<FormValues>({
         resolver: zodResolver(formSchema),
         defaultValues: {
             company: job.company,
             role: job.role,
-            jobPostingURL: job.jobPostingURL || "", // Convert null to empty string for the input field
+            jobPostingURL: job.jobPostingURL || "",
             notes: job.notes || "",
-            status: job.status,
         },
     });
 
@@ -93,7 +75,6 @@ export default function EditJobApplicationDialog({ job, isOpen, onClose, onJobUp
                 role: values.role,
                 jobPostingURL: values.jobPostingURL || "", 
                 notes: values.notes || "",
-                status: values.status, 
             };
             
             const updatedJob = await JobApplicationService.updateJobApplication(updateData);
@@ -102,15 +83,15 @@ export default function EditJobApplicationDialog({ job, isOpen, onClose, onJobUp
             onJobUpdated(updatedJob); 
             onClose();
 
-            toast.success("Application Updated! ✅", {
-                description: `${updatedJob.role} at ${updatedJob.company} saved successfully.`,
+            toast.success("Details Updated!", {
+                description: `Details for ${updatedJob.company} saved successfully. Status remains ${updatedJob.status}.`,
             });
 
         } catch (error) {
-            // Error: Show error toast (will catch backend validation errors)
+            // Error: Show error toast
             const errorMessage = (error instanceof Error) 
                 ? error.message 
-                : typeof error === 'string' ? error : "Failed to update job application. Please check status rules.";
+                : typeof error === 'string' ? error : "Failed to update job application details.";
             
             toast.error("Update Failed", {
                 description: errorMessage,
@@ -133,6 +114,9 @@ export default function EditJobApplicationDialog({ job, isOpen, onClose, onJobUp
                 </DialogHeader>
                 <div className="text-sm text-muted-foreground mb-4 -mt-3">
                     Applied on: {formattedDateApplied}
+                    <span className="ml-4 font-semibold text-foreground capitalize">
+                        Status: {job.status}
+                    </span>
                 </div>
                 
                 <Form {...form}>
@@ -183,36 +167,6 @@ export default function EditJobApplicationDialog({ job, isOpen, onClose, onJobUp
                                 </FormItem>
                             )}
                         />
-                        
-                        {/* Status Field */}
-                        <FormField
-                            control={form.control}
-                            name="status"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Current Status</FormLabel>
-                                    <Select onValueChange={field.onChange} value={field.value}>
-                                        <FormControl>
-                                            <SelectTrigger className="capitalize">
-                                                <SelectValue placeholder="Select Status" />
-                                            </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            {ALL_STATUSES.map(s => (
-                                                <SelectItem key={s} value={s} className="capitalize">
-                                                    {s}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                    <div className="text-xs text-orange-500 mt-1">
-                                        Warning: Status changes are validated and cannot be moved backwards in the interview stages.
-                                    </div>
-                                </FormItem>
-                            )}
-                        />
-
                         {/* Notes Field */}
                         <FormField
                             control={form.control}

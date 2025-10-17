@@ -22,10 +22,9 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select";
 import { JobApplicationService } from "@/services/api";
 import { toast } from 'sonner';
-// Assuming this is imported from '@/hooks/useStatusValidation'
 import { useStatusValidation } from "@/hooks/useStatusValidation"; 
 
 
@@ -36,9 +35,16 @@ const ALL_STATUSES = [
   'mid-stage interview', 
   'rejected', 
   'ghosted',
-  'OA interview', 
+  'oa interview', 
   'final interview'
 ];
+
+// Helper to format the status string for display with correct capitalisation
+const getDisplayStatus = (status: string) => {
+    if (status.toLowerCase() === 'oa interview') return 'OA Interview';
+    
+    return status.replace(/\b\w/g, c => c.toUpperCase());
+};
 
 // Status badge colouring
 const getStatusVariant = (status: string): 'applied' | 'offer' | 'interview' | 'OAInterview' | 'finalInterview' | 'rejected' | 'ghosted' | 'outline' => {
@@ -69,7 +75,6 @@ const StatusDisplay = ({ status }: { status: string }) => (
     </Badge>
 );
 
-// --- NEW INTERFACES FOR CUSTOM CELLS ---
 interface StatusSelectCellProps {
     job: JobApplication;
     onJobUpdated: (updatedJob: JobApplication) => void;
@@ -80,19 +85,23 @@ interface ActionsCellProps {
     onUndoStatusChange: (jobId: number) => Promise<void>;
     onOpenEditModal: (job: JobApplication) => void;
 }
-// ----------------------------------------
 
 
-// --- NEW COMPONENT: Status Select Cell (Hooks are safe here) ---
 const StatusSelectCell: React.FC<StatusSelectCellProps> = ({ job, onJobUpdated }) => {
-    // Hook call is now safe inside this functional component
     const { getValidNextStatuses } = useStatusValidation(); 
     const status = job.status;
     
-    // Get the list of statuses the user is allowed to move to
     const validStatuses = getValidNextStatuses(status); 
-
-    // Handle status change via the inline dropdown
+    
+    if (!validStatuses.includes(status)) {
+        validStatuses.push(status);
+        validStatuses.sort((a, b) => {
+            const rankA = ALL_STATUSES.indexOf(a.toLowerCase());
+            const rankB = ALL_STATUSES.indexOf(b.toLowerCase());
+            return rankA - rankB;
+        });
+    }
+    // Handle status change
     const handleSelectChange = async (newStatus: string) => {
         if (newStatus === status) return;
 
@@ -110,7 +119,6 @@ const StatusSelectCell: React.FC<StatusSelectCellProps> = ({ job, onJobUpdated }
           });
 
         } catch (error) {
-          // If backend validation fails, catch the error and show toast
           const errorMessage = (error instanceof Error) 
             ? error.message 
             : typeof error === 'string' ? error : "Status change blocked by progression rules.";
@@ -123,16 +131,14 @@ const StatusSelectCell: React.FC<StatusSelectCellProps> = ({ job, onJobUpdated }
       
     return (
         <Select value={status} onValueChange={handleSelectChange}>
-          <SelectTrigger className="w-[140px] h-8 text-xs capitalize p-0 border-none shadow-none focus:ring-0">
+          <SelectTrigger>
             <StatusDisplay status={status} />
           </SelectTrigger>
           <SelectContent>
-            {/* RENDER ONLY VALID NEXT STATUSES */}
             {validStatuses.map(s => ( 
               <SelectItem 
                   key={s} 
                   value={s} 
-                  className="p-1 m-1 hover:bg-muted focus:bg-muted cursor-pointer"
               >
                 <StatusDisplay status={s} />
               </SelectItem>
@@ -142,7 +148,6 @@ const StatusSelectCell: React.FC<StatusSelectCellProps> = ({ job, onJobUpdated }
     );
 };
 
-// --- NEW COMPONENT: Actions Dropdown Cell ---
 const ActionsCell: React.FC<ActionsCellProps> = ({ job, onUndoStatusChange, onOpenEditModal }) => {
     const hasUrl = !!job.jobPostingURL;
     
@@ -163,6 +168,7 @@ const ActionsCell: React.FC<ActionsCellProps> = ({ job, onUndoStatusChange, onOp
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuSeparator />
             
             <DropdownMenuItem
                 onClick={() => onOpenEditModal(job)}
@@ -186,8 +192,6 @@ const ActionsCell: React.FC<ActionsCellProps> = ({ job, onUndoStatusChange, onOp
                     </a>
                 </DropdownMenuItem>
             )}
-
-            <DropdownMenuSeparator />
           </DropdownMenuContent>
         </DropdownMenu>
     );
@@ -259,13 +263,12 @@ export const columns: ColumnDef<JobApplication>[] = [
     enableHiding: true,
   },
 
-  // Status (Renders the new component)
+  // Status
   {
     accessorKey: "status",
     header: "Status",
     cell: ({ row, table }) => {
       const job = row.original;
-      // Define the expected meta type locally
       type TableMeta = {
           onJobUpdated: (updatedJob: JobApplication) => void;
       }
@@ -311,7 +314,7 @@ export const columns: ColumnDef<JobApplication>[] = [
     enableHiding: true, 
   },
 
-  // Actions Column (Renders the new component)
+  // Actions Column
   {
     id: "actions",
     enableHiding: false,
@@ -449,9 +452,9 @@ export function JobApplicationTable({ data, onJobUpdated, onOpenEditModal, onUnd
                                 />
                                 <label 
                                     htmlFor={`filter-${status}`}
-                                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 capitalize"
+                                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                                 >
-                                    {status}
+                                    {getDisplayStatus(status)}
                                 </label>
                             </div>
                         );

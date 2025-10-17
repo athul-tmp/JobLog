@@ -1,3 +1,4 @@
+// Authentication
 export interface LoginResponse {
   message: string;
   userId: number; 
@@ -10,6 +11,7 @@ export interface AuthUser {
   email: string;
 }
 
+// Job application tracker page
 export interface JobStatusHistory {
   id: number;
   status: string;
@@ -33,6 +35,15 @@ export interface CreateJobApplicationRequest {
   role: string;
   jobPostingURL: string;
   notes: string; 
+}
+
+export interface UpdateJobApplicationRequest {
+  id: number;
+  company?: string;
+  role?: string;
+  jobPostingURL?: string;
+  notes?: string;
+  status?: string; 
 }
 
 // Dashbooard page

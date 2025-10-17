@@ -1,5 +1,5 @@
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from "axios";
-import { LoginResponse, DashboardAnalytics, JobApplication, CreateJobApplicationRequest  } from "../types/types";
+import { LoginResponse, DashboardAnalytics, JobApplication, CreateJobApplicationRequest, UpdateJobApplicationRequest  } from "../types/types";
 
 // C# backend base URL
 const API_BASE_URL = "http://localhost:5264/api"; 
@@ -105,6 +105,19 @@ export const JobApplicationService = {
             return Promise.reject(error.response.data.message || "Failed to delete all applications.");
         }
         return Promise.reject("An unexpected error occurred while clearing data.");
+    }
+  },
+
+  // Update job application
+  updateJobApplication: async (jobData: UpdateJobApplicationRequest): Promise<JobApplication> => {
+    try {
+      const response = await apiClient.put<JobApplication>("/JobApplication", jobData);
+      return response.data;
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        return Promise.reject(error.response.data.message || "Failed to update job application.");
+      }
+      return Promise.reject("An unexpected error occurred while updating the job.");
     }
   },
   

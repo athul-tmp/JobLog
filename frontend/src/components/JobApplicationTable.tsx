@@ -203,13 +203,6 @@ export const columns: ColumnDef<JobApplication>[] = [
             )}
 
             <DropdownMenuSeparator />
-            
-            {/* TODO: Action to delete */}
-            <DropdownMenuItem className="text-red-500 cursor-pointer"
-                onClick={() => console.log(`Deleting job ID: ${job.id}`)}
-            >
-              <Trash2 className="w-4 h-4 mr-2"/> Delete Application
-            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );

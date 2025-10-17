@@ -94,6 +94,31 @@ export const JobApplicationService = {
         }
         throw new Error("Failed to fetch job applications.");
     }
+  },
+
+  // Delete all job applications
+  deleteAllApplications: async (): Promise<void> => {
+    try {
+        await apiClient.delete("/JobApplication/all"); 
+    } catch (error) {
+        if (axios.isAxiosError(error) && error.response) {
+            return Promise.reject(error.response.data.message || "Failed to delete all applications.");
+        }
+        return Promise.reject("An unexpected error occurred while clearing data.");
+    }
+  },
+  
+  // Undo previous status change
+  undoStatusChange: async (jobId: number): Promise<JobApplication> => {
+      try {
+          const response = await apiClient.post<JobApplication>(`/JobApplication/undo/${jobId}`);
+          return response.data;
+      } catch (error) {
+          if (axios.isAxiosError(error) && error.response) {
+              return Promise.reject(error.response.data.message || "Failed to undo last status change.");
+          }
+          return Promise.reject("An unexpected error occurred while performing the undo operation.");
+      }
   }
 };
 

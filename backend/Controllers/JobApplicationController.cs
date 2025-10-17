@@ -104,28 +104,54 @@ public class JobApplicationController : ControllerBase
     }
   }
 
-  // Delete job application | Route: DELETE /api/JobApplication/{id}
-  [HttpDelete("{id}")]
-  public async Task<IActionResult> DeleteApplication(int id)
+  // Delete all job applications | Route: DELETE /api/JobApplication/all
+  [HttpDelete("all")]
+  public async Task<IActionResult> DeleteAllUserApplications()
   {
+    var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+    if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out var userId))
+    {
+      return Unauthorized(new { message = "Invalid user ID claim." });
+    }
+
     try
     {
-      var userId = GetUserId();
-      await _jobApplicationService.DeleteApplication(id, userId);
+      await _jobApplicationService.DeleteAllUserApplications(userId);
 
-      return NoContent();
+      return Ok(new { message = "All job applications have been successfully deleted." });
+    }
+    catch (Exception ex)
+    {
+      return StatusCode(500, new { message = "An error occurred while attempting to clear all application data.", error = ex.Message });
+    }
+  }
+
+  // Undo previous status change | Route: POST /api/JobApplication/undo/{id}
+  [HttpPost("undo/{id:int}")]
+  public async Task<IActionResult> UndoLastStatusChange(int id)
+  {
+    var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+    if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out var userId))
+    {
+      return Unauthorized(new { message = "Invalid user ID claim." });
+    }
+
+    try
+    {
+      var updatedApplication = await _jobApplicationService.UndoLastStatusChange(id, userId);
+      return Ok(updatedApplication);
     }
     catch (KeyNotFoundException)
     {
-      return NotFound(new { message = "Job Application not found or access denied." });
+      return NotFound(new { message = "Job Application not found or does not belong to user." });
     }
-    catch (UnauthorizedAccessException ex)
+    catch (InvalidOperationException ex)
     {
-      return Unauthorized(new { message = ex.Message });
+      return BadRequest(new { message = ex.Message });
     }
-    catch (Exception)
+    catch (Exception ex)
     {
-      return StatusCode(500, new { message = "An error occurred during deletion." });
+      return StatusCode(500, new { message = "An error occurred while attempting to undo the last status change.", error = ex.Message });
     }
   }
 }

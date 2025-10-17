@@ -23,7 +23,8 @@ namespace backend.Data
       modelBuilder.Entity<JobStatusHistory>()
           .HasOne(h => h.JobApplication)
           .WithMany(j => j.StatusHistory)
-          .HasForeignKey(h => h.JobApplicationId);
+          .HasForeignKey(h => h.JobApplicationId)
+          .OnDelete(DeleteBehavior.Cascade);
     }
   }
 }

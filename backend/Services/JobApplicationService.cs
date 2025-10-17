@@ -9,7 +9,7 @@ public interface IJobApplicationService
   Task<List<JobApplicationDto>> GetAllUserApplications(int userId);
   Task<JobApplication?> GetApplicationById(int applicationId, int userId);
   Task<JobApplication> UpdateApplication(int userId, JobApplicationUpdateRequest request);
-  Task DeleteApplication(int applicationId, int userId);
+  Task DeleteAllUserApplications(int userId);
   Task<JobApplication> UndoLastStatusChange(int applicationId, int userId);
 }
 
@@ -197,18 +197,20 @@ public class JobApplicationService : IJobApplicationService
     return application;
   }
 
-  // Delete job application
-  public async Task DeleteApplication(int applicationId, int userId)
+  // Delete all job application
+  public async Task DeleteAllUserApplications(int userId)
   {
-    var application = await GetApplicationById(applicationId, userId);
+    var applicationsToDelete = await _dbContext.JobApplications
+        .Where(a => a.UserId == userId)
+        .ToListAsync();
 
-    if (application == null)
+    if (applicationsToDelete.Any())
     {
-      throw new KeyNotFoundException("Job Application not found or does not belong to user.");
+      // RemoveRange handles cascading deletion of JobStatusHistory records 
+      // if configured in your DB context.
+      _dbContext.JobApplications.RemoveRange(applicationsToDelete);
+      await _dbContext.SaveChangesAsync();
     }
-
-    _dbContext.JobApplications.Remove(application);
-    await _dbContext.SaveChangesAsync();
   }
 
   // Undo a status change

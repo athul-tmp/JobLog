@@ -16,6 +16,20 @@ public class JobApplicationService : IJobApplicationService
 {
   private readonly ApplicationDbContext _dbContext;
 
+  // Application stages ranking for validation
+  private static readonly Dictionary<string, int> StatusRank = new()
+  {
+      { "Applied", 1 },
+      { "OA Interview", 2 },
+      { "Mid-stage Interview", 3 },
+      { "Final Interview", 4 },
+      { "Offer", 5 },
+      { "Rejected", 6 },
+      { "Ghosted", 7 }
+  };
+  private static readonly List<string> ProgressionStates = new() { "OA Interview", "Mid-stage Interview", "Final Interview" };
+  private static readonly List<string> DefinitiveEndStates = new() { "Offer", "Rejected" };
+
   public JobApplicationService(ApplicationDbContext dbContext)
   {
     _dbContext = dbContext;
@@ -97,8 +111,50 @@ public class JobApplicationService : IJobApplicationService
       throw new KeyNotFoundException("Job Application not found or does not belong to user.");
     }
 
-    // Check if the status has changed
-    var statusChanged = request.Status != null && application.Status != request.Status;
+    var statusChanged = false;
+
+    // Status validation block
+    if (request.Status != null && application.Status != request.Status)
+    {
+      var currentStatus = application.Status;
+      var newStatus = request.Status;
+
+      if (!StatusRank.ContainsKey(newStatus))
+      {
+        throw new InvalidOperationException($"Invalid status value: {newStatus}.");
+      }
+
+      // Block status movement back to applied 
+      if (newStatus == "Applied")
+      {
+        throw new InvalidOperationException("Cannot move status back to 'Applied' from any progressed stage.");
+      }
+
+      // Block status movement out of end states (Offer / Rejected)
+      if (DefinitiveEndStates.Contains(currentStatus))
+      {
+        // Allow transition only between Offer <-> Rejected
+        if (!DefinitiveEndStates.Contains(newStatus))
+        {
+          throw new InvalidOperationException($"Cannot move application out of definitive end state: {currentStatus}. Only transition between Offer and Rejected is allowed.");
+        }
+      }
+
+      // Block backward progression within interviews
+      if (ProgressionStates.Contains(currentStatus) && ProgressionStates.Contains(newStatus))
+      {
+        var currentRank = StatusRank[currentStatus];
+        var newRank = StatusRank[newStatus];
+
+        if (newRank < currentRank)
+        {
+          throw new InvalidOperationException($"Cannot move backward from {currentStatus} to {newStatus}.");
+        }
+      }
+
+      // If all checks pass, the status change is valid
+      statusChanged = true;
+    }
 
     // Update all editable properties if provided 
     if (request.Company != null)
@@ -125,6 +181,8 @@ public class JobApplicationService : IJobApplicationService
     // Log status change
     if (statusChanged)
     {
+      application.Status = request.Status!;
+
       var history = new JobStatusHistory
       {
         JobApplicationId = application.Id,

@@ -10,6 +10,7 @@ public interface IJobApplicationService
   Task<JobApplication?> GetApplicationById(int applicationId, int userId);
   Task<JobApplication> UpdateApplication(int userId, JobApplicationUpdateRequest request);
   Task DeleteApplication(int applicationId, int userId);
+  Task<JobApplication> UndoLastStatusChange(int applicationId, int userId);
 }
 
 public class JobApplicationService : IJobApplicationService
@@ -208,6 +209,39 @@ public class JobApplicationService : IJobApplicationService
 
     _dbContext.JobApplications.Remove(application);
     await _dbContext.SaveChangesAsync();
+  }
+
+  // Undo a status change
+  public async Task<JobApplication> UndoLastStatusChange(int applicationId, int userId)
+  {
+    var application = await GetApplicationById(applicationId, userId);
+
+    if (application == null)
+    {
+      throw new KeyNotFoundException("Job Application not found or does not belong to user.");
+    }
+
+    // Load history ordered by date (newest last)
+    var history = application.StatusHistory.OrderByDescending(h => h.ChangeDate).ToList();
+
+    if (history.Count <= 1)
+    {
+      throw new InvalidOperationException("Cannot undo the status change. This is the application's initial status.");
+    }
+
+    // Get the most recent status history entry and the preceding status
+    var lastHistoryEntry = history.First();
+    var precedingStatus = history.Skip(1).First().Status;
+
+    // Delete the last status history entry
+    _dbContext.JobStatusHistories.Remove(lastHistoryEntry);
+
+    // Revert the JobApplication's current Status
+    application.Status = precedingStatus;
+
+    await _dbContext.SaveChangesAsync();
+
+    return (await GetApplicationById(applicationId, userId))!;
   }
 }
 

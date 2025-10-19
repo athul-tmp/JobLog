@@ -34,6 +34,7 @@ const isEmailValidFormat = (email: string) => {
 
 export default function RegisterPage() {
     const router = useRouter();
+    const [firstName, setFirstName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
@@ -64,8 +65,10 @@ export default function RegisterPage() {
     const passwordsMatch = password === confirmPassword && password.length > 0;
     
     const isEmailValid = useMemo(() => isEmailValidFormat(email), [email]);
+
+    const isFirstNameValid = firstName.trim().length > 0;
     
-    const canSubmit = !isLoading && isPasswordStrong && passwordsMatch && isEmailValid && email.length > 0;
+    const canSubmit = !isLoading && isPasswordStrong && passwordsMatch && isEmailValid && isFirstNameValid && email.length > 0;
 
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -74,7 +77,7 @@ export default function RegisterPage() {
         setIsLoading(true);
 
         try {
-            await AuthService.register(email, password);
+            await AuthService.register(email, password, firstName);
             router.push("/login?success=registered");
 
         } catch (err) {
@@ -113,6 +116,17 @@ export default function RegisterPage() {
                                     <AlertDescription>{error}</AlertDescription>
                                 </Alert>
                             )}
+                            <div className="grid gap-2">
+                                <Label htmlFor="name">First Name</Label>
+                                <Input
+                                    id="firstName"
+                                    type="text"
+                                    placeholder="John"
+                                    value={firstName}
+                                    onChange={(e) => setFirstName(e.target.value)}
+                                    required
+                                />
+                            </div>
                             <div className="grid gap-2">
                                 <Label htmlFor="email">Email</Label>
                                 <Input

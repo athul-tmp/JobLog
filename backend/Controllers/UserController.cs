@@ -23,9 +23,9 @@ public class UserController : ControllerBase
   {
     // Input validations
     // Check for empty
-    if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
+    if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password) || string.IsNullOrWhiteSpace(request.FirstName))
     {
-      return BadRequest(new { message = "Email and password are required." });
+      return BadRequest(new { message = "First name, email and password are required." });
     }
 
     // Password validation
@@ -47,12 +47,13 @@ public class UserController : ControllerBase
     // Save user 
     try
     {
-      var user = await _userService.RegisterUser(request.Email, request.Password);
+      var user = await _userService.RegisterUser(request.Email, request.Password, request.FirstName);
 
       return CreatedAtAction(nameof(RegisterUser), new
       {
         userId = user.Id,
-        email = user.Email
+        email = user.Email,
+        firstName = user.FirstName,
       });
     }
     catch (InvalidOperationException ex)
@@ -98,5 +99,5 @@ public class UserController : ControllerBase
   }
 }
 
-public record UserRegistrationRequest(string Email, string Password);
+public record UserRegistrationRequest(string FirstName, string Email, string Password);
 public record UserLoginRequest(string Email, string Password);

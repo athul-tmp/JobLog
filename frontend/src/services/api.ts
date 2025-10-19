@@ -44,9 +44,9 @@ export const AuthService = {
   },
 
   // Registration method 
-  register: async (email: string, password: string): Promise<void> => {
+  register: async (email: string, password: string, firstName: string): Promise<void> => {
     try {
-      await apiClient.post("/User/register", { email, password });
+      await apiClient.post("/User/register", { firstName, email, password });
     } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
         return Promise.reject(error.response.data.message || "Registration failed.");

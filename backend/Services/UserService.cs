@@ -6,7 +6,7 @@ using BCrypt.Net;
 public interface IUserService
 {
   Task<User?> GetUserByEmail(string email);
-  Task<User> RegisterUser(string email, string password);
+  Task<User> RegisterUser(string email, string password, string firstName);
   Task<User?> AuthenticateUser(string email, string password);
 }
 
@@ -26,7 +26,7 @@ public class UserService : IUserService
   }
 
   // Register a user
-  public async Task<User> RegisterUser(string email, string password)
+  public async Task<User> RegisterUser(string email, string password, string firstName)
   {
     // Check for duplicate 
     if (await GetUserByEmail(email) != null)
@@ -41,7 +41,8 @@ public class UserService : IUserService
     var user = new User
     {
       Email = email,
-      PasswordHash = passwordHash
+      PasswordHash = passwordHash,
+      FirstName = firstName
     };
 
     // Save to the database

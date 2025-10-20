@@ -11,12 +11,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Search } from "lucide-react"; 
 import { Alert, AlertDescription } from "@/components/ui/alert"; 
 
-import AddJobApplicationDialog from "@/components/AddJobApplicationDialog"; 
-import EditJobApplicationDialog from "@/components/EditJobApplicationDialog";
+import AddJobApplicationDialog from "@/components/tracker/AddJobApplicationDialog"; 
+import EditJobApplicationDialog from "@/components/tracker/EditJobApplicationDialog";
 import { JobApplicationService } from "@/services/api"; 
 import { JobApplication } from "@/types/types"; 
 
-import { JobApplicationTable } from "@/components/JobApplicationTable"; 
+import { JobApplicationTable } from "@/components/tracker/JobApplicationTable"; 
 import { toast } from "sonner";
 
 // To fetch and manage application data

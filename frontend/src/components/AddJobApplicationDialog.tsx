@@ -106,7 +106,7 @@ export default function AddJobApplicationDialog({ onJobAdded }: AddJobApplicatio
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-                <Button className="text-base shadow-md">
+                <Button className="text-base shadow-md cursor-pointer">
                     <Plus className="w-5 h-5 mr-2" />
                     Add New Application
                 </Button>
@@ -178,7 +178,7 @@ export default function AddJobApplicationDialog({ onJobAdded }: AddJobApplicatio
                         />
                         
                         <DialogFooter>
-                            <Button type="submit" disabled={isLoading}>
+                            <Button className="cursor-pointer" type="submit" disabled={isLoading}>
                                 {isLoading ? (
                                     <>
                                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />

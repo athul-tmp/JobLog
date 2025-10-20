@@ -10,6 +10,7 @@ export interface LoginResponse {
 export interface AuthUser {
   userId: number;
   email: string;
+  firstName: string;
 }
 
 // Job application tracker page

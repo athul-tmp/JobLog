@@ -183,10 +183,10 @@ export default function EditJobApplicationDialog({ job, isOpen, onClose, onJobUp
                         />
                         
                         <DialogFooter className="mt-6">
-                            <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>
+                            <Button type="button" variant="outline" className="cursor-pointer" onClick={onClose} disabled={isLoading}>
                                 Cancel
                             </Button>
-                            <Button type="submit" disabled={isLoading}>
+                            <Button type="submit" className="cursor-pointer" disabled={isLoading}>
                                 {isLoading ? (
                                     <>
                                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />

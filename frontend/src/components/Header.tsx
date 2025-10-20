@@ -1,13 +1,14 @@
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button'; 
-import { Moon, Sun, LogOut } from 'lucide-react';
+import { Moon, Sun } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
+import { ProfileMenu } from './ProfileMenu'; 
 
 const THEME_KEY = "joblog-theme";
 
 export default function Header() {
-  const { isAuthenticated, logout } = useAuth();
+  const { isAuthenticated } = useAuth();
   const [theme, setTheme] = useState<'light' | 'dark'>('dark');
   const [isMounted, setIsMounted] = useState(false);
 
@@ -48,7 +49,7 @@ export default function Header() {
       variant="ghost" 
       size="icon" 
       onClick={toggleTheme}
-      className="text-foreground/80 hover:text-primary transition duration-200"
+      className="text-foreground/80 hover:text-primary transition duration-200 cursor-pointer"
       aria-label="Toggle dark mode"
       // Show Moon icon if current theme is dark, Sun if light
     >
@@ -83,11 +84,7 @@ export default function Header() {
             <>
               {/* Authenticated State */}
               {ThemeToggleButton}
-              
-              <Button onClick={logout} variant="link" className="text-foreground/80 text-base hover:text-primary"> 
-                Log Out
-                <LogOut className="h-4 w-4" />
-              </Button>
+              <ProfileMenu />
             </>
           ) : (
             <>
@@ -95,12 +92,12 @@ export default function Header() {
               {ThemeToggleButton}
 
               <Link href="/login" passHref>
-                <Button variant="link" className="text-foreground/80 text-base hover:text-primary">
+                <Button variant="link" className="text-foreground/80 text-base hover:text-primary cursor-pointer">
                   Log In
                 </Button>
               </Link>
               <Link href="/register" passHref>
-                <Button variant="link" className="text-foreground/80 text-base hover:text-primary"> 
+                <Button variant="link" className="text-foreground/80 text-base hover:text-primary cursor-pointer"> 
                   Register
                 </Button>
               </Link>

@@ -54,12 +54,12 @@ export default function LandingPage() {
               
               <div className="mt-10 flex justify-center space-x-4">
                 <Link href="/register" passHref>
-                  <Button size="lg" className="h-12 text-lg px-8 shadow-lg transition duration-200">
+                  <Button size="lg" className="h-12 text-lg px-8 shadow-lg transition duration-200 cursor-pointer">
                     Get Started
                   </Button>
                 </Link>
                 <Link href="/login" passHref>
-                  <Button size="lg" variant="outline" className="h-12 text-lg px-8 border-border transition duration-200">
+                  <Button size="lg" variant="outline" className="h-12 text-lg px-8 border-border transition duration-200 cursor-pointer">
                     Log In
                     <ArrowRightIcon className="ml-2 h-5 w-5" />
                   </Button>

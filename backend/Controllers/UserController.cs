@@ -94,6 +94,8 @@ public class UserController : ControllerBase
     {
       message = "Login successful",
       userId = user.Id,
+      email = user.Email,
+      firstName = user.FirstName,
       token = token
     });
   }

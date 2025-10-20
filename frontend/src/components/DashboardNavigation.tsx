@@ -15,8 +15,8 @@ export function DashboardNavigation({ currentPath }: { currentPath: string }) {
         <div className="flex justify-center my-8">
             <Tabs value={activeTab} onValueChange={navigate}>
                 <TabsList>
-                    <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-                    <TabsTrigger value="tracker">Application Tracker</TabsTrigger>
+                    <TabsTrigger className={activeTab !== 'dashboard' ? 'cursor-pointer' : ''} value="dashboard">Dashboard</TabsTrigger>
+                    <TabsTrigger className={activeTab !== 'tracker' ? 'cursor-pointer' : ''} value="tracker">Application Tracker</TabsTrigger>
                 </TabsList>
             </Tabs>
         </div>

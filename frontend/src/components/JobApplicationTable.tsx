@@ -131,12 +131,13 @@ const StatusSelectCell: React.FC<StatusSelectCellProps> = ({ job, onJobUpdated }
       
     return (
         <Select value={status} onValueChange={handleSelectChange}>
-          <SelectTrigger>
+          <SelectTrigger className="cursor-pointer">
             <StatusDisplay status={status} />
           </SelectTrigger>
           <SelectContent>
             {validStatuses.map(s => ( 
               <SelectItem 
+                  className="cursor-pointer" 
                   key={s} 
                   value={s} 
               >
@@ -161,7 +162,7 @@ const ActionsCell: React.FC<ActionsCellProps> = ({ job, onUndoStatusChange, onOp
     return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
+            <Button variant="ghost" className="h-8 w-8 p-0 cursor-pointer">
               <span className="sr-only">Open menu</span>
               <MoreHorizontal className="h-4 w-4" />
             </Button>
@@ -219,6 +220,7 @@ export const columns: ColumnDef<JobApplication>[] = [
     header: ({ column }) => {
       return (
         <Button
+          className="cursor-pointer"
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
@@ -236,6 +238,7 @@ export const columns: ColumnDef<JobApplication>[] = [
     header: ({ column }) => {
       return (
         <Button
+          className="cursor-pointer"
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
@@ -296,7 +299,7 @@ export const columns: ColumnDef<JobApplication>[] = [
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="justify-end w-full pr-0"
+          className="justify-end w-full pr-0 cursor-pointer"
         >
           Date Applied
           <ArrowUpDown className="ml-2 h-4 w-4" />
@@ -428,7 +431,7 @@ export function JobApplicationTable({ data, onJobUpdated, onOpenEditModal, onUnd
             {/* Status Filter Dropdown */}
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                    <Button variant="outline" className="h-9 px-4 capitalize">
+                    <Button variant="outline" className="h-9 px-4 capitalize cursor-pointer">
                         <ListFilter className="w-4 h-4 mr-2"/>
                         Status
                     </Button>
@@ -446,6 +449,7 @@ export function JobApplicationTable({ data, onJobUpdated, onOpenEditModal, onUnd
                                 onClick={() => handleStatusToggle(status, !isSelected)}
                             >
                                 <Checkbox
+                                    className="cursor-pointer"
                                     id={`filter-${status}`}
                                     checked={isSelected}
                                     onCheckedChange={(checked) => handleStatusToggle(status, checked as boolean)}
@@ -529,7 +533,7 @@ export function JobApplicationTable({ data, onJobUpdated, onOpenEditModal, onUnd
           size="sm"
           onClick={() => table.previousPage()}
           disabled={!table.getCanPreviousPage()}
-          className="flex items-center space-x-1"
+          className="flex items-center space-x-1 cursor-pointer "
         >
           <ChevronsLeft className="w-4 h-4" />
           <span>Previous</span>
@@ -539,7 +543,7 @@ export function JobApplicationTable({ data, onJobUpdated, onOpenEditModal, onUnd
           size="sm"
           onClick={() => table.nextPage()}
           disabled={!table.getCanNextPage()}
-          className="flex items-center space-x-1"
+          className="flex items-center space-x-1 cursor-pointer "
         >
           <span>Next</span>
           <ChevronsRight className="w-4 h-4" />

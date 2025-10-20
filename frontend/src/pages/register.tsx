@@ -189,7 +189,7 @@ export default function RegisterPage() {
                         <CardFooter className="flex flex-col gap-4 mt-5">
                             <Button 
                                 type="submit" 
-                                className="w-full" 
+                                className="w-full cursor-pointer" 
                                 disabled={!canSubmit} 
                             >
                                 {isLoading ? "Creating Account..." : "Register"}

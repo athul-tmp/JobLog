@@ -182,8 +182,7 @@ export default function TrackerPage() {
             </main>
 
             <Footer />
-
-            {/* NEW: Edit Job Application Modal (FUTURE IMPLEMENTATION) */}
+            
             {isEditModalOpen && selectedJobToEdit && (
                 <EditJobApplicationDialog
                     job={selectedJobToEdit}

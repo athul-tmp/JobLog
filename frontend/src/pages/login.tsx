@@ -110,7 +110,7 @@ export default function LoginPage() {
                             </div>
                         </CardContent>
                         <CardFooter className="flex flex-col gap-4 mt-5">
-                            <Button type="submit" className="w-full" disabled={authLoading}>
+                            <Button type="submit" className="w-full cursor-pointer" disabled={authLoading}>
                                 {authLoading ? "Logging In..." : "Log In"}
                             </Button>
                             <div className="text-sm text-center text-muted-foreground">

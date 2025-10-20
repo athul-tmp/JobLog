@@ -24,7 +24,7 @@ export const ManageAccountTab = ({ user }: { user: AuthUser }) => {
                         <Label className="text-base">Email Address</Label>
                         <div className="flex items-center space-x-2">
                             <span className="text-muted-foreground">{user.email}</span>
-                            <Button variant="outline" size="sm" disabled>Change Email (WIP)</Button>
+                            <Button className="cursor-pointer" variant="outline" size="sm" disabled>Change Email (WIP)</Button>
                         </div>
                     </div>
 
@@ -33,7 +33,7 @@ export const ManageAccountTab = ({ user }: { user: AuthUser }) => {
                         <Label className="text-base">Password</Label>
                         <div className="flex items-center space-x-2">
                             <span className="text-muted-foreground">••••••••</span>
-                            <Button variant="outline" size="sm" disabled>Change Password (WIP)</Button>
+                            <Button className="cursor-pointer" variant="outline" size="sm" disabled>Change Password (WIP)</Button>
                         </div>
                     </div>
                 </CardContent>
@@ -50,7 +50,7 @@ export const ManageAccountTab = ({ user }: { user: AuthUser }) => {
                 <CardContent>
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
-                            <Button variant="destructive">Delete Account Permanently</Button>
+                            <Button variant="destructive" className="cursor-pointer">Delete Account Permanently</Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                             <AlertDialogHeader>
@@ -64,9 +64,9 @@ export const ManageAccountTab = ({ user }: { user: AuthUser }) => {
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogCancel className="cursor-pointer" >Cancel</AlertDialogCancel>
                                 <AlertDialogAction asChild>
-                                    <Button variant="destructive" disabled>Confirm Deletion (WIP)</Button>
+                                    <Button className="cursor-pointer" variant="destructive" disabled>Confirm Deletion (WIP)</Button>
                                 </AlertDialogAction>
                             </AlertDialogFooter>
                         </AlertDialogContent>

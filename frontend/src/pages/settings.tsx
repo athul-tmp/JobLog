@@ -10,13 +10,15 @@ import { ArrowLeft, KeyRound, Database, Zap } from "lucide-react";
 import { ManageAccountTab } from "@/components/settings/ManageAccountTab"; 
 import { DataManagementTab } from "@/components/settings/DataManagementTab"; 
 import { ToolsAndIntegrationsTab } from "@/components/settings/ToolsAndIntegrationsTab"; 
+import { Spinner } from "@/components/ui/spinner";
 
 
 // Configuration for sidebar 
 const settingsNav = [
     { id: 'account', title: 'Manage Account', icon: KeyRound },
     { id: 'data', title: 'Data', icon: Database },
-    { id: 'tools', title: 'Tools & Integrations', icon: Zap },
+    // Will be added in later
+    // { id: 'tools', title: 'Tools & Integrations', icon: Zap }, 
 ];
 
 
@@ -37,7 +39,7 @@ export default function SettingsPage() {
     if (authLoading || !isAuthenticated || !user || !user.firstName) {
         return (
             <div className="flex justify-center items-center h-screen bg-background">
-                <div className="text-lg text-muted-foreground">Loading...</div> 
+                <Spinner className="size-15"/>
             </div>
         );
     }
@@ -76,7 +78,7 @@ export default function SettingsPage() {
                 <Button 
                     variant="outline"
                     onClick={() => router.back()} 
-                    className="mb-4 mt-4 text-base"
+                    className="mb-4 mt-4 text-base cursor-pointer"
                 >
                     <ArrowLeft className="h-5 w-5 mr-2" />
                     Back
@@ -98,7 +100,7 @@ export default function SettingsPage() {
                                     <Button
                                         key={item.id}
                                         variant={isActive ? 'secondary' : 'ghost'} 
-                                        className="justify-start text-base"
+                                        className={isActive? "justify-start text-base": "cursor-pointer justify-start text-base"}
                                         onClick={() => handleNavigation(item.id)}
                                     >
                                         <Icon className="h-5 w-5 mr-3" />

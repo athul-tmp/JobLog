@@ -23,7 +23,7 @@ export const DataManagementTab = () => {
                 <CardContent>
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
-                            <Button variant="destructive">Clear All Applications</Button>
+                            <Button className="cursor-pointer" variant="destructive">Clear All Applications</Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                             <AlertDialogHeader>
@@ -37,9 +37,9 @@ export const DataManagementTab = () => {
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogCancel className="cursor-pointer">Cancel</AlertDialogCancel>
                                 <AlertDialogAction asChild>
-                                    <Button variant="destructive" onClick={handleClearAllData} disabled>Yes, Clear All Data</Button> 
+                                    <Button className="cursor-pointer" variant="destructive" onClick={handleClearAllData} disabled>Yes, Clear All Data</Button> 
                                 </AlertDialogAction>
                             </AlertDialogFooter>
                         </AlertDialogContent>

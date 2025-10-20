@@ -64,6 +64,7 @@ export default function DailyTrendChart({ data }: DailyTrendChartProps) {
                 borderColor: '#7e22ce',
                 tension: 0.4, 
                 pointRadius: 5,
+                pointBackgroundColor: '#7e22ce',
                 fill: true,
             },
         ],

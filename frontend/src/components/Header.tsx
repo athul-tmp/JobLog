@@ -65,7 +65,7 @@ export default function Header() {
         {isAuthenticated ? (
           <>
             {/* Authenticated State */}
-            <span className="text-3xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-pink-500 block">
+            <span className="text-3xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600 block">
               JobLog 
             </span>
           </>

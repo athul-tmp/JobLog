@@ -22,13 +22,15 @@ export const ProfileMenu = () => {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="rounded-full h-8 w-8 ring-2 ring-primary/60 cursor-pointer transition duration-200 ml-5">
-                    <Avatar>
-                        <AvatarFallback className="bg-background text-foreground/80 text-semibold hover:bg-accent">
-                            {initials}
-                        </AvatarFallback>
-                    </Avatar>
-                </Button>
+                <div className="rounded-full p-[3px] bg-gradient-to-r from-purple-600 to-pink-600 cursor-pointer transition duration-200 ml-5">
+                    <Button variant="ghost" size="icon" className="rounded-full h-8 w-8 bg-background hover:bg-background/80">
+                        <Avatar className="cursor-pointer">
+                            <AvatarFallback className="bg-background text-semibold text-foreground/80 hover:bg-accent">
+                                {initials}
+                            </AvatarFallback>
+                        </Avatar>
+                    </Button>
+                </div>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-64">
                 <DropdownMenuLabel className="flex flex-col">

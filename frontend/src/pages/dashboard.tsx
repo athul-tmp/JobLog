@@ -21,14 +21,14 @@ import SankeyChart from "@/components/charts/SankeyChart";
 
 // Fetch Data 
 function useDashboardData() {
-  const { token, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
   const [data, setData] = useState<DashboardAnalytics | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     // Only fetch if logged in
-    if (isAuthenticated && token) {
+    if (isAuthenticated) {
       const fetchData = async () => {
         try {
           const stats = await JobApplicationService.getDashboardAnalytics();
@@ -46,7 +46,7 @@ function useDashboardData() {
       };
       fetchData();
     }
-  }, [isAuthenticated, token]);
+  }, [isAuthenticated]);
 
   return { data, isLoading, error };
 }

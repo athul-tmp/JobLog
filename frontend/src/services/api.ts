@@ -4,29 +4,13 @@ import { LoginResponse, DashboardAnalytics, JobApplication, CreateJobApplication
 // C# backend base URL
 const API_BASE_URL = "http://localhost:5264/api"; 
 
-const TOKEN_KEY = "joblog_jwt_token";
-
 const apiClient: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     "Content-Type": "application/json",
   },
+  withCredentials: true,
 });
-
-apiClient.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => {
-    // Retrieve token from localStorage
-    const token = localStorage.getItem(TOKEN_KEY);
-    // Attach it to the request header
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error: AxiosError) => {
-    return Promise.reject(error);
-  }
-);
 
 export const AuthService = {
   // Login method
@@ -54,6 +38,15 @@ export const AuthService = {
       return Promise.reject("An unexpected error occurred during registration.");
     }
   },
+
+  // Logout method to call backend to clear the HttpOnly cookie
+  logout: async (): Promise<void> => { 
+      try {
+          await apiClient.post("/User/logout");
+      } catch (error) {
+          console.error("Logout server call failed, proceeding with client-side logout:", error);
+      }
+  }
 };
 
 export const JobApplicationService = {

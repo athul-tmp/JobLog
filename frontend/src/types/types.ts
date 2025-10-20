@@ -1,16 +1,13 @@
 // Authentication
 export interface LoginResponse {
   message: string;
-  userId: number; 
   email: string;
   firstName: string;
-  token: string; 
 }
 
 export interface AuthUser {
-  userId: number;
-  email: string;
   firstName: string;
+  email: string;
 }
 
 // Job application tracker page

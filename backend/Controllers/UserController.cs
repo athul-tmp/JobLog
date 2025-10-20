@@ -17,6 +17,26 @@ public class UserController : ControllerBase
     _tokenService = tokenService;
   }
 
+  // Helper to set the JWT in an HttpOnly cookie
+  private void SetAuthCookie(string token)
+  {
+    var cookieOptions = new CookieOptions
+    {
+      HttpOnly = true,
+      Secure = false,   // IMPORTANT: true for production (https), false for local (http)
+      SameSite = SameSiteMode.Strict,
+      Expires = DateTime.UtcNow.AddDays(7)
+    };
+
+    Response.Cookies.Append("joblog_jwt_token", token, cookieOptions);
+  }
+
+  // Helper to clear the auth cookie
+  private void ClearAuthCookie()
+  {
+    Response.Cookies.Delete("joblog_jwt_token");
+  }
+
   // Registration Endpoint | Route: POST /api/User/register
   [HttpPost("register")]
   public async Task<IActionResult> RegisterUser([FromBody] UserRegistrationRequest request)
@@ -47,13 +67,11 @@ public class UserController : ControllerBase
     // Save user 
     try
     {
-      var user = await _userService.RegisterUser(request.Email, request.Password, request.FirstName);
+      await _userService.RegisterUser(request.Email, request.Password, request.FirstName);
 
       return CreatedAtAction(nameof(RegisterUser), new
       {
-        userId = user.Id,
-        email = user.Email,
-        firstName = user.FirstName,
+        message = "Registration successful. Please log in."
       });
     }
     catch (InvalidOperationException ex)
@@ -90,14 +108,25 @@ public class UserController : ControllerBase
     // JWT 
     var token = _tokenService.CreateToken(user);
 
+    // Set the JWT as an HttpOnly cookie
+    SetAuthCookie(token);
+
     return Ok(new
     {
       message = "Login successful",
-      userId = user.Id,
       email = user.Email,
       firstName = user.FirstName,
-      token = token
     });
+  }
+
+  // Logout Endpoint | Route: POST /api/User/logout
+  [HttpPost("logout")]
+  public IActionResult Logout()
+  {
+    // Clear the JWT cookie
+    ClearAuthCookie();
+
+    return Ok(new { message = "Logout successful. Cookie cleared." });
   }
 }
 

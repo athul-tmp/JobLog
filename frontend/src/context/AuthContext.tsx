@@ -4,7 +4,6 @@ import { AuthService } from "@/services/api";
 
 interface AuthContextType {
   user: AuthUser | null;
-  token: string | null;
   login: (email: string, password: string) => Promise<string | null>;
   logout: () => void;
   isAuthenticated: boolean;
@@ -14,27 +13,24 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Constants for localStorage keys
-const TOKEN_KEY = "joblog_jwt_token";
 const USER_KEY = "joblog_user_data";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
-  const [token, setToken] = useState<string | null>(null);
   const [authLoading, setAuthLoading] = useState(true); 
   
-  const isAuthenticated = !!token;
+  const isAuthenticated = !!user;
 
   useEffect(() => {
-    const storedToken = localStorage.getItem(TOKEN_KEY);
     const storedUser = localStorage.getItem(USER_KEY); 
 
-    if (storedToken && storedUser) {
-      setToken(storedToken);
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
       try {
         setUser(JSON.parse(storedUser));
       } catch (e) {
         console.error("Failed to parse user data from localStorage:", e);
-        logout();
+        localStorage.removeItem(USER_KEY);
       }
     }
     setAuthLoading(false);
@@ -47,15 +43,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const response: LoginResponse = await AuthService.login(email, password);
 
       const userData: AuthUser = {
-        userId: response.userId,
-        email: response.email,
         firstName: response.firstName,
+        email: response.email,
       };
 
-      localStorage.setItem(TOKEN_KEY, response.token);
       localStorage.setItem(USER_KEY, JSON.stringify(userData));
       
-      setToken(response.token);
       setUser(userData);
       
       return null; 
@@ -73,19 +66,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Logout method to clear session data
+  // Logout method to clear session data and call the backend to clear the HttpOnly cookie
   const logout = () => {
     setAuthLoading(true);
-    localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
-    setToken(null);
+    AuthService.logout();
     setUser(null);
     setAuthLoading(false);
   };
 
   const contextValue: AuthContextType = {
     user,
-    token,
     login,
     logout,
     isAuthenticated,

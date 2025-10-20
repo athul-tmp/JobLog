@@ -21,13 +21,13 @@ import { toast } from "sonner";
 
 // To fetch and manage application data
 function useApplicationData() {
-    const { token, isAuthenticated } = useAuth();
+    const { isAuthenticated } = useAuth();
     const [applications, setApplications] = useState<JobApplication[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     const fetchApplications = useCallback(async () => {
-        if (isAuthenticated && token) {
+        if (isAuthenticated) {
             setIsLoading(true);
             setError(null);
             try {
@@ -47,7 +47,7 @@ function useApplicationData() {
                 setIsLoading(false);
             }
         }
-    }, [isAuthenticated, token]);
+    }, [isAuthenticated]);
 
     // Run fetch once on mount
     useEffect(() => {

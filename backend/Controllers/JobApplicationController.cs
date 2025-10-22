@@ -111,23 +111,27 @@ public class JobApplicationController : ControllerBase
 
   // Delete all job applications | Route: DELETE /api/JobApplication/all
   [HttpDelete("all")]
-  public async Task<IActionResult> DeleteAllUserApplications()
+  public async Task<IActionResult> DeleteAllUserApplications([FromBody] DeleteDataRequest request)
   {
-    var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
-    if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out var userId))
+    if (string.IsNullOrWhiteSpace(request.CurrentPassword))
     {
-      return Unauthorized(new { message = "Invalid user ID claim." });
+      return BadRequest(new { message = "Current password is required to clear data." });
     }
 
     try
     {
-      await _jobApplicationService.DeleteAllUserApplications(userId);
+      var userId = GetUserId();
+      await _jobApplicationService.DeleteAllUserApplications(userId, request.CurrentPassword);
 
       return Ok(new { message = "All job applications have been successfully deleted." });
     }
-    catch (Exception ex)
+    catch (UnauthorizedAccessException)
     {
-      return StatusCode(500, new { message = "An error occurred while attempting to clear all application data.", error = ex.Message });
+      return Unauthorized(new { message = "Invalid current password." });
+    }
+    catch (Exception)
+    {
+      return StatusCode(500, new { message = "An error occurred while attempting to clear all application data." });
     }
   }
 
@@ -163,3 +167,5 @@ public class JobApplicationController : ControllerBase
     }
   }
 }
+
+public record DeleteDataRequest(string CurrentPassword);

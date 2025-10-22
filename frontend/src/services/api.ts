@@ -144,14 +144,11 @@ export const JobApplicationService = {
   },
 
   // Delete all job applications
-  deleteAllApplications: async (): Promise<void> => {
+  deleteAllApplications: async (data: { currentPassword: string }): Promise<void> => {
     try {
-        await apiClient.delete("/JobApplication/all"); 
+        await apiClient.delete("/JobApplication/all", { data: data }); 
     } catch (error) {
-        if (axios.isAxiosError(error) && error.response) {
-            return Promise.reject(error.response.data.message || "Failed to delete all applications.");
-        }
-        return Promise.reject("An unexpected error occurred while clearing data.");
+        return handleApiError(error, "Failed to delete all applications.");
     }
   },
 

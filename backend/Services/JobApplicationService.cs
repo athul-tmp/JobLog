@@ -2,6 +2,7 @@ using backend.Data;
 using backend.Models;
 using backend.DTOs;
 using Microsoft.EntityFrameworkCore;
+using backend.Helpers;
 
 public interface IJobApplicationService
 {
@@ -9,7 +10,7 @@ public interface IJobApplicationService
   Task<List<JobApplicationDto>> GetAllUserApplications(int userId);
   Task<JobApplication?> GetApplicationById(int applicationId, int userId);
   Task<JobApplication> UpdateApplication(int userId, JobApplicationUpdateRequest request);
-  Task DeleteAllUserApplications(int userId);
+  Task DeleteAllUserApplications(int userId, string currentPassword);
   Task<JobApplication> UndoLastStatusChange(int applicationId, int userId);
 }
 
@@ -184,17 +185,31 @@ public class JobApplicationService : IJobApplicationService
   }
 
   // Delete all job application
-  public async Task DeleteAllUserApplications(int userId)
+  public async Task DeleteAllUserApplications(int userId, string currentPassword)
   {
-    var applicationsToDelete = await _dbContext.JobApplications
+    await UserValidationHelper.GetAndValidateUser(_dbContext, userId, currentPassword);
+
+    var applications = await _dbContext.JobApplications
         .Where(a => a.UserId == userId)
         .ToListAsync();
 
-    if (applicationsToDelete.Any())
+    if (!applications.Any())
     {
-      _dbContext.JobApplications.RemoveRange(applicationsToDelete);
-      await _dbContext.SaveChangesAsync();
+      return; // Nothing to delete
     }
+
+    var jobApplicationIds = applications.Select(a => a.Id).ToList();
+
+    var historiesToDelete = await _dbContext.JobStatusHistories
+        .Where(h => jobApplicationIds.Contains(h.JobApplicationId))
+        .ToListAsync();
+
+    _dbContext.JobStatusHistories.RemoveRange(historiesToDelete);
+
+    // Delete parent records 
+    _dbContext.JobApplications.RemoveRange(applications);
+
+    await _dbContext.SaveChangesAsync();
   }
 
   // Undo a status change

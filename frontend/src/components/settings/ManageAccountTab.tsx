@@ -449,11 +449,11 @@ export const ManageAccountTab = () => {
             </Card>
 
             {/* Delete Account */}
-            <Card className="border-red-500 bg-red-50 dark:bg-red-950">
+            <Card className="border-red-500/50 bg-red-200 dark:bg-red-950/40">
                 <CardHeader>
-                    <CardTitle className="text-red-700 dark:text-red-400">Delete Account</CardTitle>
-                    <CardDescription>
-                        This action is permanent and cannot be undone. All your job applications will be permanently deleted.
+                    <CardTitle className="text-red-600 dark:text-red-400">Delete Account</CardTitle>
+                    <CardDescription className="text-red-500 dark:text-red-300">
+                        This action is permanent and cannot be undone. Your account and all your job applications will be permanently deleted.
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -478,7 +478,7 @@ export const ManageAccountTab = () => {
                         variant="destructive"
                         disabled={deleteLoading || !deletePassword}
                     >
-                        {deleteLoading ? 'Deleting Account...' : 'Delete My Account'}
+                        {deleteLoading ? 'Verifying...' : 'Delete Account'}
                     </Button>
                 </CardFooter>
             </Card>

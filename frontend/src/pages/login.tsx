@@ -13,6 +13,12 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { CheckCircle } from "lucide-react";
 
+// Email validation helper function
+const isEmailValidFormat = (email: string) => {
+    const regex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
+    return regex.test(email);
+};
+
 export default function LoginPage() {
     const router = useRouter();
     const { login, isAuthenticated, authLoading } = useAuth();
@@ -36,6 +42,12 @@ export default function LoginPage() {
         // Basic input validation
         if (!email || !password) {
             setError("Please enter both email and password.");
+            return;
+        }
+
+        // Email validation
+        if (!isEmailValidFormat(email)) {
+            setError("Please enter a valid email address.");
             return;
         }
 
@@ -66,7 +78,7 @@ export default function LoginPage() {
                             Sign in to view and update your job applications.
                         </CardDescription>
                     </CardHeader>
-                    <form onSubmit={handleSubmit}>
+                    <form onSubmit={handleSubmit} noValidate>
                         <CardContent className="grid gap-4">
                             {/* Success Alert (from Register Page redirect) */}
                             {registrationSuccess && (
@@ -94,7 +106,6 @@ export default function LoginPage() {
                                     placeholder="jobseeker@example.com"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    required
                                 />
                             </div>
                             <div className="grid gap-2">
@@ -105,7 +116,6 @@ export default function LoginPage() {
                                     placeholder="Enter your password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    required
                                 />
                             </div>
                         </CardContent>

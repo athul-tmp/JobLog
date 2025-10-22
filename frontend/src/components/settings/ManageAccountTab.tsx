@@ -282,7 +282,7 @@ export const ManageAccountTab = () => {
                 <CardHeader>
                     <CardTitle>Update First Name</CardTitle>
                     <CardDescription>
-                        This is the name used to greet you across the application.
+                        This is the name used to greet you across the application. Changing your email requires your current password.
                     </CardDescription>
                 </CardHeader>
                 <form onSubmit={handleUpdateName}>

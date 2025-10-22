@@ -107,10 +107,10 @@ export default function TrackerPage() {
         setSelectedJobToEdit(null);
     }, []);
 
-    // Redirect to login if not authenticated
+    // Redirect if not authenticated
     useEffect(() => {
         if (!authLoading && !isAuthenticated) {
-            router.push("/login");
+            router.push("/");
         }
     }, [isAuthenticated, authLoading, router]);
     

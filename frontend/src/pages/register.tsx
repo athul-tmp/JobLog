@@ -109,7 +109,7 @@ export default function RegisterPage() {
                             Start tracking your job applications now.
                         </CardDescription>
                     </CardHeader>
-                    <form onSubmit={handleSubmit}>
+                    <form onSubmit={handleSubmit} noValidate>
                         <CardContent className="grid gap-4">
                             {error && (
                                 <Alert variant="destructive">
@@ -124,7 +124,6 @@ export default function RegisterPage() {
                                     placeholder="John"
                                     value={firstName}
                                     onChange={(e) => setFirstName(e.target.value)}
-                                    required
                                 />
                             </div>
                             <div className="grid gap-2">
@@ -136,7 +135,6 @@ export default function RegisterPage() {
                                     value={email}
                                     className={email.length > 0 && !isEmailValid ? "border-red-500" : ""}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    required
                                 />
                                 {email.length > 0 && !isEmailValid && (
                                     <p className="flex items-center text-sm mt-1 text-red-500">
@@ -153,7 +151,6 @@ export default function RegisterPage() {
                                     placeholder="Enter strong password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    required
                                 />
                             </div>
                             
@@ -177,7 +174,6 @@ export default function RegisterPage() {
                                     type="password"
                                     value={confirmPassword}
                                     onChange={(e) => setConfirmPassword(e.target.value)}
-                                    required
                                 />
                                 {confirmPassword.length > 0 && (
                                     <p className={`text-sm mt-1 ${passwordsMatch ? 'text-green-500' : 'text-red-500'}`}>

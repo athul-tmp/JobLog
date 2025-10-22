@@ -28,10 +28,10 @@ export default function SettingsPage() {
     
     const activeTab = router.query.tab ? String(router.query.tab) : 'account';
 
-    // Redirect to login if not authenticated
+    // Redirect if not authenticated
     useEffect(() => {
         if (!authLoading && !isAuthenticated) {
-            router.push("/login");
+            router.push("/");
         }
     }, [isAuthenticated, authLoading, router]);
 
@@ -53,7 +53,7 @@ export default function SettingsPage() {
                 return <ToolsAndIntegrationsTab />;
             case 'account':
             default:
-                return <ManageAccountTab user={user} />;
+                return <ManageAccountTab />;
         }
     };
     

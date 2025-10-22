@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 
 using static ValidationHelper;
+using System.Security.Claims;
+using backend.Helpers;
 
 [ApiController]
 [Route("api/[controller]")] // Route: /api/User
@@ -35,6 +37,18 @@ public class UserController : ControllerBase
   private void ClearAuthCookie()
   {
     Response.Cookies.Delete("joblog_jwt_token");
+  }
+
+  // Helper to get User ID
+  private int GetUserId()
+  {
+    var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+
+    if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out var userId))
+    {
+      throw new UnauthorizedAccessException("User ID claim is missing or invalid.");
+    }
+    return userId;
   }
 
   // Registration Endpoint | Route: POST /api/User/register
@@ -128,7 +142,173 @@ public class UserController : ControllerBase
 
     return Ok(new { message = "Logout successful. Cookie cleared." });
   }
+
+  // Update User Name | Route: PUT /api/User/updateName
+  [Authorize]
+  [HttpPut("updateName")]
+  public async Task<IActionResult> UpdateName([FromBody] UpdateNameRequest request)
+  {
+    if (string.IsNullOrWhiteSpace(request.NewFirstName) || string.IsNullOrWhiteSpace(request.CurrentPassword))
+    {
+      return BadRequest(new { message = "New First Name and Current Password are required." });
+    }
+
+    try
+    {
+      var userId = GetUserId();
+      await _userService.UpdateUserName(userId, request.CurrentPassword, request.NewFirstName);
+
+      return Ok(new { message = "First name updated successfully. Please refresh the page." });
+    }
+    catch (UnauthorizedAccessException)
+    {
+      return Unauthorized(new { message = "Invalid current password." });
+    }
+    catch (KeyNotFoundException)
+    {
+      return NotFound(new { message = "User not found." });
+    }
+    catch (Exception)
+    {
+      return StatusCode(500, new { message = "An error occurred while updating the name." });
+    }
+  }
+
+  // Update User Email | Route: PUT /api/User/updateEmail
+  [Authorize]
+  [HttpPut("updateEmail")]
+  public async Task<IActionResult> UpdateEmail([FromBody] UpdateEmailRequest request)
+  {
+    if (string.IsNullOrWhiteSpace(request.NewEmail) || string.IsNullOrWhiteSpace(request.CurrentPassword))
+    {
+      return BadRequest(new { message = "New Email and Current Password are required." });
+    }
+    if (!IsValidEmailFormat(request.NewEmail))
+    {
+      return BadRequest(new { message = "New email format is invalid." });
+    }
+
+    try
+    {
+      var userId = GetUserId();
+      await _userService.UpdateUserEmail(userId, request.CurrentPassword, request.NewEmail);
+
+      return Ok(new { message = "Email updated successfully. You will be logged out to re-authenticate." });
+    }
+    catch (UnauthorizedAccessException)
+    {
+      return Unauthorized(new { message = "Invalid current password." });
+    }
+    catch (InvalidOperationException ex)
+    {
+      return Conflict(new { message = ex.Message }); // e.g., "Email already in use"
+    }
+    catch (Exception)
+    {
+      return StatusCode(500, new { message = "An error occurred while updating the email." });
+    }
+  }
+
+  // Update User Password | Route: PUT /api/User/updatePassword
+  [Authorize]
+  [HttpPut("updatePassword")]
+  public async Task<IActionResult> UpdatePassword([FromBody] UpdatePasswordRequest request)
+  {
+    if (string.IsNullOrWhiteSpace(request.NewPassword) || string.IsNullOrWhiteSpace(request.CurrentPassword))
+    {
+      return BadRequest(new { message = "New Password and Current Password are required." });
+    }
+    if (!IsStrongPassword(request.NewPassword))
+    {
+      return BadRequest(new { message = "New password does not meet strength requirements." });
+    }
+
+    try
+    {
+      var userId = GetUserId();
+      await _userService.UpdateUserPassword(userId, request.CurrentPassword, request.NewPassword);
+
+      // Clear the auth cookie to force re-login
+      ClearAuthCookie();
+
+      return Ok(new { message = "Password updated successfully. Session cleared." });
+    }
+    catch (UnauthorizedAccessException)
+    {
+      return Unauthorized(new { message = "Invalid current password." });
+    }
+    catch (Exception)
+    {
+      return StatusCode(500, new { message = "An error occurred while updating the password." });
+    }
+  }
+
+  // Delete Account | Route: DELETE /api/User/delete
+  [Authorize]
+  [HttpDelete("delete")]
+  public async Task<IActionResult> DeleteAccount([FromBody] DeleteAccountRequest request)
+  {
+    if (string.IsNullOrWhiteSpace(request.CurrentPassword))
+    {
+      return BadRequest(new { message = "Current Password is required for account deletion." });
+    }
+
+    try
+    {
+      var userId = GetUserId();
+      await _userService.DeleteUser(userId, request.CurrentPassword);
+
+      // Clear the auth cookie after deletion
+      ClearAuthCookie();
+
+      return Ok(new { message = "Account successfully deleted. You have been logged out." });
+    }
+    catch (UnauthorizedAccessException)
+    {
+      return Unauthorized(new { message = "Invalid current password." });
+    }
+    catch (Exception)
+    {
+      return StatusCode(500, new { message = "An error occurred during account deletion." });
+    }
+  }
+
+  // Verify current password | Route: POST /api/User/verifyPassword
+  [Authorize]
+  [HttpPost("verifyPassword")]
+  public async Task<IActionResult> VerifyPassword([FromBody] VerifyPasswordRequest request)
+  {
+    if (string.IsNullOrWhiteSpace(request.CurrentPassword))
+    {
+      return BadRequest(new { message = "Current password is required." });
+    }
+
+    try
+    {
+      var userId = GetUserId();
+      await _userService.VerifyUserPassword(userId, request.CurrentPassword);
+
+      return Ok(new { message = "Password successfully verified." });
+    }
+    catch (UnauthorizedAccessException)
+    {
+      return Unauthorized(new { message = "Invalid current password." });
+    }
+    catch (KeyNotFoundException)
+    {
+      return NotFound(new { message = "User not found." });
+    }
+    catch (Exception)
+    {
+      return StatusCode(500, new { message = "An error occurred during verification." });
+    }
+  }
 }
 
 public record UserRegistrationRequest(string FirstName, string Email, string Password);
 public record UserLoginRequest(string Email, string Password);
+public record UpdateNameRequest(string CurrentPassword, string NewFirstName);
+public record UpdateEmailRequest(string CurrentPassword, string NewEmail);
+public record UpdatePasswordRequest(string CurrentPassword, string NewPassword);
+public record DeleteAccountRequest(string CurrentPassword);
+public record VerifyPasswordRequest(string CurrentPassword);

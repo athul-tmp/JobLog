@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from "axios";
+import axios, { AxiosInstance } from "axios";
 import { LoginResponse, DashboardAnalytics, JobApplication, CreateJobApplicationRequest, UpdateJobApplicationRequest  } from "../types/types";
 
 // C# backend base URL
@@ -11,6 +11,15 @@ const apiClient: AxiosInstance = axios.create({
   },
   withCredentials: true,
 });
+
+// Helper to display api error for settings page
+const handleApiError = (error: unknown, defaultMessage: string): Promise<never> => {
+    if (axios.isAxiosError(error) && error.response) {
+        const specificMessage = error.response.data?.message; 
+        return Promise.reject(specificMessage || defaultMessage + `. Status: ${error.response.status}`);
+    }
+    return Promise.reject(defaultMessage + '. An unexpected error occurred.');
+};
 
 export const AuthService = {
   // Login method
@@ -46,7 +55,52 @@ export const AuthService = {
       } catch (error) {
           console.error("Logout server call failed, proceeding with client-side logout:", error);
       }
-  }
+  },
+
+  // Update First Name
+  updateName: async (data: { currentPassword: string, newFirstName: string }): Promise<void> => {
+      try {
+          await apiClient.put("/User/updateName", data);
+      } catch (error) {
+          return handleApiError(error, "Failed to update name.");
+      }
+  },
+  
+  // Update Email
+  updateEmail: async (data: { currentPassword: string, newEmail: string }): Promise<void> => {
+      try {
+          await apiClient.put("/User/updateEmail", data);
+      } catch (error) {
+          return handleApiError(error, "Failed to update email.");
+      }
+  },
+  
+  // Update Password
+  updatePassword: async (data: { currentPassword: string, newPassword: string }): Promise<void> => {
+      try {
+          await apiClient.put("/User/updatePassword", data);
+      } catch (error) {
+          return handleApiError(error, "Failed to update password.");
+      }
+  },
+  
+  // Delete Account
+  deleteAccount: async (data: { currentPassword: string }): Promise<void> => {
+      try {
+          await apiClient.delete("/User/delete", { data: data }); 
+      } catch (error) {
+          return handleApiError(error, "Account deletion failed.");
+      }
+  },
+
+  // Re-verify password
+  verifyPassword: async (data: { currentPassword: string }): Promise<void> => {
+      try {
+          await apiClient.post("/User/verifyPassword", data);
+      } catch (error) {
+          return handleApiError(error, "Password verification failed."); 
+      }
+  },
 };
 
 export const JobApplicationService = {

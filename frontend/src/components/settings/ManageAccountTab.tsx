@@ -9,6 +9,7 @@ import { Alert, AlertDescription } from '../ui/alert';
 import { AlertCircle, CheckCircle, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '../ui/alert-dialog';
+import { PasswordInput } from '../ui/PasswordInput';
 
 // Renders the status (success/error)
 const StatusAlert = ({ status, message }: { status: 'success' | 'error' | null, message: string | null }) => {
@@ -303,9 +304,8 @@ export const ManageAccountTab = () => {
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="name-password">Current Password (Required)</Label>
-                                <Input
+                                <PasswordInput
                                     id="name-password"
-                                    type="password"
                                     value={namePassword}
                                     onChange={(e) => {
                                         setNamePassword(e.target.value);
@@ -355,9 +355,8 @@ export const ManageAccountTab = () => {
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="email-password">Current Password (Required)</Label>
-                                <Input
+                                <PasswordInput
                                     id="email-password"
-                                    type="password"
                                     value={emailPassword}
                                     onChange={(e) => {
                                         setEmailPassword(e.target.value);
@@ -393,9 +392,8 @@ export const ManageAccountTab = () => {
                         <StatusAlert status={passwordStatus} message={passwordMessage} />
                         <div className="space-y-2">
                             <Label htmlFor="current-password">Current Password (Required)</Label>
-                            <Input
+                            <PasswordInput
                                 id="current-password"
-                                type="password"
                                 value={currentPassword}
                                 onChange={(e) => {
                                     setCurrentPassword(e.target.value);
@@ -406,9 +404,8 @@ export const ManageAccountTab = () => {
                         <div className="grid md:grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <Label htmlFor="new-password">New Password</Label>
-                                <Input
+                                <PasswordInput
                                     id="new-password"
-                                    type="password"
                                     value={newPassword}
                                     className={newPassword.length > 0 && !isPasswordStrong(newPassword) ? 'border-yellow-500' : ''}
                                     onChange={(e) => {
@@ -419,9 +416,8 @@ export const ManageAccountTab = () => {
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="confirm-new-password">Confirm New Password</Label>
-                                <Input
+                                <PasswordInput
                                     id="confirm-new-password"
-                                    type="password"
                                     value={confirmNewPassword}
                                     className={confirmNewPassword.length > 0 && newPassword !== confirmNewPassword ? 'border-red-500' : ''}
                                     onChange={(e) => {
@@ -465,9 +461,8 @@ export const ManageAccountTab = () => {
                     
                     <div className="space-y-2">
                         <Label htmlFor="delete-password" className="text-red-700 dark:text-red-400">Current Password (Required to confirm deletion)</Label>
-                        <Input
+                        <PasswordInput
                             id="delete-password"
-                            type="password"
                             value={deletePassword}
                             onChange={(e) => {
                                 setDeletePassword(e.target.value);

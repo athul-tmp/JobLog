@@ -14,6 +14,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { PasswordInput } from "@/components/ui/PasswordInput";
 
 // Display password rules
 const PasswordRequirement = ({ met, text }: { met: boolean; text: string }) => {
@@ -145,9 +146,8 @@ export default function RegisterPage() {
                             </div>
                             <div className="grid gap-2">
                                 <Label htmlFor="password">Password</Label>
-                                <Input
+                                <PasswordInput
                                     id="password"
-                                    type="password"
                                     placeholder="Enter strong password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
@@ -169,9 +169,8 @@ export default function RegisterPage() {
 
                             <div className="grid gap-2">
                                 <Label htmlFor="confirm-password">Confirm Password</Label>
-                                <Input
+                                <PasswordInput
                                     id="confirm-password"
-                                    type="password"
                                     value={confirmPassword}
                                     onChange={(e) => setConfirmPassword(e.target.value)}
                                 />

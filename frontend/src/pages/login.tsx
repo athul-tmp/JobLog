@@ -12,6 +12,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { CheckCircle } from "lucide-react";
+import { PasswordInput } from "@/components/ui/PasswordInput";
 
 // Email validation helper function
 const isEmailValidFormat = (email: string) => {
@@ -110,9 +111,8 @@ export default function LoginPage() {
                             </div>
                             <div className="grid gap-2">
                                 <Label htmlFor="password">Password</Label>
-                                <Input
+                                <PasswordInput
                                     id="password"
-                                    type="password"
                                     placeholder="Enter your password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}

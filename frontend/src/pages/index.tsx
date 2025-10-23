@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/router";
 import Head from "next/head";
 import Link from "next/link";
@@ -8,58 +8,7 @@ import { useAuth } from "@/context/AuthContext";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import Image from 'next/image'
-import { useTheme } from "@/hooks/useTheme";
-
-// Helper component for the screenshot carousel
-const ScreenshotCarousel = () => {
-    const theme = useTheme()
-    const images = [
-        { 
-            alt: "Dashboard Key Metrics",
-            light: "/images/dashboard1-light.png",
-            dark: "/images/dashboard1-dark.png",
-            width: 1200, 
-            height: 600, 
-        },
-        { 
-            alt: "Dashboard Advanced Metrics",
-            light: "/images/dashboard2-light.png",
-            dark: "/images/dashboard2-dark.png",
-            width: 1200, 
-            height: 600,
-        },
-        { 
-            alt: "Tracker Page Table View",
-            light: "/images/tracker-light.png",
-            dark: "/images/tracker-dark.png",
-            width: 1200, 
-            height: 600,
-        },
-    ];
-
-    return (
-        <div className="relative w-full overflow-hidden rounded-xl border border-primary/20 shadow-2xl dark:shadow-none">
-            <div className="flex overflow-x-scroll snap-x snap-mandatory scroll-smooth p-2 space-x-4">
-                {images.map((img, index) => (
-                    <div 
-                        key={index} 
-                        className="flex-shrink-0 snap-center w-full"
-                    >
-                        <Image 
-                            src={theme === 'dark' ? img.dark : img.light}
-                            alt={img.alt}
-                            width={img.width}
-                            height={img.height}
-                            className="w-full rounded-lg shadow-lg"
-                        />
-                    </div>
-                ))}
-            </div>
-        </div>
-    );
-};
-
+import { ScreenshotCarousel } from "@/components/ScreenshotCarousel";
 
 export default function LandingPage() {
   const { isAuthenticated, authLoading } = useAuth();
@@ -91,11 +40,11 @@ export default function LandingPage() {
         
         <main className="flex-1">
           {/* Two-column layout */}
-          <section className="container mx-auto h-auto flex items-center justify-center text-center p-6 bg-background">
-            <div className="mx-auto grid md:grid-cols-2 gap-12 items-center text-left">
+          <section className="container mx-auto flex-1 flex items-center justify-center text-center p-6 bg-background py-16">
+            <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center text-left">
                 
                 {/* Left Column: Text */}
-                <div className="space-y-6 mx-auto mt-20 md:order-1 order-2 md:text-left text-center">
+                <div className="space-y-6 mx-auto md:order-1 order-2 md:text-left text-center">
                     <h1 className="text-5xl md:text-6xl font-extrabold tracking-tighter text-foreground leading-tight">
                         Stay Organised
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-pink-500 block">

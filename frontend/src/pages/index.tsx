@@ -40,7 +40,7 @@ export default function LandingPage() {
         
         <main className="flex-1">
           {/* Two-column layout */}
-          <section className="container mx-auto flex-1 flex items-center justify-center text-center p-6 bg-background py-16">
+          <section className="container mx-auto flex-1 flex items-center justify-center text-center p-6 bg-background py-25">
             <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center text-left">
                 
                 {/* Left Column: Text */}

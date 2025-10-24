@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { JobApplication, UpdateJobApplicationRequest } from "@/types/types";
 import { format } from "date-fns";
-import { ArrowUpDown, MoreHorizontal, Eye, Link as LinkIcon, ChevronsRight, ChevronsLeft, Search, ListFilter, RotateCcw } from "lucide-react";
+import { ArrowUpDown, MoreHorizontal, Eye, Link as LinkIcon, ChevronsRight, ChevronsLeft, Search, ListFilter, RotateCcw, ArrowUp, ArrowDown } from "lucide-react";
 
 import {
   ColumnDef,
@@ -198,6 +198,17 @@ const ActionsCell: React.FC<ActionsCellProps> = ({ job, onUndoStatusChange, onOp
     );
 };
 
+// Helper function to choose the correct icon
+const renderSortIcon = (isSorted: false | 'asc' | 'desc') => {
+    if (isSorted === 'asc') {
+        return <ArrowUp className="ml-2 h-4 w-4" />;
+    }
+    if (isSorted === 'desc') {
+        return <ArrowDown className="ml-2 h-4 w-4" />;
+    }
+    // Default icon when unsorted
+    return <ArrowUpDown className="ml-2 h-4 w-4 text-muted-foreground/70" />;
+};
 
 // Column definitions
 export const columns: ColumnDef<JobApplication>[] = [
@@ -212,6 +223,7 @@ export const columns: ColumnDef<JobApplication>[] = [
     },
     size: 100, 
     enableHiding: false,
+    sortingFn: 'alphanumeric',
   },
 
   // Company Name
@@ -225,7 +237,7 @@ export const columns: ColumnDef<JobApplication>[] = [
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Company
-          <ArrowUpDown className="ml-2 h-4 w-4" />
+          {renderSortIcon(column.getIsSorted())}
         </Button>
       );
     },
@@ -243,7 +255,7 @@ export const columns: ColumnDef<JobApplication>[] = [
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
           Role
-          <ArrowUpDown className="ml-2 h-4 w-4" />
+          {renderSortIcon(column.getIsSorted())}
         </Button>
       );
     },
@@ -302,7 +314,7 @@ export const columns: ColumnDef<JobApplication>[] = [
           className="justify-end w-full pr-0 cursor-pointer"
         >
           Date Applied
-          <ArrowUpDown className="ml-2 h-4 w-4" />
+          {renderSortIcon(column.getIsSorted())}
         </Button>
       );
     },
@@ -314,7 +326,24 @@ export const columns: ColumnDef<JobApplication>[] = [
             ? <div className="text-right text-sm">{format(dateObject, "MMM d, yyyy")}</div>
             : <div className="text-right text-sm text-red-500">Invalid Date</div>;
     },
-    enableHiding: true, 
+    enableHiding: true,
+    sortingFn: (rowA, rowB, columnId) => {
+        const dateA = new Date(rowA.getValue(columnId) as string).getTime();
+        const dateB = new Date(rowB.getValue(columnId) as string).getTime();
+        
+        // Primary Sort: Date comparison
+        const dateDiff = dateA - dateB;
+
+        if (dateDiff !== 0) {
+            return dateDiff; // Return difference if dates are not identical
+        }
+
+        // Secondary sort (tie-breaker): Application No.
+        const appNoA = rowA.original.applicationNo;
+        const appNoB = rowB.original.applicationNo;
+
+        return appNoA - appNoB;
+    },
   },
 
   // Actions Column
@@ -341,7 +370,7 @@ export const columns: ColumnDef<JobApplication>[] = [
   },
 ];
 
-// Main table component
+// Main table props and component
 interface JobApplicationTableProps {
     data: JobApplication[];
     onJobUpdated: (updatedJob: JobApplication) => void; 
@@ -526,6 +555,11 @@ export function JobApplicationTable({ data, onJobUpdated, onOpenEditModal, onUnd
       {/* Pagination controls */}
 
       <div className="flex items-center justify-end space-x-2 py-4">
+
+        <div className="flex-1 text-sm text-muted-foreground">
+            {/* Pagination status */}
+            {table.getFilteredRowModel().rows.length} results found. Showing page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}.
+        </div>
         
         {/* Previous/Next Buttons */}
         <Button

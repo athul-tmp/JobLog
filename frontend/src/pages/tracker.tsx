@@ -19,6 +19,24 @@ import { JobApplication } from "@/types/types";
 import { JobApplicationTable } from "@/components/tracker/JobApplicationTable"; 
 import { toast } from "sonner";
 
+// Sorting logic
+const sortApplications = (applications: JobApplication[]): JobApplication[] => {
+    return applications.sort((a, b) => {
+        const dateA = new Date(a.dateApplied).getTime();
+        const dateB = new Date(b.dateApplied).getTime();
+        
+        // Primary sort: Date applied
+        const dateDiff = dateB - dateA;
+
+        if (dateDiff !== 0) {
+            return dateDiff; // Dates are different, use date sort
+        }
+
+        // Secondary sort (tie-breaker): Application no.
+        return b.applicationNo - a.applicationNo; 
+    });
+};
+
 // To fetch and manage application data
 function useApplicationData() {
     const { isAuthenticated } = useAuth();
@@ -32,10 +50,8 @@ function useApplicationData() {
             setError(null);
             try {
                 const data = await JobApplicationService.getAllJobApplications();
-                // Sort the data by DateApplied desc
-                const sortedData = data.sort((a, b) => 
-                    new Date(b.dateApplied).getTime() - new Date(a.dateApplied).getTime()
-                );
+                // Sort the data
+                const sortedData = sortApplications(data);
                 setApplications(sortedData);
             } catch (err) {
                 if (err instanceof Error) {
@@ -56,13 +72,16 @@ function useApplicationData() {
 
     const handleJobAdded = useCallback((newJob: JobApplication) => {
         // Add the new job to the top of the list 
-        setApplications(prev => [newJob, ...prev]);
+        setApplications(prev => sortApplications([newJob, ...prev]));
     }, []);
 
     const handleJobUpdated = useCallback((updatedJob: JobApplication) => {
-        setApplications(prev => prev.map(job => 
-            job.id === updatedJob.id ? updatedJob : job
-        ).sort((a, b) => new Date(b.dateApplied).getTime() - new Date(a.dateApplied).getTime())); // Re-sort to maintain order
+        setApplications(prev => {
+            const updatedList = prev.map(job => 
+                job.id === updatedJob.id ? updatedJob : job
+            ); 
+            return sortApplications(updatedList); 
+        }); 
     }, []);
 
     const handleUndoStatusChange = useCallback(async (jobId: number) => {

@@ -18,6 +18,7 @@ import { JobApplication } from "@/types/types";
 
 import { JobApplicationTable } from "@/components/tracker/JobApplicationTable"; 
 import { toast } from "sonner";
+import { DemoAlert } from "@/components/DemoAlert";
 
 // Sorting logic
 const sortApplications = (applications: JobApplication[]): JobApplication[] => {
@@ -154,7 +155,7 @@ export default function TrackerPage() {
             
             <main className="container mx-auto p-4 sm:p-8 min-h-[calc(100vh-128px)]">
                 <DashboardNavigation currentPath={router.pathname} />
-
+                <DemoAlert />
                 <div className="space-y-8">
                     <div className="flex justify-between items-center mb-6">
                         <h1 className="text-3xl font-extrabold tracking-tight text-foreground">

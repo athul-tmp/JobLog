@@ -12,22 +12,24 @@ public class UserController : ControllerBase
 {
   private readonly IUserService _userService;
   private readonly ITokenService _tokenService;
+  private readonly IJobApplicationService _jobApplicationService;
 
-  public UserController(IUserService userService, ITokenService tokenService)
+  public UserController(IUserService userService, ITokenService tokenService, IJobApplicationService jobApplicationService)
   {
     _userService = userService;
     _tokenService = tokenService;
+    _jobApplicationService = jobApplicationService;
   }
 
   // Helper to set the JWT in an HttpOnly cookie
-  private void SetAuthCookie(string token)
+  private void SetAuthCookie(string token, DateTime? expiryTime = null)
   {
     var cookieOptions = new CookieOptions
     {
       HttpOnly = true,
       Secure = false,   // IMPORTANT: true for production (https), false for local (http)
       SameSite = SameSiteMode.Strict,
-      Expires = DateTime.UtcNow.AddDays(7)
+      Expires = expiryTime ?? DateTime.UtcNow.AddDays(7)
     };
 
     Response.Cookies.Append("joblog_jwt_token", token, cookieOptions);
@@ -119,6 +121,20 @@ public class UserController : ControllerBase
       return Unauthorized(new { message = "Invalid email or password." });
     }
 
+    // Demo account reset
+    const string DEMO_EMAIL = "demo@joblog.com";
+    var isDemoUser = user.Email.Equals(DEMO_EMAIL, StringComparison.OrdinalIgnoreCase);
+
+    // Calculate Expiration Time
+    DateTime tokenExpiryTime = isDemoUser
+        ? DateTime.UtcNow.AddMinutes(30) // 30 minutes
+        : DateTime.UtcNow.AddDays(7);   // 7 days
+
+    if (isDemoUser)
+    {
+      await _jobApplicationService.ResetDemoApplications(user.Id);
+    }
+
     // JWT 
     var token = _tokenService.CreateToken(user);
 
@@ -130,6 +146,8 @@ public class UserController : ControllerBase
       message = "Login successful",
       email = user.Email,
       firstName = user.FirstName,
+      // Return ISO 8601 string for frontend countdown only if it's the demo user
+      tokenExpiration = isDemoUser ? tokenExpiryTime.ToString("o") : null
     });
   }
 

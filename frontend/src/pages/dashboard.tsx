@@ -18,6 +18,7 @@ import InterviewOutcomesChart from "@/components/charts/InterviewOutcomesChart";
 import InterviewTypesChart from "@/components/charts/InterviewTypesChart";
 import DailyTrendChart from "@/components/charts/DailyTrendChart";
 import SankeyChart from "@/components/charts/SankeyChart";
+import { DemoAlert } from "@/components/DemoAlert";
 
 // Fetch Data 
 function useDashboardData() {
@@ -104,7 +105,7 @@ export default function DashboardPage() {
             
             <main className="container mx-auto p-4 sm:p-8 min-h-[calc(100vh-128px)]">
                 <DashboardNavigation currentPath={router.pathname} />
-
+                <DemoAlert />
                 {/* Dashboard Content for Analytics */}
                 <div className="space-y-8">
                     <h1 className="text-3xl font-extrabold tracking-tight text-foreground">

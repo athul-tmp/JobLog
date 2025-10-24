@@ -32,9 +32,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const storedUser = localStorage.getItem(USER_KEY); 
 
     if (storedUser) {
-      setUser(JSON.parse(storedUser));
       try {
-        setUser(JSON.parse(storedUser));
+        const parsedUser: AuthUser = JSON.parse(storedUser);
+            
+        const isDemoUser = parsedUser.email === DEMO_EMAIL;
+        parsedUser.isDemo = isDemoUser;
+        
+        // Check if the demo session has expired locally
+        if (isDemoUser && parsedUser.expiresAt && parsedUser.expiresAt <= Date.now()) {
+            localStorage.removeItem(USER_KEY);
+            setUser(null);
+        } else {
+            setUser(parsedUser);
+        }
       } catch (e) {
         console.error("Failed to parse user data from localStorage:", e);
         localStorage.removeItem(USER_KEY);
@@ -50,11 +60,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const response: LoginResponse = await AuthService.login(email, password);
 
       const isDemoUser = email === DEMO_EMAIL;
+      let expiresAt: number | undefined = undefined;
+
+      if (isDemoUser && response.tokenExpiration) {
+          // Convert ISO string from backend into a timestamp 
+          expiresAt = new Date(response.tokenExpiration).getTime();
+      }
 
       const userData: AuthUser = {
         firstName: response.firstName,
         email: response.email,
         isDemo: isDemoUser,
+        expiresAt: expiresAt,
       };
 
       localStorage.setItem(USER_KEY, JSON.stringify(userData));

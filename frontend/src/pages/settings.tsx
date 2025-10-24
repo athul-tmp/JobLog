@@ -12,6 +12,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ManageAccountTab } from "@/components/settings/ManageAccountTab"; 
 import { DataManagementTab } from "@/components/settings/DataManagementTab"; 
 import { ToolsAndIntegrationsTab } from "@/components/settings/ToolsAndIntegrationsTab"; 
+import { DemoAlert } from "@/components/DemoAlert";
 
 // Configuration for sidebar 
 const settingsNav = [
@@ -88,12 +89,15 @@ export default function SettingsPage() {
                 <h1 className="text-3xl font-extrabold tracking-tight text-foreground mb-5"> Settings</h1>
 
                 {isDemoUser && (
+                    <>
+                    <DemoAlert />
                     <Alert variant="destructive" className="mb-6 bg-red-100 border-red-500 text-red-700 dark:bg-red-950/40 dark:text-red-300 dark:border-red-600">
                         <AlertTriangle className="h-4 w-4" />
                         <AlertDescription className="text-red-700 dark:text-red-300 font-bold">
-                            This is a Demo Account. Settings changes (name, email, password, deletion) are disabled to preserve the demo experience for others.
+                            You are on the Demo Account. Settings changes are disabled to preserve the demo experience for others.
                         </AlertDescription>
                     </Alert>
+                    </>
                 )}
                 
                 {/* Main Layout Container */}

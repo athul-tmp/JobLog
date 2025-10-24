@@ -31,10 +31,18 @@ public class TokenService : ITokenService
             new Claim(JwtRegisteredClaimNames.Email, user.Email),
         };
 
+    // Demo-specific expiration
+    const string DEMO_EMAIL = "demo@joblog.com";
+    var isDemoUser = user.Email.Equals(DEMO_EMAIL, StringComparison.OrdinalIgnoreCase);
+
+    var expiryTime = isDemoUser
+        ? DateTime.UtcNow.AddMinutes(30) // Short expiry for demo (30 min)
+        : DateTime.UtcNow.AddDays(7);   // Normal expiry for registered users (7 days)
+
     var tokenDescriptor = new SecurityTokenDescriptor
     {
       Subject = new ClaimsIdentity(claims), // Data
-      Expires = DateTime.UtcNow.AddDays(7), // Expires in 1 week
+      Expires = expiryTime,
       SigningCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256Signature), // Signature
       Issuer = _config["Jwt:Issuer"],
       Audience = _config["Jwt:Audience"]

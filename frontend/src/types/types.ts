@@ -3,12 +3,14 @@ export interface LoginResponse {
   message: string;
   email: string;
   firstName: string;
+  tokenExpiration?: string;
 }
 
 export interface AuthUser {
   firstName: string;
   email: string;
   isDemo: boolean;
+  expiresAt?: number;
 }
 
 // Job application tracker page

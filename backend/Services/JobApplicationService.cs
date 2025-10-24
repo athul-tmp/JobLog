@@ -12,6 +12,7 @@ public interface IJobApplicationService
   Task<JobApplication> UpdateApplication(int userId, JobApplicationUpdateRequest request);
   Task DeleteAllUserApplications(int userId, string currentPassword);
   Task<JobApplication> UndoLastStatusChange(int applicationId, int userId);
+  Task ResetDemoApplications(int userId);
 }
 
 public class JobApplicationService : IJobApplicationService
@@ -238,6 +239,39 @@ public class JobApplicationService : IJobApplicationService
     await _dbContext.SaveChangesAsync();
 
     return (await GetApplicationById(application.Id, userId))!;
+  }
+
+  /// Resets the demo user's applications
+  public async Task ResetDemoApplications(int userId)
+  {
+
+    const int DEMO_DATA_THRESHOLD = 75;
+
+    // Applications to delete
+    var applicationsToDelete = await _dbContext.JobApplications
+        .Where(a => a.UserId == userId && a.ApplicationNo > DEMO_DATA_THRESHOLD)
+        .ToListAsync();
+
+    // No user-added data to delete
+    if (!applicationsToDelete.Any())
+    {
+      return;
+    }
+
+    var jobApplicationIds = applicationsToDelete.Select(a => a.Id).ToList();
+
+    // Delete related JobStatusHistory records
+    var historiesToDelete = await _dbContext.JobStatusHistories
+        .Where(h => jobApplicationIds.Contains(h.JobApplicationId))
+        .ToListAsync();
+
+    _dbContext.JobStatusHistories.RemoveRange(historiesToDelete);
+
+    // Delete the parent JobApplication records
+    _dbContext.JobApplications.RemoveRange(applicationsToDelete);
+
+    await _dbContext.SaveChangesAsync();
+
   }
 }
 

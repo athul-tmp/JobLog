@@ -50,13 +50,66 @@ export default function SankeyChart({ data }: SankeyChartProps) {
     const safeValue = (val: number) => (val > 0 ? val : 0.0001);
 
     const chartData = [
-    ["From", "To", "Count"],
-    ["Total Applications", "Rejected (No Interview)", safeValue(rejectedNoInterview)], 
-    ["Total Applications", "Ghosted (No Interview)", safeValue(ghostedNoInterview)],   
-    ["Total Applications", "Interview", safeValue(data.totalPastInterviews)], 
-    ["Interview", "Offer", safeValue(data.totalOffers)],
-    ["Interview", "Rejected", safeValue(data.interviewedAndRejected)],
-    ["Interview", "Ghosted", safeValue(data.interviewedAndGhosted)],
+    [
+        "From", 
+        "To", 
+        "Count", 
+        { type: "string", role: "tooltip", p: { html: true } }
+    ],
+    [
+        "Total Applications", 
+        "Rejected (No Interview)", 
+        safeValue(rejectedNoInterview),
+        `<div style="font-weight: 500;">
+            Total Applications &rarr; Rejected (No Interview)
+            <div style="font-weight: normal; font-size: 13px; margin-top: 4px;">Count: ${rejectedNoInterview}</div>
+        </div>`
+    ], 
+    [
+        "Total Applications", 
+        "Ghosted (No Interview)", 
+        safeValue(ghostedNoInterview),
+        `<div style="font-weight: 500;">
+            Total Applications &rarr; Ghosted (No Interview)
+            <div style="font-weight: normal; font-size: 13px; margin-top: 4px;">Count: ${ghostedNoInterview}</div>
+        </div>`
+    ],   
+    [
+        "Total Applications", 
+        "Interview", 
+        safeValue(data.totalPastInterviews),
+        `<div style="font-weight: 500;">
+            Total Applications &rarr; Interview
+            <div style="font-weight: normal; font-size: 13px; margin-top: 4px;">Count: ${data.totalPastInterviews}</div>
+        </div>`
+    ], 
+    [
+        "Interview", 
+        "Offer", 
+        safeValue(data.totalOffers),
+        `<div style="font-weight: 500;">
+            Interview &rarr; Offer
+            <div style="font-weight: normal; font-size: 13px; margin-top: 4px;">Count: ${data.totalOffers}</div>
+        </div>`
+    ],
+    [
+        "Interview", 
+        "Rejected", 
+        safeValue(data.interviewedAndRejected),
+        `<div style="font-weight: 500;">
+            Interview &rarr; Rejected
+            <div style="font-weight: normal; font-size: 13px; margin-top: 4px;">Count: ${data.interviewedAndRejected}</div>
+        </div>`
+    ],
+    [
+        "Interview", 
+        "Ghosted", 
+        safeValue(data.interviewedAndGhosted),
+        `<div style="font-weight: 500;">
+            Interview &rarr; Ghosted
+            <div style="font-weight: normal; font-size: 13px; margin-top: 4px;">Count: ${data.interviewedAndGhosted}</div>
+        </div>`
+    ],
     ];
     
     // Color options configurations
@@ -78,6 +131,9 @@ export default function SankeyChart({ data }: SankeyChartProps) {
             fill: 'transparent',
             stroke: 'transparent', 
             strokeWidth: 0,       
+        },
+        tooltip: {
+            isHtml: true, 
         },
     };
 

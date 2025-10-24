@@ -47,15 +47,16 @@ export default function SankeyChart({ data }: SankeyChartProps) {
         );
     }
 
-    // Data array
+    const safeValue = (val: number) => (val > 0 ? val : 0.0001);
+
     const chartData = [
-        ["From", "To", "Count"],
-        ["Total Applications", "Rejected (No Interview)", rejectedNoInterview], 
-        ["Total Applications", "Ghosted (No Interview)", ghostedNoInterview],   
-        ["Total Applications", "Interview", data.totalPastInterviews], 
-        ["Interview", "Offer", data.totalOffers],
-        ["Interview", "Rejected", data.interviewedAndRejected],
-        ["Interview", "Ghosted", data.interviewedAndGhosted],
+    ["From", "To", "Count"],
+    ["Total Applications", "Rejected (No Interview)", safeValue(rejectedNoInterview)], 
+    ["Total Applications", "Ghosted (No Interview)", safeValue(ghostedNoInterview)],   
+    ["Total Applications", "Interview", safeValue(data.totalPastInterviews)], 
+    ["Interview", "Offer", safeValue(data.totalOffers)],
+    ["Interview", "Rejected", safeValue(data.interviewedAndRejected)],
+    ["Interview", "Ghosted", safeValue(data.interviewedAndGhosted)],
     ];
     
     // Color options configurations
@@ -84,7 +85,7 @@ export default function SankeyChart({ data }: SankeyChartProps) {
         <Chart
             chartType="Sankey"
             width="100%"
-            height="100%" 
+            height="350px" 
             data={chartData}
             options={options}
         />

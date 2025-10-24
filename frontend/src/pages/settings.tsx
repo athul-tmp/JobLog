@@ -1,17 +1,17 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useAuth } from "@/context/AuthContext";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, KeyRound, Database, Zap } from "lucide-react"; 
+import { ArrowLeft, KeyRound, Database, AlertTriangle } from "lucide-react"; 
+import { Spinner } from "@/components/ui/spinner";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 import { ManageAccountTab } from "@/components/settings/ManageAccountTab"; 
 import { DataManagementTab } from "@/components/settings/DataManagementTab"; 
 import { ToolsAndIntegrationsTab } from "@/components/settings/ToolsAndIntegrationsTab"; 
-import { Spinner } from "@/components/ui/spinner";
-
 
 // Configuration for sidebar 
 const settingsNav = [
@@ -25,7 +25,8 @@ const settingsNav = [
 export default function SettingsPage() {
     const router = useRouter();
     const { isAuthenticated, authLoading, user } = useAuth();
-    
+    const isDemoUser = user?.isDemo ?? false;
+
     const activeTab = router.query.tab ? String(router.query.tab) : 'account';
 
     // Redirect if not authenticated
@@ -48,12 +49,12 @@ export default function SettingsPage() {
     const renderContent = () => {
         switch (activeTab) {
             case 'data':
-                return <DataManagementTab />;
+                return <DataManagementTab isDemoUser={isDemoUser} />;
             case 'tools':
                 return <ToolsAndIntegrationsTab />;
             case 'account':
             default:
-                return <ManageAccountTab />;
+                return <ManageAccountTab isDemoUser={isDemoUser} />;
         }
     };
     
@@ -85,6 +86,15 @@ export default function SettingsPage() {
                 </Button>
 
                 <h1 className="text-3xl font-extrabold tracking-tight text-foreground mb-5"> Settings</h1>
+
+                {isDemoUser && (
+                    <Alert variant="destructive" className="mb-6 bg-red-100 border-red-500 text-red-700 dark:bg-red-950/40 dark:text-red-300 dark:border-red-600">
+                        <AlertTriangle className="h-4 w-4" />
+                        <AlertDescription className="text-red-700 dark:text-red-300 font-bold">
+                            This is a Demo Account. Settings changes (name, email, password, deletion) are disabled to preserve the demo experience for others.
+                        </AlertDescription>
+                    </Alert>
+                )}
                 
                 {/* Main Layout Container */}
                 <div className="flex flex-col md:flex-row md:gap-8 min-h-[calc(100vh-300px)]">

@@ -2,16 +2,18 @@ import { useEffect } from "react";
 import { useRouter } from "next/router";
 import Head from "next/head";
 import Link from "next/link";
-import { ArrowRightIcon } from "lucide-react"; 
+import { ArrowUpRight } from "lucide-react"; 
 
 import { useAuth } from "@/context/AuthContext";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { ScreenshotCarousel } from "@/components/ScreenshotCarousel";
+import { toast } from "sonner";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function LandingPage() {
-  const { isAuthenticated, authLoading } = useAuth();
+  const { isAuthenticated, authLoading, login, demoEmail, demoPassword } = useAuth();
   const router = useRouter();
 
   // Redirect Logic
@@ -24,10 +26,24 @@ export default function LandingPage() {
   if (authLoading) {
     return (
       <div className="flex justify-center items-center h-screen bg-background text-foreground">
-        <p className="text-xl">Loading Session...</p>
+        <Spinner className="size-15"/>
       </div>
     );
   }
+
+  // Auto-login handler for the demo
+  const handleDemoLogin = async () => {
+    const errorMessage = await login(demoEmail, demoPassword);
+
+    if (errorMessage) {
+        toast.error("Demo Login Failed", {
+            description: errorMessage,
+        });
+        return; 
+    }
+    // Success redirects to /dashboard
+    router.push("/dashboard");
+  };
   
   return (
     <>
@@ -63,12 +79,16 @@ export default function LandingPage() {
                                 Get Started
                             </Button>
                         </Link>
-                        <Link href="/login" passHref>
-                            <Button size="lg" variant="outline" className="h-12 text-lg px-8 border-border transition duration-200 cursor-pointer">
-                                Log In
-                                <ArrowRightIcon className="ml-2 h-5 w-5" />
-                            </Button>
-                        </Link>
+                        <Button 
+                            size="lg" 
+                            variant="outline" 
+                            className="h-12 text-lg px-8 border-border transition duration-200 cursor-pointer"
+                            onClick={handleDemoLogin}
+                            disabled={authLoading}
+                        >
+                            Try Demo
+                            <ArrowUpRight className="ml-2 h-5 w-5" />
+                        </Button>
                     </div>
                 </div>
 

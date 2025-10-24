@@ -22,7 +22,12 @@ const StatusAlert = ({ status, message }: { status: 'success' | 'error' | null, 
     );
 };
 
-export const DataManagementTab = () => {
+// Interface for props
+interface DataManagementTabProps {
+    isDemoUser: boolean;
+}
+
+export const DataManagementTab = ({ isDemoUser }: DataManagementTabProps) => {
     const { refreshUser } = useAuth();
     
     const [clearPassword, setClearPassword] = useState('');
@@ -109,6 +114,7 @@ export const DataManagementTab = () => {
                         <PasswordInput
                             id="clear-data-password"
                             value={clearPassword}
+                            disabled={isDemoUser}
                             onChange={(e) => {
                                 setClearPassword(e.target.value);
                                 clearStatusMessages();
@@ -121,7 +127,7 @@ export const DataManagementTab = () => {
                     <Button 
                         onClick={handleVerifyAndOpenClear} 
                         variant="destructive"
-                        disabled={clearLoading || !clearPassword}
+                        disabled={clearLoading || !clearPassword || isDemoUser}
                     >
                         <Database className="h-4 w-4 mr-2" />
                         {clearLoading ? 'Verifying...' : 'Clear All Applications'}

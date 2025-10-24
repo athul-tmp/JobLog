@@ -2,6 +2,10 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { AuthUser, LoginResponse } from "@/types/types"; 
 import { AuthService } from "@/services/api";
 
+// Demo account credentials
+const DEMO_EMAIL = "demo@joblog.com";
+const DEMO_PASSWORD = "DemoPassword123!";
+
 interface AuthContextType {
   user: AuthUser | null;
   login: (email: string, password: string) => Promise<string | null>;
@@ -9,6 +13,8 @@ interface AuthContextType {
   isAuthenticated: boolean;
   authLoading: boolean;
   refreshUser: (updates: Partial<AuthUser>) => void;
+  demoEmail: string;
+  demoPassword: string;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -43,9 +49,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const response: LoginResponse = await AuthService.login(email, password);
 
+      const isDemoUser = email === DEMO_EMAIL;
+
       const userData: AuthUser = {
         firstName: response.firstName,
         email: response.email,
+        isDemo: isDemoUser,
       };
 
       localStorage.setItem(USER_KEY, JSON.stringify(userData));
@@ -95,6 +104,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     isAuthenticated,
     authLoading,
     refreshUser,
+    demoEmail: DEMO_EMAIL,
+    demoPassword: DEMO_PASSWORD,
   };
 
   return (

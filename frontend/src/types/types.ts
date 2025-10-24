@@ -8,6 +8,7 @@ export interface LoginResponse {
 export interface AuthUser {
   firstName: string;
   email: string;
+  isDemo: boolean;
 }
 
 // Job application tracker page

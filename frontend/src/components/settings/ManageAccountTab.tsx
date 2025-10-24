@@ -38,7 +38,12 @@ const isEmailValidFormat = (email: string) => {
     return regex.test(email);
 };
 
-export const ManageAccountTab = () => {
+// Interface for props
+interface ManageAccountTabProps {
+    isDemoUser: boolean;
+}
+
+export const ManageAccountTab = ({ isDemoUser }: ManageAccountTabProps) => {
     const { user, logout, refreshUser } = useAuth();
     
     // States for name update 
@@ -71,11 +76,11 @@ export const ManageAccountTab = () => {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
     // Validation for button enablement
-    const isNameChangedAndAuthProvided = newName.trim() !== user?.firstName && newName.trim().length > 0 && namePassword.length > 0;
+    const isNameChangedAndAuthProvided = !isDemoUser && newName.trim() !== user?.firstName && newName.trim().length > 0 && namePassword.length > 0;
     
-    const isEmailChangedAndAuthProvided = newEmail !== user?.email && isEmailValidFormat(newEmail) && emailPassword.length > 0;
+    const isEmailChangedAndAuthProvided = !isDemoUser && newEmail !== user?.email && isEmailValidFormat(newEmail) && emailPassword.length > 0;
 
-    const isPasswordFormReady = currentPassword.length > 0 && newPassword.length > 0 && confirmNewPassword.length > 0 && newPassword === confirmNewPassword && isPasswordStrong(newPassword);
+    const isPasswordFormReady = !isDemoUser && currentPassword.length > 0 && newPassword.length > 0 && confirmNewPassword.length > 0 && newPassword === confirmNewPassword && isPasswordStrong(newPassword);
 
     // Function to clear all status messages
     const clearAllStatus = () => {
@@ -296,6 +301,7 @@ export const ManageAccountTab = () => {
                                     id="new-name"
                                     type="text"
                                     value={newName}
+                                    disabled={isDemoUser}
                                     onChange={(e) => {
                                         setNewName(e.target.value);
                                         clearAllStatus();
@@ -307,6 +313,7 @@ export const ManageAccountTab = () => {
                                 <PasswordInput
                                     id="name-password"
                                     value={namePassword}
+                                    disabled={isDemoUser}
                                     onChange={(e) => {
                                         setNamePassword(e.target.value);
                                         clearAllStatus();
@@ -320,7 +327,7 @@ export const ManageAccountTab = () => {
                             variant="outline" 
                             className="cursor-pointer" 
                             type="submit" 
-                            disabled={nameLoading || !isNameChangedAndAuthProvided}
+                            disabled={nameLoading || !isNameChangedAndAuthProvided || isDemoUser}
                         >
                             {nameLoading ? 'Updating...' : 'Update Name'}
                         </Button>
@@ -346,6 +353,7 @@ export const ManageAccountTab = () => {
                                     id="new-email"
                                     type="email"
                                     value={newEmail}
+                                    disabled={isDemoUser}
                                     className={!isEmailValidFormat(newEmail) ? 'border-red-500' : ''}
                                     onChange={(e) => {
                                         setNewEmail(e.target.value);
@@ -358,6 +366,7 @@ export const ManageAccountTab = () => {
                                 <PasswordInput
                                     id="email-password"
                                     value={emailPassword}
+                                    disabled={isDemoUser}
                                     onChange={(e) => {
                                         setEmailPassword(e.target.value);
                                         clearAllStatus();
@@ -371,7 +380,7 @@ export const ManageAccountTab = () => {
                             variant="outline"
                             className="cursor-pointer"
                             type="submit"
-                            disabled={emailLoading || !isEmailChangedAndAuthProvided}
+                            disabled={emailLoading || !isEmailChangedAndAuthProvided || isDemoUser}
                         >
                             {emailLoading ? 'Changing Email...' : 'Change Email'}
                         </Button>
@@ -395,6 +404,7 @@ export const ManageAccountTab = () => {
                             <PasswordInput
                                 id="current-password"
                                 value={currentPassword}
+                                disabled={isDemoUser}
                                 onChange={(e) => {
                                     setCurrentPassword(e.target.value);
                                     clearAllStatus();
@@ -407,6 +417,7 @@ export const ManageAccountTab = () => {
                                 <PasswordInput
                                     id="new-password"
                                     value={newPassword}
+                                    disabled={isDemoUser}
                                     className={newPassword.length > 0 && !isPasswordStrong(newPassword) ? 'border-yellow-500' : ''}
                                     onChange={(e) => {
                                         setNewPassword(e.target.value)
@@ -419,6 +430,7 @@ export const ManageAccountTab = () => {
                                 <PasswordInput
                                     id="confirm-new-password"
                                     value={confirmNewPassword}
+                                    disabled={isDemoUser}
                                     className={confirmNewPassword.length > 0 && newPassword !== confirmNewPassword ? 'border-red-500' : ''}
                                     onChange={(e) => {
                                         setConfirmNewPassword(e.target.value);
@@ -440,7 +452,7 @@ export const ManageAccountTab = () => {
                             variant="outline"
                             className="cursor-pointer"
                             type="submit" 
-                            disabled={passwordLoading || !isPasswordFormReady}
+                            disabled={passwordLoading || !isPasswordFormReady || isDemoUser}
                         >
                             {passwordLoading ? 'Changing Password...' : 'Change Password'}
                         </Button>
@@ -464,6 +476,7 @@ export const ManageAccountTab = () => {
                         <PasswordInput
                             id="delete-password"
                             value={deletePassword}
+                            disabled={isDemoUser}
                             onChange={(e) => {
                                 setDeletePassword(e.target.value);
                                 clearAllStatus();
@@ -476,7 +489,7 @@ export const ManageAccountTab = () => {
                     <Button 
                         onClick={handleDeleteButton}
                         variant="destructive"
-                        disabled={deleteLoading || !deletePassword}
+                        disabled={deleteLoading || !deletePassword || isDemoUser}
                     >
                         {deleteLoading ? 'Verifying...' : 'Delete Account'}
                     </Button>
@@ -510,7 +523,7 @@ export const ManageAccountTab = () => {
                         <Button 
                             onClick={confirmDeleteAction} 
                             variant="destructive"
-                            disabled={deleteLoading}
+                            disabled={deleteLoading || isDemoUser}
                         >
                             {deleteLoading ? 'Processing...' : 'Confirm Deletion'}
                         </Button>

@@ -81,7 +81,7 @@ export const DemoAlert = () => {
         <Button
           onClick={handleLogout}
           variant="outline"
-          className="text-sm sm:text-base active:scale-95 transition-transform duration-150 mt-2 sm:mt-0 cursor-pointer"
+          className="bg-blue-200 hover:bg-blue-300 text-sm sm:text-base active:scale-95 transition-transform duration-150 mt-2 sm:mt-0 cursor-pointer"
           disabled={isExpired}
         >
           <LogOut className="h-4 w-4 mr-2" />

@@ -8,8 +8,6 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
 } from "@/components/ui/carousel"
 import { useTheme } from "@/hooks/useTheme"
 import Image from 'next/image';
@@ -72,8 +70,6 @@ export function ScreenshotCarousel() {
           </CarouselItem>
         ))}
       </CarouselContent>
-      <CarouselPrevious />
-      <CarouselNext />
     </Carousel>
     </div>
   )

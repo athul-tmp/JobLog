@@ -157,8 +157,8 @@ export default function TrackerPage() {
                 <DashboardNavigation currentPath={router.pathname} />
                 <DemoAlert />
                 <div className="space-y-8">
-                    <div className="flex justify-between items-center mb-6">
-                        <h1 className="text-3xl font-extrabold tracking-tight text-foreground">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+                        <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground text-center sm:text-left">
                             Applications
                         </h1>
                         <AddJobApplicationDialog onJobAdded={handleJobAdded} /> 
@@ -178,14 +178,16 @@ export default function TrackerPage() {
                     {/* Job Applications Table */}
                     {isReady && (
                         <Card className="ring-1 ring-primary/40">
-                            <CardContent>
+                            <CardContent className="overflow-x-auto">
                                 {applications.length > 0 ? (
+                                    <div className="min-w-[700px]">
                                     <JobApplicationTable 
                                         data={applications} 
                                         onJobUpdated={handleJobUpdated} 
                                         onUndoStatusChange={handleUndoStatusChange}
                                         onOpenEditModal={handleOpenEditModal} 
                                     />
+                                    </div>
                                 ) : (
                                     <div className="p-10 border border-border rounded-lg flex flex-col items-center justify-center dark:bg-card">
                                         <Search className="w-8 h-8 text-muted-foreground mx-auto mb-4"/>

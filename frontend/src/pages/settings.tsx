@@ -86,7 +86,7 @@ export default function SettingsPage() {
                     >
                         <ArrowLeft className="h-5 w-5" />
                     </Button>
-                    <h1 className="text-3xl font-extrabold tracking-tight text-foreground">
+                    <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
                         Settings
                     </h1>
                 </div>
@@ -131,7 +131,7 @@ export default function SettingsPage() {
                                     ${
                                     isActive
                                         ? "bg-accent text-foreground shadow-sm border border-border/60"
-                                        : "text-foreground/80 hover:text-foreground hover:bg-muted/60"
+                                        : "text-foreground/80 hover:text-foreground hover:bg-muted/60 cursor-pointer"
                                     }
                                 `}
                                 >

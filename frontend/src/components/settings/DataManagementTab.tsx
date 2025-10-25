@@ -98,7 +98,7 @@ export const DataManagementTab = ({ isDemoUser }: DataManagementTabProps) => {
 
     return (
         <div className="space-y-6">
-            <h2 className="text-2xl font-bold tracking-tight">Data Management</h2>
+            <h2 className="text-xl font-bold tracking-tight">Data Management</h2>
             <Card className="border-red-500/50 bg-red-200 dark:bg-red-950/40">
                 <CardHeader>
                     <CardTitle className="text-red-600 dark:text-red-400">Clear All Application Data</CardTitle>

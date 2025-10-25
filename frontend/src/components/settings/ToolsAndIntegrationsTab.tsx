@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 export const ToolsAndIntegrationsTab = () => {
     return (
         <div className="space-y-6">
-            <h2 className="text-2xl font-bold tracking-tight">Tools & Integrations</h2>
+            <h2 className="text-xl font-bold tracking-tight">Extension</h2>
             <Card>
                 <CardContent className="p-6">
                     <p className="text-lg font-semibold mb-2">Browser Extension (Coming Soon)</p>

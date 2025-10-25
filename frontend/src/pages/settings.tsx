@@ -16,10 +16,10 @@ import { DemoAlert } from "@/components/DemoAlert";
 
 // Configuration for sidebar 
 const settingsNav = [
-    { id: 'account', title: 'Manage Account', icon: KeyRound },
+    { id: 'account', title: 'Account', icon: KeyRound },
     { id: 'data', title: 'Data', icon: Database },
     // Will be added in later
-    // { id: 'tools', title: 'Tools & Integrations', icon: Zap }, 
+    // { id: 'tools', title: 'Extension', icon: Zap }, 
 ];
 
 
@@ -74,19 +74,22 @@ export default function SettingsPage() {
             </Head>
             <Header />
             
-            <main className="container mx-auto min-h-[calc(100vh-128px)]">
+            <main className="container mx-auto px-3 sm:px-6 min-h-[calc(100vh-128px)]">
                 
                 {/* Back Button */}
-                <Button 
-                    variant="outline"
-                    onClick={() => router.back()} 
-                    className="mb-4 mt-4 text-base cursor-pointer"
-                >
-                    <ArrowLeft className="h-5 w-5 mr-2" />
-                    Back
-                </Button>
-
-                <h1 className="text-3xl font-extrabold tracking-tight text-foreground mb-5"> Settings</h1>
+                <div className="flex items-center gap-2 mb-5 mt-4">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => router.back()}
+                        className="cursor-pointer"
+                    >
+                        <ArrowLeft className="h-5 w-5" />
+                    </Button>
+                    <h1 className="text-3xl font-extrabold tracking-tight text-foreground">
+                        Settings
+                    </h1>
+                </div>
 
                 {isDemoUser && (
                     <>
@@ -104,29 +107,44 @@ export default function SettingsPage() {
                 <div className="flex flex-col md:flex-row md:gap-8 min-h-[calc(100vh-300px)]">
                     
                     {/* Sidebar Navigation Wrapper */}
-                    <div className="w-full md:w-64 flex-shrink-0 bg-muted/50 dark:bg-muted/30 border border-border/80 rounded-lg mb-6 md:mb-0">
-                        <nav className="flex flex-col space-y-1 p-4">
+                    <div
+                    className="
+                        w-full md:w-64 flex-shrink-0 
+                        bg-muted/40 dark:bg-muted/20 
+                        border border-border/80 rounded-lg 
+                        mb-4 md:mb-0 
+                        overflow-hidden
+                    "
+                    >
+                        <nav className="flex md:flex-col sm:flex-row md:space-y-1 sm:space-x-2 md:space-x-0 p-2 sm:p-3 md:p-4">
                             {settingsNav.map((item) => {
-                                const Icon = item.icon;
-                                const isActive = item.id === activeTab;
-                                
-                                return (
-                                    <Button
-                                        key={item.id}
-                                        variant={isActive ? 'secondary' : 'ghost'} 
-                                        className={isActive? "justify-start text-base": "cursor-pointer justify-start text-base"}
-                                        onClick={() => handleNavigation(item.id)}
-                                    >
-                                        <Icon className="h-5 w-5 mr-3" />
-                                        {item.title}
-                                    </Button>
-                                );
+                            const Icon = item.icon;
+                            const isActive = item.id === activeTab;
+
+                            return (
+                                <button
+                                key={item.id}
+                                onClick={() => handleNavigation(item.id)}
+                                className={`
+                                    flex items-center w-full md:w-auto md:justify-start justify-center gap-2
+                                    rounded-md px-3 py-2 md:text-base text-sm font-medium transition-all duration-150
+                                    ${
+                                    isActive
+                                        ? "bg-accent text-foreground shadow-sm border border-border/60"
+                                        : "text-foreground/80 hover:text-foreground hover:bg-muted/60"
+                                    }
+                                `}
+                                >
+                                <Icon className="h-5 w-5 flex-shrink-0" />
+                                <span>{item.title}</span>
+                                </button>
+                            );
                             })}
                         </nav>
                     </div>
                     
                     {/* Main Content Area */}
-                    <div className="flex-1">
+                    <div className="flex-1 w-full overflow-x-hidden">
                         {renderContent()}
                     </div>
                 </div>

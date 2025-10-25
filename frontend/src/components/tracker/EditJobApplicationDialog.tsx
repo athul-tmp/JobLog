@@ -114,9 +114,9 @@ export default function EditJobApplicationDialog({ job, isOpen, onClose, onJobUp
                 </DialogHeader>
                 <div className="text-sm text-muted-foreground mb-4 -mt-3">
                     Applied on: {formattedDateApplied}
-                    <span className="ml-4 font-semibold text-foreground capitalize">
+                    <div className="font-semibold text-foreground capitalize">
                         Status: {job.status}
-                    </span>
+                    </div>
                 </div>
                 
                 <Form {...form}>

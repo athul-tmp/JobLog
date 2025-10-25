@@ -38,7 +38,7 @@ const IMAGES = [
 
 export function ScreenshotCarousel() {
   const plugin = React.useRef(
-    Autoplay({ delay: 2000, stopOnInteraction: true })
+    Autoplay({ delay: 3000, stopOnInteraction: false })
   )
 
   const theme = useTheme();

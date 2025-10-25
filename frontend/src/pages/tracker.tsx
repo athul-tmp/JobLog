@@ -19,6 +19,7 @@ import { JobApplication } from "@/types/types";
 import { JobApplicationTable } from "@/components/tracker/JobApplicationTable"; 
 import { toast } from "sonner";
 import { DemoAlert } from "@/components/DemoAlert";
+import { JobApplicationCards } from "@/components/tracker/JobApplicationCards";
 
 // Sorting logic
 const sortApplications = (applications: JobApplication[]): JobApplication[] => {
@@ -175,30 +176,55 @@ export default function TrackerPage() {
                        </div>
                     )}
                     
-                    {/* Job Applications Table */}
+                    {/* Job Applications Table (Shown on large screens) */}
                     {isReady && (
-                        <Card className="ring-1 ring-primary/40">
-                            <CardContent className="overflow-x-auto">
-                                {applications.length > 0 ? (
-                                    <div className="min-w-[700px]">
-                                    <JobApplicationTable 
-                                        data={applications} 
-                                        onJobUpdated={handleJobUpdated} 
-                                        onUndoStatusChange={handleUndoStatusChange}
-                                        onOpenEditModal={handleOpenEditModal} 
-                                    />
-                                    </div>
-                                ) : (
-                                    <div className="p-10 border border-border rounded-lg flex flex-col items-center justify-center dark:bg-card">
+                        <Card className="ring-1 ring-primary/40 hidden lg:block">
+                            <CardContent>
+                                <div className="overflow-x-auto">
+                                    {applications.length > 0 ? (
+                                        <JobApplicationTable 
+                                            data={applications} 
+                                            onJobUpdated={handleJobUpdated} 
+                                            onUndoStatusChange={handleUndoStatusChange}
+                                            onOpenEditModal={handleOpenEditModal} 
+                                        />
+                                        
+                                    ) : (
+                                        <div className="p-10 border border-border rounded-lg flex flex-col items-center justify-center dark:bg-card">
+                                            <Search className="w-8 h-8 text-muted-foreground mx-auto mb-4"/>
+                                            <h3 className="text-lg font-semibold text-foreground">No Applications Found</h3>
+                                            <p className="text-sm text-muted-foreground">
+                                                Click &quot;+ Add New Application&quot; to start tracking your job search!
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
+                            </CardContent>
+                        </Card>
+                    )}
+
+                    {/* Job Application Cards (Shown on small/medium screens) */}
+                    {isReady && (
+                        <div className="lg:hidden">
+                            {applications.length > 0 ? (
+                                <JobApplicationCards 
+                                    data={applications} 
+                                    onJobUpdated={handleJobUpdated} 
+                                    onUndoStatusChange={handleUndoStatusChange}
+                                    onOpenEditModal={handleOpenEditModal} 
+                                />
+                            ) : (
+                                <Card className="ring-1 ring-primary/40">
+                                    <CardContent className="p-10 flex flex-col items-center justify-center">
                                         <Search className="w-8 h-8 text-muted-foreground mx-auto mb-4"/>
                                         <h3 className="text-lg font-semibold text-foreground">No Applications Found</h3>
                                         <p className="text-sm text-muted-foreground">
                                             Click &quot;+ Add New Application&quot; to start tracking your job search!
                                         </p>
-                                    </div>
-                                )}
-                            </CardContent>
-                        </Card>
+                                    </CardContent>
+                                </Card>
+                            )}
+                        </div>
                     )}
                 </div>
             </main>

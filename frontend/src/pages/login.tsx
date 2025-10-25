@@ -69,12 +69,10 @@ export default function LoginPage() {
                 <title>Login | JobLog</title>
             </Head>
             <Header/>
-            <div className="flex justify-center items-center min-h-screen bg-background">
-                <Card 
-                    className="w-[400px] shadow-2xl ring-2 ring-primary/40 dark:shadow-none"
-                >
+            <div className="flex justify-center items-center min-h-screen bg-background px-4">
+                <Card className="w-full max-w-sm shadow-2xl ring-2 ring-primary/40 dark:shadow-none">
                     <CardHeader className="text-center">
-                        <CardTitle className="text-3xl font-extrabold text-foreground">Welcome Back</CardTitle>
+                        <CardTitle className="text-2xl sm:text-3xl font-extrabold text-foreground">Welcome Back</CardTitle>
                         <CardDescription>
                             Sign in to view and update your job applications.
                         </CardDescription>

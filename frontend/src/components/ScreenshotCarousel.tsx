@@ -46,9 +46,10 @@ export function ScreenshotCarousel() {
   const theme = useTheme();
 
   return (
+    <div className="relative w-full lg:ml-5 sm:overflow-visible overflow-hidden">
     <Carousel
       plugins={[plugin.current]}
-      className="w-full ml-5"
+      className="w-full"
       onMouseEnter={plugin.current.stop}
       onMouseLeave={plugin.current.reset}
     >
@@ -74,5 +75,6 @@ export function ScreenshotCarousel() {
       <CarouselPrevious />
       <CarouselNext />
     </Carousel>
+    </div>
   )
 }

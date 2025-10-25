@@ -102,10 +102,10 @@ export default function RegisterPage() {
                 <title>Register | JobLog</title>
             </Head>
             <Header/>
-            <div className="flex justify-center items-center min-h-screen bg-background">
-                <Card className="w-[400px] shadow-2xl ring-2 ring-primary/40 dark:shadow-none" >
+           <div className="flex justify-center items-center min-h-screen bg-background px-4 py-4">
+                <Card className="w-full max-w-sm shadow-2xl ring-2 ring-primary/40 dark:shadow-none">
                     <CardHeader className="text-center">
-                        <CardTitle className="text-3xl font-extrabold text-foreground">Create Your Account</CardTitle>
+                        <CardTitle className="text-2xl sm:text-3xl font-extrabold text-foreground">Create Your Account</CardTitle>
                         <CardDescription>
                             Start tracking your job applications now.
                         </CardDescription>
@@ -158,7 +158,7 @@ export default function RegisterPage() {
                                 <h3 className={`font-semibold text-sm ${isPasswordStrong ? 'text-green-500' : 'text-foreground'}`}>
                                     {isPasswordStrong ? 'Strong Password' : 'Password Requirements:'}
                                 </h3>
-                                <div className="grid grid-cols-2 gap-y-1 gap-x-4">
+                                <div className="grid sm:grid-cols-2 gap-y-1 gap-x-4">
                                     <PasswordRequirement met={criteria.minLength} text="Minimum 8 characters" />
                                     <PasswordRequirement met={criteria.hasUpperCase} text="1 Uppercase letter" />
                                     <PasswordRequirement met={criteria.hasLowerCase} text="1 Lowercase letter" />

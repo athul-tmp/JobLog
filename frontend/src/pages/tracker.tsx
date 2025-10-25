@@ -149,7 +149,7 @@ export default function TrackerPage() {
     return (
         <>
             <Head>
-                <title>Application Tracker | JobLog</title>
+                <title>Applications | JobLog</title>
             </Head>
             <Header />
             
@@ -159,7 +159,7 @@ export default function TrackerPage() {
                 <div className="space-y-8">
                     <div className="flex justify-between items-center mb-6">
                         <h1 className="text-3xl font-extrabold tracking-tight text-foreground">
-                            Application Tracker
+                            Applications
                         </h1>
                         <AddJobApplicationDialog onJobAdded={handleJobAdded} /> 
                     </div>

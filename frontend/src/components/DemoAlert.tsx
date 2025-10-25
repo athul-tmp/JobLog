@@ -66,22 +66,28 @@ export const DemoAlert = () => {
   const logoutText = isExpired ? "Session Expired. Logging out..." : "Log Out Demo";
 
   return (
-    <Alert className="mb-6 bg-blue-100 border-blue-500 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-600 flex justify-between items-center p-4">
+    <Alert className="
+      mb-6 bg-blue-100 border-blue-500 text-blue-700 
+      dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-600
+      flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-4 p-4
+    ">
       <div className="flex items-start">
           <AlertTriangle className="h-5 w-5 mt-0.5 mr-3 flex-shrink-0 text-blue-700 dark:text-blue-300" />
-          <AlertDescription className="text-blue-700 dark:text-blue-300 font-medium">
+          <AlertDescription className="text-blue-700 dark:text-blue-300 font-medium text-sm sm:text-base leading-relaxed">
               You are on the Demo Account. Feel free to explore all features. Please note that data is shared; you may see applications added or changed by other users demoing at the same time. All changes will be automatically reset when a new session starts. <strong>Your session expires in {timeLeftText}</strong>
           </AlertDescription>
       </div>
-      <Button 
-          onClick={handleLogout} 
-          variant="link" 
-          className="ml-4 flex-shrink-0 text-bg"
-          disabled={isExpired} 
-      >
+      <div className="flex sm:flex-shrink-0 justify-end sm:justify-center">
+        <Button
+          onClick={handleLogout}
+          variant="outline"
+          className="text-sm sm:text-base active:scale-95 transition-transform duration-150 mt-2 sm:mt-0 cursor-pointer"
+          disabled={isExpired}
+        >
           <LogOut className="h-4 w-4 mr-2" />
           {logoutText}
-      </Button>
+        </Button>
+      </div>
     </Alert>
   );
 };

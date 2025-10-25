@@ -125,7 +125,7 @@ export default function AddJobApplicationDialog({ onJobAdded }: AddJobApplicatio
                                 <FormItem>
                                     <FormLabel>Company</FormLabel>
                                     <FormControl>
-                                        <Input {...field} />
+                                        <Input placeholder="Company Name" {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -140,7 +140,7 @@ export default function AddJobApplicationDialog({ onJobAdded }: AddJobApplicatio
                                 <FormItem>
                                     <FormLabel>Role/Title</FormLabel>
                                     <FormControl>
-                                        <Input {...field} />
+                                        <Input placeholder="Job Title" {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>

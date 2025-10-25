@@ -1,5 +1,3 @@
-// frontend/src/components/tracker/JobApplicationCards.tsx
-
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { JobApplication, UpdateJobApplicationRequest } from "@/types/types";
 import { format } from "date-fns";

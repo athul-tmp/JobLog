@@ -103,7 +103,7 @@ export const DataManagementTab = ({ isDemoUser }: DataManagementTabProps) => {
                 <CardHeader>
                     <CardTitle className="text-red-600 dark:text-red-400">Clear All Application Data</CardTitle>
                     <CardDescription  className="text-red-500 dark:text-red-300">
-                        This action is permanent and cannot be undone. This is <strong>useful when starting a new job search phase</strong>. This will delete <strong>ALL</strong> applications and reset your tracker data.
+                        This action is permanent and cannot be undone. This is <strong>useful when starting a new job search phase</strong>. This will delete <strong>ALL</strong> applications and reset your analytics history.
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -144,7 +144,7 @@ export const DataManagementTab = ({ isDemoUser }: DataManagementTabProps) => {
                             Confirm Data Wipe
                         </AlertDialogTitle>
                         <AlertDialogDescription>
-                            Your password has been verified. This action cannot be undone. You are about to permanently delete <strong>ALL</strong> job application and tracker data associated with your account.
+                            Your password has been verified. This action cannot be undone. You are about to permanently delete <strong>ALL</strong> job application and analytics data associated with your account.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     

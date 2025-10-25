@@ -11,15 +11,15 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Search } from "lucide-react"; 
 import { Alert, AlertDescription } from "@/components/ui/alert"; 
 
-import AddJobApplicationDialog from "@/components/tracker/AddJobApplicationDialog"; 
-import EditJobApplicationDialog from "@/components/tracker/EditJobApplicationDialog";
+import AddJobApplicationDialog from "@/components/applications/AddJobApplicationDialog"; 
+import EditJobApplicationDialog from "@/components/applications/EditJobApplicationDialog";
 import { JobApplicationService } from "@/services/api"; 
 import { JobApplication } from "@/types/types"; 
 
-import { JobApplicationTable } from "@/components/tracker/JobApplicationTable"; 
+import { JobApplicationTable } from "@/components/applications/JobApplicationTable"; 
 import { toast } from "sonner";
 import { DemoAlert } from "@/components/DemoAlert";
-import { JobApplicationCards } from "@/components/tracker/JobApplicationCards";
+import { JobApplicationCards } from "@/components/applications/JobApplicationCards";
 
 // Sorting logic
 const sortApplications = (applications: JobApplication[]): JobApplication[] => {
@@ -109,7 +109,7 @@ function useApplicationData() {
 }
 
 
-export default function TrackerPage() {
+export default function ApplicationsPage() {
     const { isAuthenticated, authLoading } = useAuth();
     const router = useRouter();
     const { applications, isLoading: isDataLoading, error: dataError, handleJobAdded,handleJobUpdated, handleUndoStatusChange } = useApplicationData();

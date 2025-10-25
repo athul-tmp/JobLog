@@ -5,11 +5,11 @@ export function DashboardNavigation({ currentPath }: { currentPath: string }) {
     const router = useRouter();
 
     const navigate = (value: string) => {
-        router.push(value === 'dashboard' ? '/dashboard' : '/tracker');
+        router.push(value === 'dashboard' ? '/dashboard' : '/applications');
     };
 
     // Determine the current active tab based on the path
-    const activeTab = currentPath.includes('tracker') ? 'tracker' : 'dashboard';
+    const activeTab = currentPath.includes('applications') ? 'applications' : 'dashboard';
 
     return (
         <div className="flex justify-center my-8 px-2 sm:px-0">
@@ -17,18 +17,14 @@ export function DashboardNavigation({ currentPath }: { currentPath: string }) {
                 <TabsList
                 className="
                     flex flex-wrap sm:flex-nowrap justify-center gap-2 sm:gap-4
-                    p-1 sm:p-2 rounded-lg border border-border/50 bg-card
+                    p-1 sm:p-2 rounded-lg border-2 border-border bg-card
                     w-full max-w-md sm:max-w-none
                 "
                 >
                     <TabsTrigger
                     className="
                         flex-1 min-w-[140px] text-xs sm:text-sm md:text-base py-2 sm:py-3
-                        rounded-md font-medium text-foreground/80
-                        cursor-pointer data-[state=active]:cursor-default data-[state=active]:pointer-events-none
-                        data-[state=active]:bg-primary data-[state=active]:text-primary-foreground
-                        data-[state=active]:shadow-sm
-                        transition-all duration-200 active:scale-95
+                        data-[state=active]:border-2 data-[state=active]:border-border
                     "
                     value="dashboard"
                     >
@@ -37,13 +33,9 @@ export function DashboardNavigation({ currentPath }: { currentPath: string }) {
                     <TabsTrigger
                     className="
                         flex-1 min-w-[140px] text-xs sm:text-sm md:text-base py-2 sm:py-3
-                        rounded-md font-medium text-foreground/80
-                        cursor-pointer data-[state=active]:cursor-default data-[state=active]:pointer-events-none
-                        data-[state=active]:bg-primary data-[state=active]:text-primary-foreground
-                        data-[state=active]:shadow-sm
-                        transition-all duration-200 active:scale-95
+                        data-[state=active]:border-2 data-[state=active]:border-border
                     "
-                    value="tracker"
+                    value="applications"
                     >
                     Applications
                     </TabsTrigger>

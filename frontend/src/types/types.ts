@@ -13,7 +13,7 @@ export interface AuthUser {
   expiresAt?: number;
 }
 
-// Job application tracker page
+// Job application page
 export interface JobStatusHistory {
   id: number;
   status: string;

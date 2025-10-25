@@ -103,12 +103,12 @@ export default function DashboardPage() {
             </Head>
             <Header />
             
-            <main className="container mx-auto p-4 sm:p-8 min-h-[calc(100vh-128px)]">
+            <main className="container mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-8 min-h-[calc(100vh-128px)]">
                 <DashboardNavigation currentPath={router.pathname} />
                 <DemoAlert />
                 {/* Dashboard Content for Analytics */}
                 <div className="space-y-8">
-                    <h1 className="text-3xl font-extrabold tracking-tight text-foreground">
+                    <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground text-center sm:text-left">
                         Dashboard
                     </h1>
                     
@@ -117,23 +117,23 @@ export default function DashboardPage() {
 
                     {/* Data Loading Spinner */}
                     {isDataLoading && (
-                       <div className="flex justify-center items-center h-32">
-                           <p className="text-lg text-muted-foreground">Loading data...</p>
-                           <Spinner/>
+                       <div className="flex flex-col items-center justify-center h-32 text-center">
+                            <Spinner className="mb-2" />
+                            <p className="text-sm sm:text-base text-muted-foreground">Loading data...</p>
                        </div>
                     )}
 
                     {isReady && (
                         <div className="space-y-8">
-                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+                            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
                                 
                                 {/* Total Applied Card */}
                                 <Card className="ring-1 ring-primary/40">
                                     <CardHeader className="flex flex-row items-center justify-between space-y-0">
-                                        <CardTitle>Total Applications</CardTitle>
+                                        <CardTitle className="text-sm sm:text-base">Total Applications</CardTitle>
                                     </CardHeader>
                                     <CardContent>
-                                        <div className="text-2xl font-bold text-primary">{stats.totalApplications}</div>
+                                        <div className="text-xl sm:text-2xl font-bold text-primary">{stats.totalApplications}</div>
                                         <p className="text-xs text-foreground mt-1">Total jobs applied to</p>
                                     </CardContent>
                                 </Card>
@@ -141,10 +141,10 @@ export default function DashboardPage() {
                                 {/* Total Pending Card */}
                                 <Card className="ring-1 ring-primary/40">
                                     <CardHeader className="flex flex-row items-center justify-between space-y-0">
-                                        <CardTitle>Total Applied</CardTitle>
+                                        <CardTitle className="text-sm sm:text-base">Total Applied</CardTitle>
                                     </CardHeader>
                                     <CardContent>
-                                        <div className="text-2xl font-bold text-yellow-600">{stats.totalPending}</div>
+                                        <div className="text-xl sm:text-2xl font-bold text-yellow-600">{stats.totalPending}</div>
                                         <p className="text-xs text-foreground mt-1">Applied but pending reply</p>
                                     </CardContent>
                                 </Card>
@@ -152,10 +152,10 @@ export default function DashboardPage() {
                                 {/* Total Interviews Card */}
                                 <Card className="ring-1 ring-primary/40">
                                     <CardHeader className="flex flex-row items-center justify-between space-y-0">
-                                        <CardTitle>Total Interviews</CardTitle>
+                                        <CardTitle className="text-sm sm:text-base">Total Interviews</CardTitle>
                                     </CardHeader>
                                     <CardContent>
-                                        <div className="text-2xl font-bold text-blue-600">{stats.totalInterviews}</div>
+                                        <div className="text-xl sm:text-2xl font-bold text-blue-600">{stats.totalInterviews}</div>
                                         <p className="text-xs text-foreground mt-1">Interviews completed but pending reply</p>
                                     </CardContent>
                                 </Card>
@@ -163,10 +163,10 @@ export default function DashboardPage() {
                                 {/* Total Offers Card */}
                                 <Card className="ring-1 ring-primary/40">
                                     <CardHeader className="flex flex-row items-center justify-between space-y-0">
-                                        <CardTitle>Total Offers</CardTitle>
+                                        <CardTitle className="text-sm sm:text-base">Total Offers</CardTitle>
                                     </CardHeader>
                                     <CardContent>
-                                        <div className="text-2xl font-bold text-green-600">{stats.totalOffers}</div>
+                                        <div className="text-xl sm:text-2xl font-bold text-green-600">{stats.totalOffers}</div>
                                         <p className="text-xs text-foreground mt-1">Successful offers</p>
                                     </CardContent>
                                 </Card>
@@ -174,10 +174,10 @@ export default function DashboardPage() {
                                 {/* Total Ghosted Card */}
                                 <Card className="ring-1 ring-primary/40">
                                     <CardHeader className="flex flex-row items-center justify-between space-y-0">
-                                        <CardTitle>Total Ghosted</CardTitle>
+                                        <CardTitle className="text-sm sm:text-base">Total Ghosted</CardTitle>
                                     </CardHeader>
                                     <CardContent>
-                                        <div className="text-2xl font-bold text-gray-600">{stats.totalGhosted}</div>
+                                        <div className="text-xl sm:text-2xl font-bold text-gray-600">{stats.totalGhosted}</div>
                                         <p className="text-xs text-foreground mt-1">No response after application/interview</p>
                                     </CardContent>
                                 </Card>
@@ -185,10 +185,10 @@ export default function DashboardPage() {
                                 {/* Total Rejections Card */}
                                 <Card className="ring-1 ring-primary/40">
                                     <CardHeader className="flex flex-row items-center justify-between space-y-0">
-                                        <CardTitle>Total Rejections</CardTitle>
+                                        <CardTitle className="text-sm sm:text-base">Total Rejections</CardTitle>
                                     </CardHeader>
                                     <CardContent>
-                                        <div className="text-2xl font-bold text-red-600">{stats.totalRejections}</div>
+                                        <div className="text-xl sm:text-2xl font-bold text-red-600">{stats.totalRejections}</div>
                                         <p className="text-xs text-foreground mt-1">Rejected after application/interview</p>
                                     </CardContent>
                                 </Card>
@@ -196,33 +196,33 @@ export default function DashboardPage() {
                             </div>
                             
                             {/* Pie Charts Section */}
-                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {/* Application Breakdown Chart */}
-                                <Card className="lg:col-span-1 ring-1 ring-primary/40">
+                                <Card className="ring-1 ring-primary/40">
                                     <CardHeader>
-                                        <CardTitle>Application Stages Breakdown</CardTitle>
+                                        <CardTitle className="text-sm sm:text-base text-center sm:text-left">Application Stages Breakdown</CardTitle>
                                     </CardHeader>
-                                    <CardContent className="h-[300px] flex items-center justify-center">
+                                    <CardContent className="h-[250px] sm:h-[300px] flex items-center justify-center">
                                         <StageBreakdownChart data={stats} />
                                     </CardContent>
                                 </Card>
 
                                 {/* Interview Outcomes Chart */}
-                                <Card className="lg:col-span-1 ring-1 ring-primary/40">
+                                <Card className="ring-1 ring-primary/40">
                                     <CardHeader>
-                                        <CardTitle>All Interview Outcomes</CardTitle>
+                                        <CardTitle className="text-sm sm:text-base text-center sm:text-left">All Interview Outcomes</CardTitle>
                                     </CardHeader>
-                                    <CardContent className="h-[300px] flex items-center justify-center">
+                                    <CardContent className="h-[250px] sm:h-[300px] flex items-center justify-center">
                                         <InterviewOutcomesChart data={stats} /> 
                                     </CardContent>
                                 </Card>
 
                                 {/* Interview Types */}
-                                <Card className="lg:col-span-1 ring-1 ring-primary/40">
+                                <Card className="ring-1 ring-primary/40">
                                     <CardHeader>
-                                        <CardTitle>Active Interview Breakdown</CardTitle>
+                                        <CardTitle className="text-sm sm:text-base text-center sm:text-left">Active Interview Breakdown</CardTitle>
                                     </CardHeader>
-                                    <CardContent className="h-[300px] flex items-center justify-center">
+                                    <CardContent className="h-[250px] sm:h-[300px] flex items-center justify-center">
                                         <InterviewTypesChart data={stats.interviewTypeBreakdown} /> 
                                     </CardContent>
                                 </Card>
@@ -232,28 +232,26 @@ export default function DashboardPage() {
                             <div className="grid grid-cols-1">
                                 <Card className="ring-1 ring-primary/40">
                                     <CardHeader>
-                                        <CardTitle>Daily Application Trend ({currentMonthName})</CardTitle>
+                                        <CardTitle className="text-sm sm:text-base text-center sm:text-left">Daily Application Trend ({currentMonthName})</CardTitle>
                                     </CardHeader>
                                     <CardContent>
-                                        <div className="h-[300px] mb-4">
+                                        <div className="h-[250px] sm:h-[300px] mb-4">
                                             <DailyTrendChart 
                                                 data={stats.applicationsPerDay} 
                                             />
                                         </div>
                                         
                                         {/* Comparison Text Summary with Percentage  */}
-                                        <div className="text-sm text-muted-foreground pt-2 border-t border-border flex flex-col gap-2">
-                                        
-                                            
+                                        <div className="text-xs sm:text-sm text-muted-foreground pt-2 border-t border-border flex flex-col gap-2">
                                             {/* Current Month Total & Percentage Change */}
-                                            <div className="flex justify-between items-baseline">
+                                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-baseline gap-2">
                                                 <p className="text-base font-medium">
                                                     {currentMonthName} Total: 
                                                     <span className="font-bold text-foreground ml-1">{currentMonthCount}</span> applications
                                                 </p>
                                                 {/* Display the Monthly Increase/Decrease if theres enough data */}
                                                 {(currentMonthCount > 0 || previousMonthCount > 0) && (
-                                                <p className={`text-base font-semibold flex items-center ${monthlyColor}`}>
+                                                <p className={`font-semibold flex items-center ${monthlyColor}`}>
                                                     <MonthlyTrendIcon className="w-4 h-4 mr-1" />
                                                     {MonthlyIncrease.toFixed(0)}% vs. {previousMonthName}
                                                 </p>
@@ -273,7 +271,7 @@ export default function DashboardPage() {
                             <div className="grid grid-cols-1">
                                 <Card className="ring-1 ring-primary/40">
                                     <CardHeader>
-                                        <CardTitle>All Past Applications Flow</CardTitle>
+                                        <CardTitle className="text-sm sm:text-base text-center sm:text-left">Applications Flow</CardTitle>
                                     </CardHeader>
                                     <CardContent>
                                         <SankeyChart data={stats} />

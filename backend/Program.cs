@@ -67,6 +67,24 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+// TEMPORARY DB CRASH DEBUGGER 
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    try
+    {
+        var context = services.GetRequiredService<ApplicationDbContext>();
+        // Force the connection to open/initialize pool 
+        context.Database.OpenConnection();
+        context.Database.CloseConnection();
+    }
+    catch (Exception ex)
+    {
+        app.Logger.LogCritical(ex, "FATAL ERROR: Remote Supabase connection failed during container startup.");
+        throw;
+    }
+}
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

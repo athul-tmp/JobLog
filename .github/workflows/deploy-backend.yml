@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - "backend/**"
+  workflow_dispatch:
 
 env:
   PROJECT_ID: joblog-athul-2025

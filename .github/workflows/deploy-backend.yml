@@ -75,7 +75,7 @@ jobs:
 
           # Environment secrets
           env_vars: |
-            ConnectionStrings__PostgreSQLConnection=${{ secrets.SUPABASE_CONNECTION_STRING }}
+            ConnectionStrings__DefaultConnection=${{ secrets.SUPABASE_CONNECTION_STRING }}
             JwtSettings__Key=${{ secrets.JWT_SECRET }}
 
       # Map the custom domain

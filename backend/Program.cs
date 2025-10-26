@@ -20,7 +20,9 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowNextjsApp",
         builder =>
         {
-            builder.WithOrigins("http://localhost:3000")
+            builder.WithOrigins(
+                "http://localhost:3000",
+                "https://joblog.athulthampan.com")
                    .AllowAnyHeader()
                    .AllowAnyMethod()
                    .AllowCredentials(); ;

@@ -72,6 +72,7 @@ jobs:
             --allow-unauthenticated 
             --max-instances 1
             --no-cpu-throttling
+            --timeout 600
 
           # Environment secrets
           env_vars: |

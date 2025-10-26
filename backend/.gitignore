@@ -12,3 +12,9 @@ Migrations/
 *.suo
 *.user
 *.userosscache
+
+appsettings.Development.json
+appsettings.json
+*.db
+backend.http
+Properties/launchSettings.json

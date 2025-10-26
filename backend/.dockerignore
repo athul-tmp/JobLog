@@ -1,0 +1,10 @@
+bin/
+obj/
+Migrations/
+
+appsettings.Development.json
+appsettings.json
+*.db
+ApplicationDbContextFactory.cs
+backend.http
+Properties/launchSettings.json

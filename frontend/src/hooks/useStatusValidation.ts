@@ -1,4 +1,3 @@
-import { JobApplication } from "@/types/types";
 
 // Mirrors backend status grouping
 const StatusRank: { [key: string]: number } = {

@@ -77,11 +77,3 @@ jobs:
           env_vars: |
             ConnectionStrings__DefaultConnection=${{ secrets.SUPABASE_CONNECTION_STRING }}
             JwtSettings__Key=${{ secrets.JWT_SECRET }}
-
-      # Map the custom domain
-      - name: Map Custom Domain
-        run: |
-          gcloud run domain-mappings create \
-            --service ${{ env.SERVICE_NAME }} \
-            --domain api.joblog.athulthampan.com \
-            --region ${{ env.REGION }} --platform managed || true

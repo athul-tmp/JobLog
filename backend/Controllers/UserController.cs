@@ -28,7 +28,7 @@ public class UserController : ControllerBase
     {
       HttpOnly = true,
       Secure = true,   // IMPORTANT: true for production (https), false for local (http)
-      SameSite = SameSiteMode.Strict,
+      SameSite = SameSiteMode.Lax,
       Expires = expiryTime ?? DateTime.UtcNow.AddDays(7)
     };
 

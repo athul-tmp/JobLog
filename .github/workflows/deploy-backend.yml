@@ -72,7 +72,6 @@ jobs:
             --allow-unauthenticated 
             --max-instances 1
             --no-cpu-throttling
-            --timeout 600
 
           # Environment secrets
           env_vars: |
@@ -85,4 +84,4 @@ jobs:
           gcloud run domain-mappings create \
             --service ${{ env.SERVICE_NAME }} \
             --domain api.joblog.athulthampan.com \
-            --region ${{ env.REGION }} || true
+            --region ${{ env.REGION }} --platform managed || true

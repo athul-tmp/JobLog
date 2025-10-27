@@ -28,7 +28,7 @@ public class UserController : ControllerBase
     {
       HttpOnly = true,
       Secure = true,
-      SameSite = SameSiteMode.Lax,
+      SameSite = SameSiteMode.None,
       Expires = expiryTime ?? DateTimeOffset.UtcNow.AddDays(7),
     };
 

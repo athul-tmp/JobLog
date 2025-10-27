@@ -24,12 +24,12 @@ public class UserController : ControllerBase
   // Helper to set the JWT in an HttpOnly cookie
   private void SetAuthCookie(string token, DateTime? expiryTime = null)
   {
-    var isHttpsRequest = Request.IsHttps;
     var cookieOptions = new CookieOptions
     {
       HttpOnly = true,
-      Secure = isHttpsRequest,
-      SameSite = isHttpsRequest ? SameSiteMode.None : SameSiteMode.Lax,
+      Secure = true,
+      SameSite = SameSiteMode.Lax,
+      Expires = expiryTime ?? DateTimeOffset.UtcNow.AddDays(7),
     };
 
     Response.Cookies.Append("joblog_jwt_token", token, cookieOptions);

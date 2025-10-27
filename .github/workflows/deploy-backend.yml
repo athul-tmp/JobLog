@@ -76,4 +76,4 @@ jobs:
           # Environment secrets
           env_vars: |
             ConnectionStrings__DefaultConnection=${{ secrets.SUPABASE_CONNECTION_STRING }}
-            JwtSettings__Key=${{ secrets.JWT_SECRET }}
+            Jwt__Key=${{ secrets.JWT_SECRET }}

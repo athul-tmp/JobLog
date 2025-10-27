@@ -17,8 +17,9 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
 
 # Port
-ENV ASPNETCORE_URLS=http://+:$PORT 
-EXPOSE 8080 
+ENV ASPNETCORE_URLS=http://+:8080
+ENV PORT=8080
+EXPOSE 8080
 
 # Copy published output from the build stage
 COPY --from=build /app/publish .

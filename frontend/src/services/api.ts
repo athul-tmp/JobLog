@@ -2,7 +2,7 @@ import axios, { AxiosInstance } from "axios";
 import { LoginResponse, DashboardAnalytics, JobApplication, CreateJobApplicationRequest, UpdateJobApplicationRequest  } from "../types/types";
 
 // C# backend base URL
-const API_BASE_URL = "http://localhost:5264/api"; 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5264';
 
 const apiClient: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,

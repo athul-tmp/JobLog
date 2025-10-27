@@ -16,18 +16,30 @@ builder.Services.AddScoped<IJobApplicationService, JobApplicationService>();
 builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
 
 // CORS config
+var allowedCorsOrigins = builder.Configuration
+    .GetSection("Cors:AllowedOrigins")
+    .Get<string[]>()
+    ?? Array.Empty<string>();
+
+if (allowedCorsOrigins.Length == 0)
+{
+    allowedCorsOrigins = new[]
+    {
+        "http://localhost:3000",
+        "https://joblog.athulthampan.com"
+    };
+}
+
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowNextjsApp",
-        builder =>
-        {
-            builder.WithOrigins(
-                "http://localhost:3000",
-                "https://joblog.athulthampan.com")
-                   .AllowAnyHeader()
-                   .AllowAnyMethod()
-                   .AllowCredentials(); ;
-        });
+    options.AddPolicy("AllowNextjsApp", policyBuilder =>
+    {
+        policyBuilder
+            .WithOrigins(allowedCorsOrigins)
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+    });
 });
 
 // JWT config

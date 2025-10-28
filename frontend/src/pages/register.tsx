@@ -125,6 +125,7 @@ export default function RegisterPage() {
                                     placeholder="John"
                                     value={firstName}
                                     onChange={(e) => setFirstName(e.target.value)}
+                                    autoComplete="given-name"
                                 />
                             </div>
                             <div className="grid gap-2">
@@ -136,6 +137,7 @@ export default function RegisterPage() {
                                     value={email}
                                     className={email.length > 0 && !isEmailValid ? "border-red-500" : ""}
                                     onChange={(e) => setEmail(e.target.value)}
+                                    autoComplete="email"
                                 />
                                 {email.length > 0 && !isEmailValid && (
                                     <p className="flex items-center text-sm mt-1 text-red-500">
@@ -151,6 +153,7 @@ export default function RegisterPage() {
                                     placeholder="Enter strong password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
+                                    autoComplete="new-password"
                                 />
                             </div>
                             
@@ -173,6 +176,7 @@ export default function RegisterPage() {
                                     id="confirm-password"
                                     value={confirmPassword}
                                     onChange={(e) => setConfirmPassword(e.target.value)}
+                                    autoComplete="new-password"
                                 />
                                 {confirmPassword.length > 0 && (
                                     <p className={`text-sm mt-1 ${passwordsMatch ? 'text-green-500' : 'text-red-500'}`}>

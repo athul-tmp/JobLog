@@ -9,6 +9,7 @@ import {
     Title,
     Tooltip,
     Legend,
+    Filler,
 } from 'chart.js';
 import { ApplicationsPerDay } from '@/types/types';
 import { useTheme } from '@/hooks/useTheme';
@@ -20,7 +21,8 @@ ChartJS.register(
     LineElement,
     Title,
     Tooltip,
-    Legend
+    Legend,
+    Filler,
 );
 
 const THEME_COLORS = {

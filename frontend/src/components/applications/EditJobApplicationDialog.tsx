@@ -7,7 +7,8 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter
+  DialogFooter,
+  DialogDescription
 } from "@/components/ui/dialog";
 import {
   Form,
@@ -111,6 +112,9 @@ export default function EditJobApplicationDialog({ job, isOpen, onClose, onJobUp
             <DialogContent className="sm:max-w-[500px]">
                 <DialogHeader>
                     <DialogTitle className="text-xl">Edit Application #{job.applicationNo}</DialogTitle>
+                    <DialogDescription>
+                        Enter the new details for the job application.
+                    </DialogDescription>
                 </DialogHeader>
                 <div className="text-sm text-muted-foreground mb-4 -mt-3">
                     Applied on: {formattedDateApplied}
@@ -130,7 +134,7 @@ export default function EditJobApplicationDialog({ job, isOpen, onClose, onJobUp
                                     <FormItem className="col-span-1">
                                         <FormLabel>Company</FormLabel>
                                         <FormControl>
-                                            <Input placeholder="Company Name" {...field} />
+                                            <Input id="company-name" placeholder="Company Name" {...field} autoComplete="organisation"/>
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -145,7 +149,7 @@ export default function EditJobApplicationDialog({ job, isOpen, onClose, onJobUp
                                     <FormItem className="col-span-1">
                                         <FormLabel>Role/Title</FormLabel>
                                         <FormControl>
-                                            <Input placeholder="Job Title" {...field} />
+                                            <Input id="job-title" placeholder="Job Title" {...field} autoComplete="organisation-title"/>
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -161,7 +165,7 @@ export default function EditJobApplicationDialog({ job, isOpen, onClose, onJobUp
                                 <FormItem>
                                     <FormLabel>Job Posting URL (Optional)</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="https://..." {...field} />
+                                        <Input id="job-url" placeholder="https://..." {...field} autoComplete="url"/>
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>

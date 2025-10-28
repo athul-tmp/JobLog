@@ -450,6 +450,7 @@ export function JobApplicationTable({ data, onJobUpdated, onOpenEditModal, onUnd
             <div className="relative flex-1 min-w-[200px] sm:min-w-[250px]">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
+                  id="search"
                   placeholder="Search company or role..."
                   value={globalFilterValue}
                   onChange={(event) => handleGlobalFilterChange(event.target.value)}

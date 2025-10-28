@@ -8,7 +8,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogFooter 
+  DialogFooter, 
+  DialogDescription
 } from "@/components/ui/dialog";
 import {
   Form,
@@ -114,6 +115,9 @@ export default function AddJobApplicationDialog({ onJobAdded }: AddJobApplicatio
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
                     <DialogTitle>Add New Job Application</DialogTitle>
+                    <DialogDescription>
+                        Enter the details for the new job application.
+                    </DialogDescription>
                 </DialogHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -125,7 +129,7 @@ export default function AddJobApplicationDialog({ onJobAdded }: AddJobApplicatio
                                 <FormItem>
                                     <FormLabel>Company</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="Company Name" {...field} />
+                                        <Input id="company-name" placeholder="Company Name" {...field} autoComplete="organisation"/>
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -140,7 +144,7 @@ export default function AddJobApplicationDialog({ onJobAdded }: AddJobApplicatio
                                 <FormItem>
                                     <FormLabel>Role/Title</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="Job Title" {...field} />
+                                        <Input id="job-title" placeholder="Job Title" {...field} autoComplete="organisation-title"/>
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -155,7 +159,7 @@ export default function AddJobApplicationDialog({ onJobAdded }: AddJobApplicatio
                                 <FormItem>
                                     <FormLabel>Job Posting URL (Optional)</FormLabel>
                                     <FormControl>
-                                        <Input placeholder="https://..." {...field} />
+                                        <Input id="job-url" placeholder="https://..." {...field} autoComplete="url"/>
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>

@@ -118,7 +118,7 @@ export default function RegisterPage() {
                                 </Alert>
                             )}
                             <div className="grid gap-2">
-                                <Label htmlFor="name">First Name</Label>
+                                <Label htmlFor="firstName">First Name</Label>
                                 <Input
                                     id="firstName"
                                     type="text"

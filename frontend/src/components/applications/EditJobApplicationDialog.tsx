@@ -134,7 +134,7 @@ export default function EditJobApplicationDialog({ job, isOpen, onClose, onJobUp
                                     <FormItem className="col-span-1">
                                         <FormLabel>Company</FormLabel>
                                         <FormControl>
-                                            <Input id="company-name" placeholder="Company Name" {...field} autoComplete="organisation"/>
+                                            <Input placeholder="Company Name" {...field} autoComplete="organisation"/>
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -149,7 +149,7 @@ export default function EditJobApplicationDialog({ job, isOpen, onClose, onJobUp
                                     <FormItem className="col-span-1">
                                         <FormLabel>Role/Title</FormLabel>
                                         <FormControl>
-                                            <Input id="job-title" placeholder="Job Title" {...field} autoComplete="organisation-title"/>
+                                            <Input placeholder="Job Title" {...field} autoComplete="organisation-title"/>
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -165,7 +165,7 @@ export default function EditJobApplicationDialog({ job, isOpen, onClose, onJobUp
                                 <FormItem>
                                     <FormLabel>Job Posting URL (Optional)</FormLabel>
                                     <FormControl>
-                                        <Input id="job-url" placeholder="https://..." {...field} autoComplete="url"/>
+                                        <Input placeholder="https://..." {...field} autoComplete="url"/>
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>

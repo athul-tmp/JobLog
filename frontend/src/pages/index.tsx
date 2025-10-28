@@ -69,7 +69,7 @@ export default function LandingPage() {
                     </h1>
                     
                     <p className="mt-4 text-lg md:text-xl text-muted-foreground">
-                        JobLog helps you stay organised and focused while you apply for jobs. 
+                        JobLog is a job application tracker with detailed analytics that helps you stay organised and focused while you apply for jobs. 
                         Track every application, stay on top of interviews, and turn your job search into a clear, data-driven journey.
                     </p>
                     

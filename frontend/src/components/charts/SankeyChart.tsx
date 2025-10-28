@@ -1,7 +1,7 @@
 import React from "react";
 import { Chart } from "react-google-charts"; 
 import { DashboardAnalytics } from '@/types/types';
-import { useTheme } from '@/hooks/useTheme';
+import { useTheme } from "next-themes";
 
 // Outcome colors
 const NODE_COLORS = {
@@ -28,9 +28,9 @@ interface SankeyChartProps {
 }
 
 export default function SankeyChart({ data }: SankeyChartProps) {
-    const theme = useTheme();
-    const themeColors = THEME_COLORS[theme];
-
+    const { resolvedTheme } = useTheme();
+    const themeKey = (resolvedTheme || 'dark') as 'light' | 'dark';
+    const themeColors = THEME_COLORS[themeKey];
     // Calculations for chart
     const rejectedNoInterview = data.totalRejections - data.interviewedAndRejected;
     const ghostedNoInterview = data.totalGhosted - data.interviewedAndGhosted;

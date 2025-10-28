@@ -2,7 +2,7 @@ import React from 'react';
 import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, TooltipItem } from 'chart.js';
 import { InterviewBreakdown } from '@/types/types';
-import { useTheme } from '@/hooks/useTheme';
+import { useTheme } from 'next-themes';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -26,8 +26,9 @@ interface InterviewTypesChartProps {
 }
 
 export default function InterviewTypesChart({ data }: InterviewTypesChartProps) {
-    const theme = useTheme();
-    const themeColors = THEME_COLORS[theme];
+    const { resolvedTheme } = useTheme();
+    const themeKey = (resolvedTheme || 'dark') as 'light' | 'dark';
+    const themeColors = THEME_COLORS[themeKey];
 
     // Shows if no active interviews
     const totalActiveInterviews = data.reduce((sum, item) => sum + item.count, 0);

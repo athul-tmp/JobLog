@@ -9,8 +9,9 @@ import {
   CarouselContent,
   CarouselItem,
 } from "@/components/ui/carousel"
-import { useTheme } from "@/hooks/useTheme"
+
 import Image from 'next/image';
+import { useTheme } from "next-themes"
 
 const IMAGES = [
     { 
@@ -48,7 +49,7 @@ export function ScreenshotCarousel() {
     Autoplay({ delay: 3000, stopOnInteraction: false })
   )
 
-  const theme = useTheme();
+  const { theme } = useTheme();
 
   return (
     <div className="relative w-full lg:ml-5 sm:overflow-visible overflow-hidden">

@@ -12,7 +12,7 @@ import {
     Filler,
 } from 'chart.js';
 import { ApplicationsPerDay } from '@/types/types';
-import { useTheme } from '@/hooks/useTheme';
+import { useTheme } from 'next-themes';
 
 ChartJS.register(
     CategoryScale,
@@ -42,8 +42,9 @@ interface DailyTrendChartProps {
 }
 
 export default function DailyTrendChart({ data }: DailyTrendChartProps) {    
-    const theme = useTheme();
-    const themeColors = THEME_COLORS[theme];
+    const { resolvedTheme } = useTheme();
+    const themeKey = (resolvedTheme || 'dark') as 'light' | 'dark';
+    const themeColors = THEME_COLORS[themeKey];
 
     // Shows if no applications this month
     const totalApplicationsThisMonth = data.reduce((sum, item) => sum + item.count, 0);

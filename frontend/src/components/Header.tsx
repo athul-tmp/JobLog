@@ -2,47 +2,18 @@ import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button'; 
 import { Moon, Sun } from 'lucide-react';
-import React, { useState, useEffect } from 'react';
 import { ProfileMenu } from './ProfileMenu'; 
-
-const THEME_KEY = "joblog-theme";
+import { useTheme } from 'next-themes';
 
 export default function Header() {
   const { isAuthenticated } = useAuth();
-  const [theme, setTheme] = useState<'light' | 'dark'>('dark');
-  const [isMounted, setIsMounted] = useState(false);
-
-  // Theme Loading
-  useEffect(() => {
-    setIsMounted(true); 
-    // Check local storage for saved preference
-    const storedTheme = localStorage.getItem(THEME_KEY);
-    if (storedTheme) {
-      setTheme(storedTheme as 'light' | 'dark');
-    }
-  }, []);
-
-  // Theme Application
-  useEffect(() => {
-    if (!isMounted) return; 
-
-    const htmlElement = document.documentElement;
-
-    if (theme === 'dark') {
-      htmlElement.classList.add('dark');
-    } else {
-      htmlElement.classList.remove('dark');
-    }
-
-    localStorage.setItem(THEME_KEY, theme);
-
-  }, [theme, isMounted]); 
-
+  const { theme, setTheme } = useTheme();
+  
   const toggleTheme = () => {
     const newTheme = theme === 'dark' ? 'light' : 'dark';
     setTheme(newTheme);
   };
-  
+
   // Theme Toggle Button
   const ThemeToggleButton = (
     <Button 

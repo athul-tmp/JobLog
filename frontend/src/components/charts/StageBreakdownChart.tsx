@@ -2,7 +2,7 @@ import React from 'react';
 import { Pie } from 'react-chartjs-2'; 
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, TooltipItem } from 'chart.js';
 import { DashboardAnalytics } from '@/types/types';
-import { useTheme } from '@/hooks/useTheme';
+import { useTheme } from 'next-themes';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -28,8 +28,9 @@ interface StageBreakdownChartProps {
 }
 
 export default function StageBreakdownChart({ data }: StageBreakdownChartProps) {
-    const theme = useTheme();
-    const themeColors = THEME_COLORS[theme];
+    const { resolvedTheme } = useTheme();
+    const themeKey = (resolvedTheme || 'dark') as 'light' | 'dark';
+    const themeColors = THEME_COLORS[themeKey];
 
     // Shows if no applications
     if (data.totalApplications === 0) {

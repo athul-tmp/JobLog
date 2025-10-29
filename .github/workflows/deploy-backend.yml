@@ -77,3 +77,7 @@ jobs:
           env_vars: |
             ConnectionStrings__DefaultConnection=${{ secrets.NEON_CONNECTION_STRING }}
             Jwt__Key=${{ secrets.JWT_SECRET }}
+            Brevo:ApiKey=${{ secrets.BREVO_API_KEY }}
+            Brevo:SenderEmail=${{ secrets.BREVO_SENDER_EMAIL }}
+            Brevo:SenderName=${{ secrets.BREVO_SENDER_NAME }}
+            FrontendUrl=${{ secrets.FRONTEND_URL }}

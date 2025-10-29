@@ -5,8 +5,6 @@ ApplicationDbContextFactory.cs
 
 **/.microsoft/usersecrets/secrets.json
 
-Migrations/
-
 .vscode/
 
 *.suo

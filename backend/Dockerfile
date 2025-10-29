@@ -21,8 +21,16 @@ ENV ASPNETCORE_URLS=http://+:8080
 ENV PORT=8080
 EXPOSE 8080
 
+# Install EF Core CLI tools in the runtime image
+RUN dotnet tool install --global dotnet-ef --version 8.0.4 
+ENV PATH="${PATH}:/root/.dotnet/tools"
+
+# Copy custom entrypoint script and make it executable
+COPY ["entrypoint.sh", "/app/entrypoint.sh"] 
+RUN chmod +x /app/entrypoint.sh
+
 # Copy published output from the build stage
 COPY --from=build /app/publish .
 
-# Entry point to run the application
-ENTRYPOINT ["dotnet", "backend.dll"]
+# Custom script as entrypoint
+ENTRYPOINT ["./entrypoint.sh"]

@@ -325,6 +325,79 @@ public class UserController : ControllerBase
       return StatusCode(500, new { message = "An error occurred during verification." });
     }
   }
+
+  // Forgot Password Endpoint | Route: POST /api/User/forgotPassword
+  [HttpPost("forgotPassword")]
+  [AllowAnonymous]
+  public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
+  {
+    if (string.IsNullOrWhiteSpace(request.Email))
+    {
+      return BadRequest(new { message = "Email is required." });
+    }
+
+    if (!IsValidEmailFormat(request.Email))
+    {
+      return BadRequest(new { message = "Email format is invalid." });
+    }
+
+    try
+    {
+      await _userService.ForgotPassword(request.Email);
+
+      return Ok(new
+      {
+        message = "If an account exists for this email, a password reset link has been sent."
+      });
+    }
+    catch (Exception)
+    {
+      return Ok(new
+      {
+        message = "If an account exists for this email, a password reset link has been sent."
+      });
+    }
+  }
+
+  // Reset Password Endpoint | Route: POST /api/User/resetPassword
+  [HttpPost("resetPassword")]
+  [AllowAnonymous]
+  public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
+  {
+    if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Token) || string.IsNullOrWhiteSpace(request.NewPassword))
+    {
+      return BadRequest(new { message = "Email, token, and new password are required." });
+    }
+
+    // Password strength validation
+    if (!IsStrongPassword(request.NewPassword))
+    {
+      return BadRequest(new
+      {
+        message = "Password does not meet the strength requirements.",
+        details = "Must be at least 8 characters, include uppercase, lowercase, a number, and a special character."
+      });
+    }
+
+    try
+    {
+      await _userService.ResetPassword(request.Email, request.Token, request.NewPassword);
+
+      return Ok(new { message = "Password successfully reset. You can now log in." });
+    }
+    catch (UnauthorizedAccessException)
+    {
+      return Unauthorized(new { message = "Invalid or expired reset token." });
+    }
+    catch (InvalidOperationException ex)
+    {
+      return BadRequest(new { message = ex.Message });
+    }
+    catch (Exception)
+    {
+      return StatusCode(500, new { message = "An error occurred while resetting the password." });
+    }
+  }
 }
 
 public record UserRegistrationRequest(string FirstName, string Email, string Password);
@@ -334,3 +407,5 @@ public record UpdateEmailRequest(string CurrentPassword, string NewEmail);
 public record UpdatePasswordRequest(string CurrentPassword, string NewPassword);
 public record DeleteAccountRequest(string CurrentPassword);
 public record VerifyPasswordRequest(string CurrentPassword);
+public record ForgotPasswordRequest(string Email);
+public record ResetPasswordRequest(string Email, string Token, string NewPassword);

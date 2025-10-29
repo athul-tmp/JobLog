@@ -1,4 +1,4 @@
-# This script runs EF Core migrations before starting the application.
+#!/bin/bash
 
 # Execute database migrations
 echo "Applying Entity Framework Core migrations..."

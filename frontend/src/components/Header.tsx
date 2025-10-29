@@ -4,15 +4,32 @@ import { Button } from '@/components/ui/button';
 import { Moon, Sun } from 'lucide-react';
 import { ProfileMenu } from './ProfileMenu'; 
 import { useTheme } from 'next-themes';
+import { useEffect, useState } from 'react';
 
 export default function Header() {
   const { isAuthenticated } = useAuth();
   const { theme, setTheme } = useTheme();
+
+  const [mounted, setMounted] = useState(false);
+  
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   
   const toggleTheme = () => {
     const newTheme = theme === 'dark' ? 'light' : 'dark';
     setTheme(newTheme);
   };
+
+  let themeIcon: React.ReactNode;
+
+  if (!mounted) {
+    themeIcon = null; 
+  } else {
+    themeIcon = theme === 'dark' 
+      ? <Sun className="h-5 w-5" /> 
+      : <Moon className="h-5 w-5" />
+  }
 
   // Theme Toggle Button
   const ThemeToggleButton = (
@@ -22,9 +39,8 @@ export default function Header() {
       onClick={toggleTheme}
       className="text-foreground/80 hover:text-primary active:scale-90 active:text-primary transition-transform duration-150 cursor-pointer"
       aria-label="Toggle dark mode"
-      // Show Moon icon if current theme is dark, Sun if light
     >
-      {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+      {themeIcon}
     </Button>
   );
   

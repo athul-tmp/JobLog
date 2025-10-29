@@ -25,7 +25,7 @@ public class EmailService : IEmailService
 
   public async Task<bool> SendPasswordResetEmail(string toEmail, string userName, string resetLink)
   {
-    var apiKey = _config["Brevo:SMTP_KEY"];
+    var apiKey = _config["Brevo:ApiKey"];
     var senderEmail = _config["Brevo:SenderEmail"];
     var senderName = _config["Brevo:SenderName"];
 

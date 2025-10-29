@@ -1,5 +1,5 @@
 import axios, { AxiosInstance } from "axios";
-import { LoginResponse, DashboardAnalytics, JobApplication, CreateJobApplicationRequest, UpdateJobApplicationRequest  } from "../types/types";
+import { LoginResponse, DashboardAnalytics, JobApplication, CreateJobApplicationRequest, UpdateJobApplicationRequest, ForgotPasswordRequest, ResetPasswordRequest  } from "../types/types";
 
 // C# backend base URL
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5264/api';
@@ -101,6 +101,32 @@ export const AuthService = {
           return handleApiError(error, "Password verification failed."); 
       }
   },
+
+  // Forgot Password method
+  forgotPassword: async (data: ForgotPasswordRequest): Promise<string> => {
+    try {
+      const response = await apiClient.post<{ message: string }>("/User/forgotPassword", data);
+      return response.data.message;
+    } catch (error) {
+      console.error("Forgot password request failed (but we return success):", error);
+      return "If an account exists for this email, a password reset link has been sent.";
+    }
+  },
+  
+  // Reset Password method
+  resetPassword: async (data: ResetPasswordRequest): Promise<string> => {
+    try {
+      const response = await apiClient.post<{ message: string }>("/User/resetPassword", data);
+      return response.data.message;
+    } catch (error) {
+        if (axios.isAxiosError(error) && error.response) {
+            const message = error.response.data?.message || "Invalid or expired reset link.";
+            const details = error.response.data?.details ? `: ${error.response.data.details}` : '';
+            return Promise.reject(message + details);
+        }
+        return Promise.reject("An unexpected error occurred during password reset.");
+    }
+  },
 };
 
 export const JobApplicationService = {
@@ -176,7 +202,7 @@ export const JobApplicationService = {
           }
           return Promise.reject("An unexpected error occurred while performing the undo operation.");
       }
-  }
+  },
 };
 
 export default apiClient;

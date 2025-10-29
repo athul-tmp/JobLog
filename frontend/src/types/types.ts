@@ -13,6 +13,16 @@ export interface AuthUser {
   expiresAt?: number;
 }
 
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+export interface ResetPasswordRequest {
+  email: string;
+  token: string;
+  newPassword: string;
+}
+
 // Job application page
 export interface JobStatusHistory {
   id: number;

@@ -15,7 +15,7 @@ import { CheckCircle } from "lucide-react";
 import { PasswordInput } from "@/components/ui/PasswordInput";
 
 // Email validation helper function
-const isEmailValidFormat = (email: string) => {
+export const isEmailValidFormat = (email: string) => {
     const regex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
     return regex.test(email);
 };
@@ -117,6 +117,14 @@ export default function LoginPage() {
                                     onChange={(e) => setPassword(e.target.value)}
                                     autoComplete="current-password"
                                 />
+                                <div className="flex justify-between items-center">
+                                    <Link 
+                                        href="/forgot-password" 
+                                        className="text-sm font-medium text-primary hover:underline"
+                                    >
+                                        Forgot Password?
+                                    </Link>
+                                </div>
                             </div>
                         </CardContent>
                         <CardFooter className="flex flex-col gap-4 mt-5">

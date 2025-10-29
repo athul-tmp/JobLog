@@ -1,7 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Head from "next/head";
 import Link from "next/link";
-import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -11,7 +10,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Loader2 } from "lucide-react";
@@ -23,16 +22,28 @@ const formSchema = z.object({
     email: z.string().email({ message: "Invalid email format." }),
 });
 
+const MAX_COOLDOWN_SECONDS = 60;
+
 export default function ForgotPasswordPage() {
-    const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [cooldownSeconds, setCooldownSeconds] = useState(0);
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: { email: "" },
     });
+
+    // Timer effect for spam prevention
+    useEffect(() => {
+        if (cooldownSeconds > 0) {
+            const timer = setTimeout(() => {
+                setCooldownSeconds(cooldownSeconds - 1);
+            }, 1000);
+            return () => clearTimeout(timer);
+        }
+    }, [cooldownSeconds]);
 
     const handleSubmit = async (values: z.infer<typeof formSchema>) => {
         setError(null);
@@ -48,11 +59,13 @@ export default function ForgotPasswordPage() {
             const responseMessage = await AuthService.forgotPassword({ email: values.email });
             setSuccessMessage(responseMessage);
             
+            setCooldownSeconds(MAX_COOLDOWN_SECONDS);
             // Clear form after success
             form.reset();
 
         } catch {
             setSuccessMessage("If an account exists for this email, a password reset link has been sent.");
+            setCooldownSeconds(MAX_COOLDOWN_SECONDS);
             form.reset(); 
         } finally {
             setIsLoading(false);
@@ -111,7 +124,7 @@ export default function ForgotPasswordPage() {
                                 />
                             </CardContent>
                             <CardFooter className="flex flex-col gap-4 mt-5">
-                                <Button type="submit" className="w-full cursor-pointer" disabled={isLoading}>
+                                <Button type="submit" className="w-full cursor-pointer" disabled={isLoading || cooldownSeconds > 0}>
                                     {isLoading ? (
                                         <>
                                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />

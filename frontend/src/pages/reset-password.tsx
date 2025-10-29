@@ -21,9 +21,11 @@ import { Form } from "@/components/ui/form";
 // Password strength pattern
 const STRONG_PASSWORD_REGEX = /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/;
 
+const PASSWORD_REQUIREMENTS_MESSAGE = "Password must be at least 8 characters, include uppercase, lowercase, a number, and a special character.";
+
 const formSchema = z.object({
     newPassword: z.string().regex(STRONG_PASSWORD_REGEX, {
-        message: "Password must be at least 8 characters, include uppercase, lowercase, a number, and a special character."
+        message: PASSWORD_REQUIREMENTS_MESSAGE
     }),
     confirmPassword: z.string(),
 }).refine(data => data.newPassword === data.confirmPassword, {
@@ -42,8 +44,10 @@ export default function ResetPasswordPage() {
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: { newPassword: "", confirmPassword: "" },
+        mode: "onChange",
     });
-    
+    const { isValid } = form.formState;
+
     // Check for necessary URL parameters
     const isTokenValid = useMemo(() => 
         typeof queryEmail === 'string' && queryEmail.length > 0 && 
@@ -163,7 +167,7 @@ export default function ResetPasswordPage() {
                                     <Button 
                                         type="submit" 
                                         className="w-full cursor-pointer" 
-                                        disabled={isLoading}
+                                        disabled={isLoading || !isValid}
                                     >
                                         {isLoading ? (
                                             <>

@@ -3,6 +3,7 @@ using backend.Models;
 using Microsoft.EntityFrameworkCore;
 using BCrypt.Net;
 using backend.Helpers;
+using System.Security.Cryptography;
 
 public interface IUserService
 {
@@ -14,15 +15,21 @@ public interface IUserService
   Task UpdateUserPassword(int userId, string currentPassword, string newPassword);
   Task DeleteUser(int userId, string currentPassword);
   Task VerifyUserPassword(int userId, string currentPassword);
+  Task ForgotPassword(string email);
+  Task ResetPassword(string email, string token, string newPassword);
 }
 
 public class UserService : IUserService
 {
   private readonly ApplicationDbContext _dbContext;
+  private readonly IEmailService _emailService;
+  private readonly IConfiguration _config;
 
-  public UserService(ApplicationDbContext dbContext)
+  public UserService(ApplicationDbContext dbContext, IEmailService emailService, IConfiguration config)
   {
     _dbContext = dbContext;
+    _emailService = emailService;
+    _config = config;
   }
 
   // Get user
@@ -155,4 +162,70 @@ public class UserService : IUserService
     await UserValidationHelper.GetAndValidateUser(_dbContext, userId, currentPassword);
   }
 
+  // To handle forgot password request
+  public async Task ForgotPassword(string email)
+  {
+    var user = await GetUserByEmail(email);
+
+    if (user == null)
+    {
+      return;
+    }
+
+    // Generate a secure and short-lived token
+    var tokenBytes = RandomNumberGenerator.GetBytes(32);
+    var token = Convert.ToBase64String(tokenBytes);
+
+    // Hash and store the token
+    var hashedToken = BCrypt.Net.BCrypt.HashPassword(token);
+
+    // Token expires in 1 hour
+    var expiry = DateTime.UtcNow.AddHours(1);
+
+    user.PasswordResetToken = hashedToken;
+    user.ResetTokenExpires = expiry;
+
+    await _dbContext.SaveChangesAsync();
+
+    // Reset link for the frontend
+    var frontendUrl = _config["FrontendUrl"] ?? "http://localhost:3000"; // Fallback to local
+    var resetLink = $"{frontendUrl}/reset-password?email={Uri.EscapeDataString(user.Email)}&token={Uri.EscapeDataString(token)}";
+
+    // Send the email
+    await _emailService.SendPasswordResetEmail(user.Email, user.FirstName, resetLink);
+  }
+
+  // To handle password reset
+  public async Task ResetPassword(string email, string token, string newPassword)
+  {
+    var user = await GetUserByEmail(email);
+
+    // Basic checks
+    if (user == null || user.PasswordResetToken == null || user.ResetTokenExpires == null)
+    {
+      throw new InvalidOperationException("Invalid or expired reset request.");
+    }
+
+    // Check token expiration
+    if (user.ResetTokenExpires.Value < DateTime.UtcNow)
+    {
+      throw new InvalidOperationException("The password reset link has expired.");
+    }
+
+    // Verify the provided token against the stored hash
+    if (!BCrypt.Net.BCrypt.Verify(token, user.PasswordResetToken))
+    {
+      throw new UnauthorizedAccessException("Invalid password reset token.");
+    }
+
+    // Reset password
+    user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
+
+    // Clear the reset token to prevent reuse
+    user.PasswordResetToken = null;
+    user.ResetTokenExpires = null;
+
+    _dbContext.Users.Update(user);
+    await _dbContext.SaveChangesAsync();
+  }
 }

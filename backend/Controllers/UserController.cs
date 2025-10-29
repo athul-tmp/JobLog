@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using static ValidationHelper;
 using System.Security.Claims;
 using backend.Helpers;
+using Microsoft.Extensions.Hosting;
 
 [ApiController]
 [Route("api/[controller]")] // Route: /api/User
@@ -13,22 +14,25 @@ public class UserController : ControllerBase
   private readonly IUserService _userService;
   private readonly ITokenService _tokenService;
   private readonly IJobApplicationService _jobApplicationService;
+  private readonly IHostEnvironment _env;
 
-  public UserController(IUserService userService, ITokenService tokenService, IJobApplicationService jobApplicationService)
+  public UserController(IUserService userService, ITokenService tokenService, IJobApplicationService jobApplicationService, IHostEnvironment env)
   {
     _userService = userService;
     _tokenService = tokenService;
     _jobApplicationService = jobApplicationService;
+    _env = env;
   }
 
   // Helper to set the JWT in an HttpOnly cookie
   private void SetAuthCookie(string token, DateTime? expiryTime = null)
   {
+    bool isDevelopment = _env.IsDevelopment();
     var cookieOptions = new CookieOptions
     {
       HttpOnly = true,
-      Secure = true,
-      SameSite = SameSiteMode.None,
+      Secure = !isDevelopment,
+      SameSite = isDevelopment ? SameSiteMode.Strict : SameSiteMode.None,
       Expires = expiryTime ?? DateTimeOffset.UtcNow.AddDays(7),
     };
 

@@ -13,17 +13,13 @@ COPY . .
 RUN dotnet publish "backend.csproj" -c Release -o /app/publish --no-restore
 
 # Runtime image
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS final 
 WORKDIR /app
 
 # Port
 ENV ASPNETCORE_URLS=http://+:8080
 ENV PORT=8080
 EXPOSE 8080
-
-# Install EF Core CLI tools in the runtime image
-RUN dotnet tool install --global dotnet-ef --version 8.0.4 
-ENV PATH="${PATH}:/root/.dotnet/tools"
 
 # Copy custom entrypoint script and make it executable
 COPY ["entrypoint.sh", "/app/entrypoint.sh"] 

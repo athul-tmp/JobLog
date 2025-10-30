@@ -29,16 +29,16 @@ export default function PrivacyAndTermsPage() {
                     <h2 className="text-3xl font-extrabold tracking-tight mb-6">1. Privacy Policy</h2>
                     <div className="space-y-6 text-muted-foreground">
                         <p>
-                            JobLog is an independent software project developed and maintained by Athul Thampan. It was designed to help individuals track and manage their job applications effectively, while also serving as a demonstration of full-stack development capability.
+                            JobLog is an independent software project developed and maintained by Athul Thampan. It is designed to help individuals track and manage job applications effectively, while also demonstrating full-stack development capability.
                         </p>
                         <p>
-                            JobLog collects only the information you provide, such as your name, email address, and job details (company, role, status, notes, etc.).
+                            JobLog collects only the information you choose to provide, such as your name, email address, and job-related details (e.g., company, role, status, notes). Your email may be used for account authentication, including registration confirmation, login, and password reset.
                         </p>
                         <p>
-                            Your name and email are stored locally in your browser for display purposes, and authentication tokens are stored securely in cookies. All passwords are encrypted using strong hashing techniques (BCrypt).
+                            Authentication tokens are stored securely in cookies. Your name and email may be stored locally in your browser for display purposes. All passwords are encrypted using strong hashing techniques (BCrypt).
                         </p>
                         <p>
-                            JobLog does not use advertising, or tracking services, and no information is shared with third parties.
+                            JobLog does not use advertising or tracking services, and no personal information is shared with third parties.
                         </p>
                         <p>
                             If you delete your account, all associated data will be permanently removed from the database.
@@ -49,13 +49,13 @@ export default function PrivacyAndTermsPage() {
                     <h2 className="text-3xl font-extrabold tracking-tight mt-6 mb-6">2. Terms of Use</h2>
                     <div className="space-y-6 text-muted-foreground">
                         <p>
-                            JobLog is an independent project developed to showcase full-stack development capabilities and provide a practical tool for managing job applications. While fully functional and available for individual use, it is not a commercial service and may receive updates or modifications over time.
+                            JobLog is an independently developed application intended for individual use. While fully functional, it is not a commercial service and may evolve with future improvements or updates.
                         </p>
                         <p>
-                            JobLog is provided without warranty or guarantee of data retention. The developer is not responsible for any loss of information, account access, or downtime. By using JobLog, you acknowledge that all data you enter is your own responsibility.
+                            JobLog is provided without warranty or guarantee of data retention. The developer is not responsible for any loss of information, account access, or downtime. By using JobLog, you acknowledge that all data you create or enter is your own responsibility.
                         </p>
                         <p>
-                            JobLog and its Chrome extension are independently developed applications intended for personal use. They are provided as non-commercial software without any warranties.
+                            JobLog and its Chrome extension are provided as non-commercial software, without any warranties of any kind.
                         </p>
                     </div>
                 </div>

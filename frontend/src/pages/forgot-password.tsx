@@ -92,7 +92,7 @@ export default function ForgotPasswordPage() {
                                 {/* Success Alert */}
                                 {successMessage && (
                                     <Alert className="bg-green-100 dark:bg-green-900 border-green-500 text-green-700 dark:text-green-200">
-                                        <AlertDescription className="text-bg">{successMessage}</AlertDescription>
+                                        <AlertDescription className="text-bg">{successMessage} Please check your email inbox and spam.</AlertDescription>
                                     </Alert>
                                 )}
 

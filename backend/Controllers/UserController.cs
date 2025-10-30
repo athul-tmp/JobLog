@@ -57,50 +57,6 @@ public class UserController : ControllerBase
     return userId;
   }
 
-  // Registration Endpoint | Route: POST /api/User/register
-  [HttpPost("register")]
-  public async Task<IActionResult> RegisterUser([FromBody] UserRegistrationRequest request)
-  {
-    // Input validations
-    // Check for empty
-    if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password) || string.IsNullOrWhiteSpace(request.FirstName))
-    {
-      return BadRequest(new { message = "First name, email and password are required." });
-    }
-
-    // Password validation
-    if (!IsStrongPassword(request.Password))
-    {
-      return BadRequest(new
-      {
-        message = "Password does not meet the strength requirements.",
-        details = "Must be at least 8 characters, include uppercase, lowercase, a number, and a special character."
-      });
-    }
-
-    // Email validation
-    if (!IsValidEmailFormat(request.Email))
-    {
-      return BadRequest(new { message = "Email format is invalid." });
-    }
-
-    // Save user 
-    try
-    {
-      await _userService.RegisterUser(request.Email, request.Password, request.FirstName);
-
-      return CreatedAtAction(nameof(RegisterUser), new
-      {
-        message = "Registration successful. Please log in."
-      });
-    }
-    catch (InvalidOperationException ex)
-    {
-      // "Email already in use" exception
-      return Conflict(new { message = ex.Message });
-    }
-  }
-
   // Login Endpoint | Route: POST /api/User/login
   [HttpPost("login")]
   public async Task<IActionResult> LoginUser([FromBody] UserLoginRequest request)
@@ -196,15 +152,11 @@ public class UserController : ControllerBase
     }
   }
 
-  // Update User Email | Route: PUT /api/User/updateEmail
+  // Initiate email change | ROUTE: POST /api/User/inititate-email-change
   [Authorize]
-  [HttpPut("updateEmail")]
-  public async Task<IActionResult> UpdateEmail([FromBody] UpdateEmailRequest request)
+  [HttpPost("initiate-email-change")]
+  public async Task<IActionResult> InitiateEmailChange([FromBody] InitiateEmailChangeRequest request)
   {
-    if (string.IsNullOrWhiteSpace(request.NewEmail) || string.IsNullOrWhiteSpace(request.CurrentPassword))
-    {
-      return BadRequest(new { message = "New Email and Current Password are required." });
-    }
     if (!IsValidEmailFormat(request.NewEmail))
     {
       return BadRequest(new { message = "New email format is invalid." });
@@ -213,21 +165,61 @@ public class UserController : ControllerBase
     try
     {
       var userId = GetUserId();
-      await _userService.UpdateUserEmail(userId, request.CurrentPassword, request.NewEmail);
+      await _userService.InitiateEmailChange(userId, request.CurrentPassword, request.NewEmail);
 
-      return Ok(new { message = "Email updated successfully. You will be logged out to re-authenticate." });
+      return Ok(new
+      {
+        message = $"A verification link has been sent to {request.NewEmail}. Please check your inbox to confirm the change."
+      });
     }
     catch (UnauthorizedAccessException)
     {
-      return Unauthorized(new { message = "Invalid current password." });
+      return Unauthorized(new { message = "Invalid current password provided." });
     }
     catch (InvalidOperationException ex)
     {
-      return Conflict(new { message = ex.Message }); // e.g., "Email already in use"
+      return BadRequest(new { message = ex.Message });
     }
     catch (Exception)
     {
-      return StatusCode(500, new { message = "An error occurred while updating the email." });
+      return StatusCode(500, new { message = "An unexpected error occurred while initiating the email change." });
+    }
+  }
+
+  // Complete email change | ROUTE: POST /api/User/complete-email-change
+  [Authorize]
+  [HttpPost("complete-email-change")]
+  [AllowAnonymous]
+  public async Task<IActionResult> CompleteEmailChange([FromBody] CompleteEmailChangeRequest request)
+  {
+    if (string.IsNullOrWhiteSpace(request.Token) || request.UserId <= 0)
+    {
+      return BadRequest(new { message = "User ID and token are required." });
+    }
+
+    try
+    {
+      var oldEmail = await _userService.CompleteEmailChange(request.UserId, request.Token);
+
+      ClearAuthCookie();
+
+      return Ok(new
+      {
+        message = "Email successfully changed. You must log in again with your new email.",
+        oldEmail = oldEmail
+      });
+    }
+    catch (UnauthorizedAccessException)
+    {
+      return Unauthorized(new { message = "Invalid email change verification token." });
+    }
+    catch (InvalidOperationException ex)
+    {
+      return BadRequest(new { message = ex.Message });
+    }
+    catch (Exception)
+    {
+      return StatusCode(500, new { message = "An unexpected error occurred during email change confirmation." });
     }
   }
 
@@ -398,9 +390,79 @@ public class UserController : ControllerBase
       return StatusCode(500, new { message = "An error occurred while resetting the password." });
     }
   }
+
+  // Initiate registration Endpoint | Route: POST /api/User/initiate-registration
+  [HttpPost("initiate-registration")]
+  [AllowAnonymous]
+  public async Task<IActionResult> InitiateRegistration([FromBody] InitiateRegistrationRequest request)
+  {
+    if (string.IsNullOrWhiteSpace(request.Email) || !IsValidEmailFormat(request.Email))
+    {
+      return BadRequest(new { message = "Valid email is required." });
+    }
+
+    try
+    {
+      await _userService.InitiateRegistration(request.Email);
+
+      return Ok(new
+      {
+        message = "A verification link has been sent to your email. Please check your inbox to continue registration."
+      });
+    }
+    catch (InvalidOperationException ex)
+    {
+      return Ok(new { message = ex.Message });
+    }
+    catch (Exception)
+    {
+      return StatusCode(500, new { message = "An error occurred while initiating registration." });
+    }
+  }
+
+  // Complete registration Endpoint | Route: POST /api/User/complete-registration
+  [HttpPost("complete-registration")]
+  [AllowAnonymous]
+  public async Task<IActionResult> CompleteRegistration([FromBody] CompleteRegistrationRequest request)
+  {
+    if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Token) ||
+        string.IsNullOrWhiteSpace(request.FirstName) || string.IsNullOrWhiteSpace(request.Password))
+    {
+      return BadRequest(new { message = "All fields are required." });
+    }
+
+    if (!IsStrongPassword(request.Password))
+    {
+      return BadRequest(new
+      {
+        message = "Password does not meet the strength requirements.",
+      });
+    }
+
+    try
+    {
+      await _userService.CompleteRegistration(request.Email, request.Token, request.FirstName, request.Password);
+
+      return CreatedAtAction(nameof(CompleteRegistration), new
+      {
+        message = "Registration successful! You can now log in."
+      });
+    }
+    catch (UnauthorizedAccessException)
+    {
+      return Unauthorized(new { message = "Invalid or expired verification token." });
+    }
+    catch (InvalidOperationException ex)
+    {
+      return BadRequest(new { message = ex.Message });
+    }
+    catch (Exception)
+    {
+      return StatusCode(500, new { message = "An unexpected error occurred during final registration." });
+    }
+  }
 }
 
-public record UserRegistrationRequest(string FirstName, string Email, string Password);
 public record UserLoginRequest(string Email, string Password);
 public record UpdateNameRequest(string CurrentPassword, string NewFirstName);
 public record UpdateEmailRequest(string CurrentPassword, string NewEmail);
@@ -409,3 +471,7 @@ public record DeleteAccountRequest(string CurrentPassword);
 public record VerifyPasswordRequest(string CurrentPassword);
 public record ForgotPasswordRequest(string Email);
 public record ResetPasswordRequest(string Email, string Token, string NewPassword);
+public record InitiateRegistrationRequest(string Email);
+public record CompleteRegistrationRequest(string Email, string Token, string FirstName, string Password);
+public record InitiateEmailChangeRequest(string CurrentPassword, string NewEmail);
+public record CompleteEmailChangeRequest(int UserId, string Token);

@@ -3,28 +3,16 @@ import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useAuth } from "@/context/AuthContext";
-import { CheckCircle, XCircle, AlertTriangle } from "lucide-react";
+import { CheckCircle, AlertTriangle } from "lucide-react";
 
-import { AuthService,  } from "@/services/api";
+import { AuthService } from "@/services/api";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { PasswordInput } from "@/components/ui/PasswordInput";
-
-// Display password rules
-const PasswordRequirement = ({ met, text }: { met: boolean; text: string }) => {
-    return (
-        <div className={`flex items-center space-x-2 text-sm ${met ? 'text-green-500 dark:text-green-400' : 'text-red-500 dark:text-red-400'}`}>
-            {met ? <CheckCircle className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
-            <span>{text}</span>
-        </div>
-    );
-};
 
 // Email validation helper using regex
 const isEmailValidFormat = (email: string) => {
@@ -35,13 +23,13 @@ const isEmailValidFormat = (email: string) => {
 
 export default function RegisterPage() {
     const router = useRouter();
-    const [firstName, setFirstName] = useState("");
+    // Only keep email state
     const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [confirmPassword, setConfirmPassword] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const { isAuthenticated } = useAuth();
+    const [verificationSentMessage, setVerificationSentMessage] = useState<string | null>(null); 
+    const [registrationWarning, setRegistrationWarning] = useState<string | null>(null);
+    const { isAuthenticated } = useAuth(); //
 
     // Redirect logic
     useEffect(() => {
@@ -50,42 +38,35 @@ export default function RegisterPage() {
         }
     }, [isAuthenticated, router]);
 
-    // Password strength check
-    const checkPasswordStrength = (pw: string) => {
-        return {
-            minLength: pw.length >= 8,
-            hasUpperCase: /[A-Z]/.test(pw),
-            hasLowerCase: /[a-z]/.test(pw),
-            hasNumber: /[0-9]/.test(pw),
-            hasSpecialChar: /[#?!@$%^&*-]/.test(pw),
-        };
-    };
-
-    const criteria = useMemo(() => checkPasswordStrength(password), [password]);
-    const isPasswordStrong = Object.values(criteria).every(Boolean);
-    const passwordsMatch = password === confirmPassword && password.length > 0;
-    
+    // Only check email validity
     const isEmailValid = useMemo(() => isEmailValidFormat(email), [email]);
-
-    const isFirstNameValid = firstName.trim().length > 0;
     
-    const canSubmit = !isLoading && isPasswordStrong && passwordsMatch && isEmailValid && isFirstNameValid && email.length > 0;
-
+    // Only email and loading status affect submission
+    const canSubmit = !isLoading && isEmailValid && email.length > 0;
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
+        setVerificationSentMessage(null);
+        setRegistrationWarning(null);
         setIsLoading(true);
 
         try {
-            await AuthService.register(email, password, firstName);
-            router.push("/login?success=registered");
+            const message = await AuthService.initiateRegistration(email);
+            
+            // Check the message content
+            if (message.includes("already registered")) {
+                setRegistrationWarning(message);
+            } else {
+                setVerificationSentMessage(message);
+            }
 
+            setEmail("");
         } catch (err) {
-            let errorMessage = "An unexpected error occurred during registration.";
+            let errorMessage = "An unexpected error occurred. Please try again.";
             
             if (typeof err === 'string') {
-                errorMessage = err + " Please log in.";
+                errorMessage = err;
             } else if (err && typeof err === 'object' && 'message' in err) {
                  errorMessage = (err as Error).message;
             }
@@ -95,6 +76,82 @@ export default function RegisterPage() {
             setIsLoading(false);
         }
     };
+    
+    // Render the warning state first if present
+    if (registrationWarning) {
+        return (
+            <>
+                <Head><title>Register | JobLog</title></Head>
+                <Header/>
+                <div className="flex justify-center items-center min-h-screen bg-background px-4 py-4">
+                    <Card className="w-full max-w-sm shadow-2xl ring-2 ring-primary/40 dark:shadow-none text-center">
+                        <CardHeader>
+                            <CardTitle className="text-2xl font-extrabold text-foreground">Account Found</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <Alert variant="default" className="bg-yellow-50 dark:bg-yellow-950/20 text-yellow-700 dark:text-yellow-300 border-yellow-200 dark:border-yellow-800">
+                                <AlertTriangle className="h-4 w-4" />
+                                <AlertDescription className="text-left text-bg">
+                                    {registrationWarning} 
+                                </AlertDescription>
+                            </Alert>
+                            <p className="mt-4 text-sm text-muted-foreground">
+                                Please proceed to the login page.
+                            </p>
+                            <Button 
+                                onClick={() => router.push("/login")} 
+                                className="w-full mt-4"
+                            >
+                                Go to Log In
+                            </Button>
+                        </CardContent>
+                        <CardFooter>
+                        </CardFooter>
+                    </Card>
+                </div>
+                <Footer/>
+            </>
+        );
+    }
+
+
+    // Render the success state if verificationSentMessage is present
+    if (verificationSentMessage) {
+        return (
+            <>
+                <Head><title>Register | JobLog</title></Head>
+                <Header/>
+                <div className="flex justify-center items-center min-h-screen bg-background px-4 py-4">
+                    <Card className="w-full max-w-sm shadow-2xl ring-2 ring-primary/40 dark:shadow-none text-center">
+                        <CardHeader>
+                            <CardTitle className="text-2xl font-extrabold text-foreground">Check Your Inbox</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                            <Alert variant="default" className="bg-green-50 dark:bg-green-950/20 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800">
+                                <CheckCircle className="h-4 w-4" />
+                                <AlertDescription className="text-left text-bg">
+                                    {verificationSentMessage}
+                                </AlertDescription>
+                            </Alert>
+                            <p className="mt-4 text-sm text-muted-foreground">
+                                The link is valid for <strong>1 hour</strong>. If you don&apos;t see the email, please check your spam folder. Otherwise, you can request a new link below.
+                            </p>
+                            <Button 
+                                onClick={() => setVerificationSentMessage(null)} 
+                                variant="default" 
+                                className="w-full mt-4"
+                            >
+                                Re-enter Email
+                            </Button>
+                        </CardContent>
+                        <CardFooter>
+                        </CardFooter>
+                    </Card>
+                </div>
+                <Footer/>
+            </>
+        );
+    }
 
     return (
         <>
@@ -102,12 +159,12 @@ export default function RegisterPage() {
                 <title>Register | JobLog</title>
             </Head>
             <Header/>
-           <div className="flex justify-center items-center min-h-screen bg-background px-4 py-4">
+            <div className="flex justify-center items-center min-h-screen bg-background px-4 py-4">
                 <Card className="w-full max-w-sm shadow-2xl ring-2 ring-primary/40 dark:shadow-none">
                     <CardHeader className="text-center">
-                        <CardTitle className="text-2xl sm:text-3xl font-extrabold text-foreground">Create Your Account</CardTitle>
+                        <CardTitle className="text-2xl sm:text-3xl font-extrabold text-foreground">Registration</CardTitle>
                         <CardDescription>
-                            Start tracking your job applications now.
+                            Enter your email to receive a verification link.
                         </CardDescription>
                     </CardHeader>
                     <form onSubmit={handleSubmit} noValidate>
@@ -118,17 +175,6 @@ export default function RegisterPage() {
                                 </Alert>
                             )}
                             <div className="grid gap-2">
-                                <Label htmlFor="firstName">First Name</Label>
-                                <Input
-                                    id="firstName"
-                                    type="text"
-                                    placeholder="John"
-                                    value={firstName}
-                                    onChange={(e) => setFirstName(e.target.value)}
-                                    autoComplete="given-name"
-                                />
-                            </div>
-                            <div className="grid gap-2">
                                 <Label htmlFor="email">Email</Label>
                                 <Input
                                     id="email"
@@ -138,49 +184,12 @@ export default function RegisterPage() {
                                     className={email.length > 0 && !isEmailValid ? "border-red-500" : ""}
                                     onChange={(e) => setEmail(e.target.value)}
                                     autoComplete="email"
+                                    required
                                 />
                                 {email.length > 0 && !isEmailValid && (
                                     <p className="flex items-center text-sm mt-1 text-red-500">
                                         <AlertTriangle className="w-4 h-4 mr-1"/>
                                         Please enter a valid email.
-                                    </p>
-                                )}
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="password">Password</Label>
-                                <PasswordInput
-                                    id="password"
-                                    placeholder="Enter strong password"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    autoComplete="new-password"
-                                />
-                            </div>
-                            
-                            <div className="grid gap-2 p-2 rounded-lg border border-border bg-card">
-                                <h3 className={`font-semibold text-sm ${isPasswordStrong ? 'text-green-500' : 'text-foreground'}`}>
-                                    {isPasswordStrong ? 'Strong Password' : 'Password Requirements:'}
-                                </h3>
-                                <div className="grid sm:grid-cols-2 gap-y-1 gap-x-4">
-                                    <PasswordRequirement met={criteria.minLength} text="Minimum 8 characters" />
-                                    <PasswordRequirement met={criteria.hasUpperCase} text="1 Uppercase letter" />
-                                    <PasswordRequirement met={criteria.hasLowerCase} text="1 Lowercase letter" />
-                                    <PasswordRequirement met={criteria.hasNumber} text="1 Number" />
-                                    <PasswordRequirement met={criteria.hasSpecialChar} text="1 Special character" />
-                                </div>
-                            </div>
-
-                            <div className="grid gap-2">
-                                <Label htmlFor="confirm-password">Confirm Password</Label>
-                                <PasswordInput
-                                    id="confirm-password"
-                                    value={confirmPassword}
-                                    onChange={(e) => setConfirmPassword(e.target.value)}
-                                    autoComplete="new-password"
-                                />
-                                {confirmPassword.length > 0 && (
-                                    <p className={`text-sm mt-1 ${passwordsMatch ? 'text-green-500' : 'text-red-500'}`}>
-                                        {passwordsMatch ? "Passwords match." : "Passwords do not match."}
                                     </p>
                                 )}
                             </div>
@@ -191,7 +200,7 @@ export default function RegisterPage() {
                                 className="w-full cursor-pointer" 
                                 disabled={!canSubmit} 
                             >
-                                {isLoading ? "Creating Account..." : "Register"}
+                                {isLoading ? "Sending Link..." : "Send Verification Link"}
                             </Button>
                             <div className="text-sm text-center text-muted-foreground">
                                 Already have an account?{" "}

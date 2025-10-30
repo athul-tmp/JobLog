@@ -150,18 +150,13 @@ export const ManageAccountTab = ({ isDemoUser }: ManageAccountTabProps) => {
         }
 
         try {
-            await AuthService.updateEmail({ 
+            const message = await AuthService.initiateEmailChange({ 
                 currentPassword: emailPassword, 
                 newEmail: newEmail 
             });
 
-            // Update state and localStorage immediately
-            if (user) {
-                refreshUser({ email: newEmail });
-            }
-
             setEmailStatus('success');
-            setEmailMessage('Email updated successfully. You will use this email to log in next time.');
+            setEmailMessage(message); 
             setEmailPassword('');
         } catch (error) {
             setEmailStatus('error');

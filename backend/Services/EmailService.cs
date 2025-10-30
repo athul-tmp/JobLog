@@ -8,6 +8,7 @@ using System.Text.Json;
 public interface IEmailService
 {
   Task<bool> SendPasswordResetEmail(string toEmail, string userName, string resetLink);
+  Task<bool> SendVerificationEmail(string toEmail, string verificationLink);
 }
 
 public class EmailService : IEmailService
@@ -102,4 +103,37 @@ public class EmailService : IEmailService
 
     return response.IsSuccessStatusCode;
   }
+  public async Task<bool> SendVerificationEmail(string toEmail, string verificationLink)
+  {
+    var apiKey = _config["Brevo:ApiKey"];
+    var senderEmail = _config["Brevo:SenderEmail"];
+    var senderName = _config["Brevo:SenderName"];
+
+    if (string.IsNullOrEmpty(apiKey) || string.IsNullOrEmpty(senderEmail))
+    {
+      return false;
+    }
+
+    var emailBody = new
+    {
+      sender = new { name = senderName, email = senderEmail },
+      to = new[] { new { email = toEmail } },
+      subject = "JobLog Email Verification",
+      htmlContent = $@"
+        <p>Thank you for registering! Please click the button below to verify your email and complete your account setup.</p>
+        <a href='{verificationLink}' style='background-color: #7e22ce; color: #ffffff !important; padding: 12px 25px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;'>
+            Verify Email & Continue
+        </a>
+        <p style='margin-top: 15px;'>This link is valid for 1 hour.</p>
+      "
+    };
+
+    using var client = _clientFactory.CreateClient();
+    client.DefaultRequestHeaders.Add("api-key", apiKey);
+    var content = new StringContent(System.Text.Json.JsonSerializer.Serialize(emailBody), System.Text.Encoding.UTF8, "application/json");
+    var response = await client.PostAsync(BrevoApiUrl, content);
+
+    return response.IsSuccessStatusCode;
+  }
+
 }

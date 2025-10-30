@@ -8,7 +8,6 @@ using System.Security.Cryptography;
 public interface IUserService
 {
   Task<User?> GetUserByEmail(string email);
-  Task<User> RegisterUser(string email, string password, string firstName);
   Task<User?> AuthenticateUser(string email, string password);
   Task UpdateUserName(int userId, string currentPassword, string newFirstName);
   Task UpdateUserEmail(int userId, string currentPassword, string newEmail);
@@ -17,6 +16,8 @@ public interface IUserService
   Task VerifyUserPassword(int userId, string currentPassword);
   Task ForgotPassword(string email);
   Task ResetPassword(string email, string token, string newPassword);
+  Task InitiateRegistration(string email);
+  Task<User> CompleteRegistration(string email, string token, string firstName, string password);
 }
 
 public class UserService : IUserService
@@ -36,32 +37,6 @@ public class UserService : IUserService
   public Task<User?> GetUserByEmail(string email)
   {
     return _dbContext.Users.SingleOrDefaultAsync(u => u.Email == email);
-  }
-
-  // Register a user
-  public async Task<User> RegisterUser(string email, string password, string firstName)
-  {
-    // Check for duplicate 
-    if (await GetUserByEmail(email) != null)
-    {
-      throw new InvalidOperationException("Email address is already in use.");
-    }
-
-    // Hash the password 
-    var passwordHash = BCrypt.Net.BCrypt.HashPassword(password);
-
-    // Create the new User 
-    var user = new User
-    {
-      Email = email,
-      PasswordHash = passwordHash,
-      FirstName = firstName
-    };
-
-    // Save to the database
-    _dbContext.Users.Add(user);
-    await _dbContext.SaveChangesAsync();
-    return user;
   }
 
   // Authentication
@@ -227,5 +202,71 @@ public class UserService : IUserService
 
     _dbContext.Users.Update(user);
     await _dbContext.SaveChangesAsync();
+  }
+
+  // Initiate Registration
+  public async Task InitiateRegistration(string email)
+  {
+    if (await GetUserByEmail(email) != null)
+    {
+      throw new InvalidOperationException("Email address is already registered. Please log in.");
+    }
+    // Clean old tokens for this email
+    _dbContext.EmailVerifications.RemoveRange(_dbContext.EmailVerifications.Where(v => v.Email == email));
+
+    // Generate token
+    var tokenBytes = RandomNumberGenerator.GetBytes(32);
+    var rawToken = Convert.ToBase64String(tokenBytes);
+    var hashedToken = BCrypt.Net.BCrypt.HashPassword(rawToken);
+
+    var verificationRecord = new EmailVerification
+    {
+      Email = email,
+      Token = hashedToken,
+      ExpiryDate = DateTime.UtcNow.AddHours(1)
+    };
+
+    _dbContext.EmailVerifications.Add(verificationRecord);
+    await _dbContext.SaveChangesAsync();
+
+    // Create the final verification link
+    var frontendUrl = _config["FrontendUrl"] ?? "http://localhost:3000";
+    var verificationLink = $"{frontendUrl}/complete-registration?email={Uri.EscapeDataString(email)}&token={Uri.EscapeDataString(rawToken)}";
+
+    await _emailService.SendVerificationEmail(email, verificationLink);
+  }
+
+  // Complete Registration
+  public async Task<User> CompleteRegistration(string email, string token, string firstName, string password)
+  {
+    var record = await _dbContext.EmailVerifications.SingleOrDefaultAsync(v => v.Email == email);
+
+    // Validation checks
+    if (record == null || record.ExpiryDate < DateTime.UtcNow)
+    {
+      if (record != null) _dbContext.EmailVerifications.Remove(record);
+      throw new InvalidOperationException("Verification link is invalid or has expired.");
+    }
+
+    if (!BCrypt.Net.BCrypt.Verify(token, record.Token))
+    {
+      throw new UnauthorizedAccessException("Invalid verification token.");
+    }
+
+    // Everything is valid then create the user
+    var passwordHash = BCrypt.Net.BCrypt.HashPassword(password);
+    var newUser = new User
+    {
+      Email = email,
+      PasswordHash = passwordHash,
+      FirstName = firstName,
+      CreatedAt = DateTime.UtcNow
+    };
+
+    _dbContext.Users.Add(newUser);
+    _dbContext.EmailVerifications.Remove(record);
+
+    await _dbContext.SaveChangesAsync();
+    return newUser;
   }
 }

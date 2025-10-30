@@ -12,6 +12,7 @@ namespace backend.Data
     public DbSet<JobApplication> JobApplications { get; set; }
     public DbSet<User> Users { get; set; }
     public DbSet<JobStatusHistory> JobStatusHistories { get; set; }
+    public DbSet<EmailVerification> EmailVerifications { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -49,8 +49,17 @@ export default function VerifyEmailChangePage() {
                     ? err 
                     : "An unexpected error occurred during email change confirmation.";
                 
-                setStatus('error');
-                setMessage(errorMessage);
+                const ALREADY_CONSUMED_MSG = "Invalid or incomplete email change request. Please restart the process.";
+                
+                if (errorMessage.includes(ALREADY_CONSUMED_MSG)) {
+                    logout();
+                    
+                    setStatus('success');
+                    setMessage("Email change confirmed successfully. You must log in again with your new email address.");
+                } else {
+                    setStatus('error');
+                    setMessage(errorMessage);
+                }
             } finally {
                 setIsLoading(false);
             }

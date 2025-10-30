@@ -187,7 +187,6 @@ public class UserController : ControllerBase
   }
 
   // Complete email change | ROUTE: POST /api/User/complete-email-change
-  [Authorize]
   [HttpPost("complete-email-change")]
   [AllowAnonymous]
   public async Task<IActionResult> CompleteEmailChange([FromBody] CompleteEmailChangeRequest request)

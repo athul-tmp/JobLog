@@ -64,8 +64,7 @@ export default function VerifyEmailChangePage() {
     if (isLoading) {
         return (
             <div className="flex justify-center items-center h-screen bg-background">
-                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                <p className="ml-3 text-lg text-muted-foreground">Verifying email change...</p>
+                <Loader2 className="size-15 animate-spin"/>
             </div>
         );
     }

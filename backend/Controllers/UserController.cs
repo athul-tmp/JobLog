@@ -371,7 +371,7 @@ public class UserController : ControllerBase
 
       return Ok(new
       {
-        message = "A verification link has been sent to your email. Please check your inbox and spam to continue registration."
+        message = "A verification link has been sent to your email. Please check your inbox to continue registration."
       });
     }
     catch (InvalidOperationException ex)

@@ -120,17 +120,59 @@ public class EmailService : IEmailService
       to = new[] { new { email = toEmail } },
       subject = "JobLog Email Verification",
       htmlContent = $@"
-        <p>Thank you for registering! Please click the button below to verify your email and complete your account setup.</p>
-        <a href='{verificationLink}' style='background-color: #7e22ce; color: #ffffff !important; padding: 12px 25px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;'>
-            Verify Email & Continue
-        </a>
-        <p style='margin-top: 15px;'>This link is valid for 1 hour.</p>
+        <html lang='en'>
+        <head>
+          <meta charset='UTF-8'>
+          <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+          <title>Email Verification</title>
+          <style>
+              /* Basic reset styles for email clients */
+              body, table, td, a {{ -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }}
+              table, td {{ mso-table-lspace: 0pt; mso-table-rspace: 0pt; }}
+              img {{ -ms-interpolation-mode: bicubic; border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }}
+              a {{ text-decoration: none; }}
+              /* Styling for the main content */
+              .container {{ max-width: 600px; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif; color: #333333; }}
+              .header-text {{ font-size: 24px; font-weight: bold; color: #7e22ce; margin-top: 10px; margin-bottom: 20px; text-align: center; }}
+              .button {{ background-color: #7e22ce; color: #ffffff !important; padding: 12px 25px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold; }}
+              .button-container {{ text-align: center; padding: 20px 0; }}
+          </style>
+        </head>
+        <body>
+          <div class='container' style='max-width: 600px; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif; color: #333333; border: 1px solid #eeeeee; border-radius: 8px;'>
+
+              <h1 class='header-text'>
+                  Verify Your Email for <span style='color: #7e22ce;'>JobLog</span>
+              </h1>
+              
+              <p style='margin-bottom: 20px;'>Hello,</p>
+              <p style='margin-bottom: 20px;'>Please click the button below to verify your email address and complete your account setup.</p>
+              
+              <table role='presentation' border='0' cellpadding='0' cellspacing='0' class='body' style='width: 100%;'>
+                  <tr>
+                      <td align='center' style='padding: 20px 0;'>
+                          <a href='{verificationLink}' class='button' style='background-color: #7e22ce; color: #ffffff !important; padding: 12px 25px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;'>
+                              Verify Email & Continue
+                          </a>
+                      </td>
+                  </tr>
+              </table>
+              
+              <p style='margin-top: 30px; border-top: 1px solid #eeeeee; padding-top: 10px; font-size: 12px; color: #999999;'>
+                  If you did not initiate this registration, you can safely ignore this email.
+              </p>
+              <p style='font-size: 12px; color: #999999;'>
+                  &copy; {DateTime.UtcNow.Year} JobLog. All rights reserved.
+              </p>
+          </div>
+        </body>
+        </html>
       "
     };
 
     using var client = _clientFactory.CreateClient();
     client.DefaultRequestHeaders.Add("api-key", apiKey);
-    var content = new StringContent(System.Text.Json.JsonSerializer.Serialize(emailBody), System.Text.Encoding.UTF8, "application/json");
+    var content = new StringContent(JsonSerializer.Serialize(emailBody), Encoding.UTF8, "application/json");
     var response = await client.PostAsync(BrevoApiUrl, content);
 
     return response.IsSuccessStatusCode;

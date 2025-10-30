@@ -36,18 +36,6 @@ export const AuthService = {
     }
   },
 
-  // Registration method 
-  register: async (email: string, password: string, firstName: string): Promise<void> => {
-    try {
-      await apiClient.post("/User/register", { firstName, email, password });
-    } catch (error) {
-      if (axios.isAxiosError(error) && error.response) {
-        return Promise.reject(error.response.data.message || "Registration failed.");
-      }
-      return Promise.reject("An unexpected error occurred during registration.");
-    }
-  },
-
   // Logout method to call backend to clear the HttpOnly cookie
   logout: async (): Promise<void> => { 
       try {
@@ -125,6 +113,29 @@ export const AuthService = {
             return Promise.reject(message + details);
         }
         return Promise.reject("An unexpected error occurred during password reset.");
+    }
+  },
+  // Initiate Registration
+  initiateRegistration: async (email: string): Promise<string> => {
+    try {
+        const response = await apiClient.post<{ message: string }>("/User/initiate-registration", { email });
+        return response.data.message;
+    } catch (error) {
+        return handleApiError(error, "Failed to initiate registration.");
+    }
+  },
+
+  // Complete Registration
+  completeRegistration: async (data: { email: string, token: string, firstName: string, password: string }): Promise<string> => {
+    try {
+        const response = await apiClient.post<{ message: string }>("/User/complete-registration", data);
+        return response.data.message;
+    } catch (error) {
+        if (axios.isAxiosError(error) && error.response) {
+            const message = error.response.data?.message || "Invalid or expired verification link.";
+            return Promise.reject(message);
+        }
+        return Promise.reject("An unexpected error occurred during registration.");
     }
   },
 };

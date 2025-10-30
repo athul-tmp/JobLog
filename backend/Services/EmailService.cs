@@ -299,8 +299,6 @@ public class EmailService : IEmailService
                   <p style='margin-bottom: 20px;'>Hello,</p>
                   <p style='margin-bottom: 20px;'>This email confirms that the email address for your JobLog account has been successfully changed from <strong>{oldEmail}</strong> to <strong>{newEmail}</strong>.</p>
                   
-                  <p style='margin-bottom: 20px;'>If you initiated this change, no further action is required. You should now log in with the new email address: <strong>{newEmail}</strong>.</p>
-                  
                   <p style='margin-bottom: 20px; color: #dc3545; font-weight: bold;'>
                       If you did NOT authorise this change, please contact support immediately to secure your account.
                   </p>

@@ -54,12 +54,27 @@ export const AuthService = {
       }
   },
   
-  // Update Email
-  updateEmail: async (data: { currentPassword: string, newEmail: string }): Promise<void> => {
+  // Initiate Email Change
+  initiateEmailChange: async (data: { currentPassword: string, newEmail: string }): Promise<string> => {
       try {
-          await apiClient.put("/User/updateEmail", data);
+          const response = await apiClient.post<{ message: string }>("/User/initiate-email-change", data);
+          return response.data.message;
       } catch (error) {
-          return handleApiError(error, "Failed to update email.");
+          return handleApiError(error, "Failed to initiate email change.");
+      }
+  },
+
+  // Complete Email Change
+  completeEmailChange: async (data: { userId: number, token: string }): Promise<string> => {
+      try {
+          const response = await apiClient.post<{ message: string, oldEmail: string }>("/User/complete-email-change", data);
+          return response.data.message;
+      } catch (error) {
+          if (axios.isAxiosError(error) && error.response) {
+              const message = error.response.data?.message || "Invalid or expired verification link.";
+              return Promise.reject(message);
+          }
+          return Promise.reject("An unexpected error occurred during email change confirmation.");
       }
   },
   

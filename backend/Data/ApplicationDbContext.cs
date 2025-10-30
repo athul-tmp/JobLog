@@ -26,6 +26,13 @@ namespace backend.Data
           .WithMany(j => j.StatusHistory)
           .HasForeignKey(h => h.JobApplicationId)
           .OnDelete(DeleteBehavior.Cascade);
+
+      modelBuilder.Entity<EmailVerification>()
+          .HasOne(ev => ev.User)
+          .WithMany()
+          .HasForeignKey(ev => ev.UserId)
+          .IsRequired(false)
+          .OnDelete(DeleteBehavior.Cascade);
     }
   }
 }

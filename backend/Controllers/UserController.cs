@@ -152,15 +152,11 @@ public class UserController : ControllerBase
     }
   }
 
-  // Update User Email | Route: PUT /api/User/updateEmail
+  // Initiate email change | ROUTE: POST /api/User/inititate-email-change
   [Authorize]
-  [HttpPut("updateEmail")]
-  public async Task<IActionResult> UpdateEmail([FromBody] UpdateEmailRequest request)
+  [HttpPost("initiate-email-change")]
+  public async Task<IActionResult> InitiateEmailChange([FromBody] InitiateEmailChangeRequest request)
   {
-    if (string.IsNullOrWhiteSpace(request.NewEmail) || string.IsNullOrWhiteSpace(request.CurrentPassword))
-    {
-      return BadRequest(new { message = "New Email and Current Password are required." });
-    }
     if (!IsValidEmailFormat(request.NewEmail))
     {
       return BadRequest(new { message = "New email format is invalid." });
@@ -169,21 +165,61 @@ public class UserController : ControllerBase
     try
     {
       var userId = GetUserId();
-      await _userService.UpdateUserEmail(userId, request.CurrentPassword, request.NewEmail);
+      await _userService.InitiateEmailChange(userId, request.CurrentPassword, request.NewEmail);
 
-      return Ok(new { message = "Email updated successfully. You will be logged out to re-authenticate." });
+      return Ok(new
+      {
+        message = $"A verification link has been sent to {request.NewEmail}. Please check your inbox to confirm the change."
+      });
     }
     catch (UnauthorizedAccessException)
     {
-      return Unauthorized(new { message = "Invalid current password." });
+      return Unauthorized(new { message = "Invalid current password provided." });
     }
     catch (InvalidOperationException ex)
     {
-      return Conflict(new { message = ex.Message }); // e.g., "Email already in use"
+      return BadRequest(new { message = ex.Message });
     }
     catch (Exception)
     {
-      return StatusCode(500, new { message = "An error occurred while updating the email." });
+      return StatusCode(500, new { message = "An unexpected error occurred while initiating the email change." });
+    }
+  }
+
+  // Complete email change | ROUTE: POST /api/User/complete-email-change
+  [Authorize]
+  [HttpPost("complete-email-change")]
+  [AllowAnonymous]
+  public async Task<IActionResult> CompleteEmailChange([FromBody] CompleteEmailChangeRequest request)
+  {
+    if (string.IsNullOrWhiteSpace(request.Token) || request.UserId <= 0)
+    {
+      return BadRequest(new { message = "User ID and token are required." });
+    }
+
+    try
+    {
+      var oldEmail = await _userService.CompleteEmailChange(request.UserId, request.Token);
+
+      ClearAuthCookie();
+
+      return Ok(new
+      {
+        message = "Email successfully changed. You must log in again with your new email.",
+        oldEmail = oldEmail
+      });
+    }
+    catch (UnauthorizedAccessException)
+    {
+      return Unauthorized(new { message = "Invalid email change verification token." });
+    }
+    catch (InvalidOperationException ex)
+    {
+      return BadRequest(new { message = ex.Message });
+    }
+    catch (Exception)
+    {
+      return StatusCode(500, new { message = "An unexpected error occurred during email change confirmation." });
     }
   }
 
@@ -437,3 +473,5 @@ public record ForgotPasswordRequest(string Email);
 public record ResetPasswordRequest(string Email, string Token, string NewPassword);
 public record InitiateRegistrationRequest(string Email);
 public record CompleteRegistrationRequest(string Email, string Token, string FirstName, string Password);
+public record InitiateEmailChangeRequest(string CurrentPassword, string NewEmail);
+public record CompleteEmailChangeRequest(int UserId, string Token);

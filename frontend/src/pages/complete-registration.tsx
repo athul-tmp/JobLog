@@ -108,9 +108,8 @@ export default function CompleteRegistrationPage() {
     // Handle loading
     if (isInitialLoad) {
         return (
-            <div className="flex justify-center items-center min-h-screen">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                <p className="ml-3 text-lg">Loading verification details...</p>
+            <div className="flex justify-center items-center h-screen bg-background">
+                <Loader2 className="size-15 animate-spin"/>
             </div>
         );
     }

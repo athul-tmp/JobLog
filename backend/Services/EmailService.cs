@@ -87,7 +87,7 @@ public class EmailService : IEmailService
               <p style='font-size: 14px; color: #666666;'>If you did not request a password reset, please ignore this email.</p>
               
               <p style='margin-top: 30px; border-top: 1px solid #eeeeee; padding-top: 10px; font-size: 12px; color: #999999;'>
-                  &copy; {DateTime.UtcNow.Year} JobLog. All rights reserved.
+                  &copy; {DateTime.UtcNow.Year} JobLog.
               </p>
           </div>
         </body>
@@ -164,7 +164,7 @@ public class EmailService : IEmailService
                   If you did not initiate this registration, you can safely ignore this email.
               </p>
               <p style='font-size: 12px; color: #999999;'>
-                  &copy; {DateTime.UtcNow.Year} JobLog. All rights reserved.
+                  &copy; {DateTime.UtcNow.Year} JobLog.
               </p>
           </div>
         </body>
@@ -240,7 +240,7 @@ public class EmailService : IEmailService
                       This link is valid for 1 hour. If you did not request this change, please ignore this email.
                   </p>
                   <p style='font-size: 12px; color: #999999;'>
-                      &copy; {DateTime.UtcNow.Year} JobLog. All rights reserved.
+                      &copy; {DateTime.UtcNow.Year} JobLog.
                   </p>
               </div>
             </body>
@@ -307,7 +307,7 @@ public class EmailService : IEmailService
                       This is a security notification sent to your old email address.
                   </p>
                   <p style='font-size: 12px; color: #999999;'>
-                      &copy; {DateTime.UtcNow.Year} JobLog. All rights reserved.
+                      &copy; {DateTime.UtcNow.Year} JobLog.
                   </p>
               </div>
             </body>

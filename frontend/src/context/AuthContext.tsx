@@ -28,8 +28,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   
   const isAuthenticated = !!user;
 
-  useEffect(() => {
+  const loadUserFromStorage = () => {
     const storedUser = localStorage.getItem(USER_KEY); 
+    let loadedUser: AuthUser | null = null;
 
     if (storedUser) {
       try {
@@ -41,16 +42,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Check if the demo session has expired locally
         if (isDemoUser && parsedUser.expiresAt && parsedUser.expiresAt <= Date.now()) {
             localStorage.removeItem(USER_KEY);
-            setUser(null);
         } else {
-            setUser(parsedUser);
+            loadedUser = parsedUser;
         }
       } catch (e) {
         console.error("Failed to parse user data from localStorage:", e);
         localStorage.removeItem(USER_KEY);
       }
     }
+    
+    setUser(loadedUser);
+  };
+
+  useEffect(() => {
+    loadUserFromStorage();
     setAuthLoading(false);
+
+    // Cross-tab synchronisation
+    const handleStorageChange = (event: StorageEvent) => {
+      if (event.key === USER_KEY) {
+        loadUserFromStorage(); 
+        console.log(`Auth state updated via storage event. New state: ${event.newValue ? 'Authenticated' : 'Logged Out'}`);
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+
+    // Clean up the event listener when the component unmounts
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+    
   }, []);
 
   // Login method to set session data

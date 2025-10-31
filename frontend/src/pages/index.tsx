@@ -49,6 +49,14 @@ export default function LandingPage() {
     <>
       <Head>
         <title>JobLog</title>
+
+        <meta property="og:title" content="JobLog" />
+        <meta property="og:description" content="Full-stack platform for organising and visualising your job search." />
+        <meta property="og:url" content="https://joblog.athulthampan.com/" />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content="https://joblog.athulthampan.com/images/joblog.png" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
       </Head>
       
       <div className="min-h-screen flex flex-col">

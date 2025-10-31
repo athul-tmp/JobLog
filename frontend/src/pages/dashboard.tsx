@@ -117,9 +117,9 @@ export default function DashboardPage() {
 
                     {/* Data Loading Spinner */}
                     {isDataLoading && (
-                       <div className="flex flex-col items-center justify-center h-32 text-center">
-                            <Spinner className="mb-2" />
-                            <p className="text-sm sm:text-base text-muted-foreground">Loading data...</p>
+                       <div className="flex justify-center items-center h-32">
+                           <p className="text-lg text-muted-foreground">Loading data...</p>
+                           <Spinner/>
                        </div>
                     )}
 

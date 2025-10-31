@@ -168,7 +168,7 @@ For local development, JobLog uses **Docker Compose** to run the PostgreSQL data
 
 ### Prerequisites
 * [Node.js](https://nodejs.org/) (v18+)
-* **[.NET SDK](https://dotnet.microsoft.com/download) (v8.0)**
+* [.NET SDK](https://dotnet.microsoft.com/download) (v8.0)
 * [Docker](https://www.docker.com/products/docker-desktop)
 
 ### Configuration

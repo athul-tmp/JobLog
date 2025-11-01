@@ -12,6 +12,31 @@ const apiClient: AxiosInstance = axios.create({
   withCredentials: true,
 });
 
+type LogoutHandler = () => void;
+let onLogout: LogoutHandler | null = null;
+export const setLogoutHandler = (handler: LogoutHandler) => {
+    onLogout = handler;
+};
+
+// Add a interceptor to catch 401 Unauthorised errors
+apiClient.interceptors.response.use(
+    (response) => response, // Pass successful responses through
+    (error) => {
+        if (axios.isAxiosError(error) && error.response) {
+            // Check for 401 Unauthorised/Session Expired
+            if (error.response.status === 401) {
+                console.error("401 Unauthorized detected. Session likely expired, triggering auto-logout.");
+                // Trigger the logout function
+                if (onLogout) {
+                    onLogout();
+                }
+            }
+        }
+        // Return a rejected promise so the calling component can still handle the request failure
+        return Promise.reject(error);
+    }
+);
+
 // Helper to display api error for settings page
 const handleApiError = (error: unknown, defaultMessage: string): Promise<never> => {
     if (axios.isAxiosError(error) && error.response) {

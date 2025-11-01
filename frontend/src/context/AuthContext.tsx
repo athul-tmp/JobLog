@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { AuthUser, LoginResponse } from "@/types/types"; 
-import { AuthService } from "@/services/api";
+import { AuthService, setLogoutHandler } from "@/services/api";
 
 // Demo account credentials
 const DEMO_EMAIL = "demo@joblog.com";
@@ -116,13 +116,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   // Logout method to clear session data and call the backend to clear the HttpOnly cookie
-  const logout = () => {
+  const logout = useCallback(() => {
     setAuthLoading(true);
     localStorage.removeItem(USER_KEY);
     AuthService.logout();
     setUser(null);
     setAuthLoading(false);
-  };
+  }, [setAuthLoading, setUser]);
+
+  useEffect(() => {
+    setLogoutHandler(logout);
+  }, [logout]);
 
   // Function to refresh stored user
   const refreshUser = (updates: Partial<AuthUser>) => {

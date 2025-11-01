@@ -383,12 +383,14 @@ export function JobApplicationTable({ data, onJobUpdated, onOpenEditModal, onUnd
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
+  const [globalFilter, setGlobalFilter] = useState('');
   
   const table = useReactTable({
     data,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
+    onGlobalFilterChange: setGlobalFilter,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
@@ -398,6 +400,7 @@ export function JobApplicationTable({ data, onJobUpdated, onOpenEditModal, onUnd
       sorting,
       columnFilters,
       columnVisibility,
+      globalFilter,
     },
     meta: {
         onJobUpdated,
@@ -412,11 +415,11 @@ export function JobApplicationTable({ data, onJobUpdated, onOpenEditModal, onUnd
   });
   
   // Get the current value of the main search input
-  const globalFilterValue = (table.getColumn("company")?.getFilterValue() as string) ?? "";
+  const globalFilterValue = table.getState().globalFilter ?? "";
   
   // For combined search across Company and Role
   const handleGlobalFilterChange = (value: string) => {
-    table.getColumn("company")?.setFilterValue(value);
+    table.setGlobalFilter(value);
   }
 
   // To toggle status filter on/off

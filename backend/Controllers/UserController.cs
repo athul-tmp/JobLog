@@ -99,7 +99,7 @@ public class UserController : ControllerBase
     var token = _tokenService.CreateToken(user);
 
     // Set the JWT as an HttpOnly cookie
-    SetAuthCookie(token);
+    SetAuthCookie(token, tokenExpiryTime);
 
     return Ok(new
     {

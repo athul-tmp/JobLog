@@ -135,8 +135,8 @@ export default function ApplicationsPage() {
         }
     }, [isAuthenticated, authLoading, router]);
     
-    // Show loading state when logging out
-    if (authLoading || !isAuthenticated) {
+    // Show loading state when logging out / data loading
+    if (authLoading || !isAuthenticated || isDataLoading) {
         return (
             <div className="flex justify-center items-center h-screen bg-background text-foreground">
                 <Spinner className="size-15"/>
@@ -167,14 +167,6 @@ export default function ApplicationsPage() {
 
                     {/* Error Display */}
                     {dataError && <Alert variant="destructive"><AlertDescription>{dataError}</AlertDescription></Alert>}
-
-                    {/* Data Loading Spinner */}
-                    {isDataLoading && (
-                       <div className="flex justify-center items-center h-32">
-                           <p className="text-lg text-muted-foreground">Loading applications...</p>
-                           <Spinner/>
-                       </div>
-                    )}
                     
                     {/* Job Applications Table (Shown on large screens) */}
                     {isReady && (

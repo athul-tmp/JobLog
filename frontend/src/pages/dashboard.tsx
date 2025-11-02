@@ -64,8 +64,8 @@ export default function DashboardPage() {
         }
     }, [isAuthenticated, authLoading, router]);
     
-    // Show loading state when logging out
-    if (authLoading || !isAuthenticated) {
+    // Show loading state when logging out / data loading
+    if (authLoading || !isAuthenticated || isDataLoading) {
         return (
             <div className="flex justify-center items-center h-screen bg-background">
                 <Spinner className="size-15"/>
@@ -114,14 +114,6 @@ export default function DashboardPage() {
                     
                     {/* Error Display */}
                     {dataError && <Alert variant="destructive"><AlertDescription>{dataError}</AlertDescription></Alert>}
-
-                    {/* Data Loading Spinner */}
-                    {isDataLoading && (
-                       <div className="flex justify-center items-center h-32">
-                           <p className="text-lg text-muted-foreground">Loading data...</p>
-                           <Spinner/>
-                       </div>
-                    )}
 
                     {isReady && (
                         <div className="space-y-8">

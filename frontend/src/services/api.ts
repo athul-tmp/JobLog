@@ -25,7 +25,7 @@ apiClient.interceptors.response.use(
         if (axios.isAxiosError(error) && error.response) {
             // Check for 401 Unauthorised/Session Expired
             if (error.response.status === 401) {
-                console.error("401 Unauthorized detected. Session likely expired, triggering auto-logout.");
+                console.error("401 Unauthorised detected. Session likely expired, triggering auto-logout.");
                 // Trigger the logout function
                 if (onLogout) {
                     onLogout();

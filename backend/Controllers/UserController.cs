@@ -34,6 +34,7 @@ public class UserController : ControllerBase
       Secure = !isDevelopment,
       SameSite = isDevelopment ? SameSiteMode.Strict : SameSiteMode.None,
       Expires = expiryTime ?? DateTimeOffset.UtcNow.AddDays(7),
+      Path = "/"
     };
 
     Response.Cookies.Append("joblog_jwt_token", token, cookieOptions);

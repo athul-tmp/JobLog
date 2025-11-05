@@ -88,6 +88,19 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
     options.KnownProxies.Clear();
 });
 
+builder.Services.Configure<CookiePolicyOptions>(options =>
+{
+    options.MinimumSameSitePolicy = SameSiteMode.Unspecified;
+
+    options.OnAppendCookie = cookieContext =>
+    {
+        if (cookieContext.CookieOptions.SameSite == SameSiteMode.None && !builder.Environment.IsDevelopment())
+        {
+            cookieContext.CookieOptions.Secure = true;
+        }
+    };
+});
+
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
@@ -112,7 +125,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
+app.UseCookiePolicy();
 app.UseCors("AllowNextjsApp");
 
 app.UseAuthentication();

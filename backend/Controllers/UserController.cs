@@ -32,7 +32,7 @@ public class UserController : ControllerBase
     {
       HttpOnly = true,
       Secure = !isDevelopment,
-      SameSite = isDevelopment ? SameSiteMode.Strict : SameSiteMode.None,
+      SameSite = SameSiteMode.Strict,
       Expires = expiryTime ?? DateTimeOffset.UtcNow.AddDays(7),
       Path = "/"
     };

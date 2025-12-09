@@ -103,7 +103,7 @@ async function sendToBackend(jobData) {
 
         if (response.ok) {
             statusMessage.style.color = 'green';
-            statusMessage.textContent = `SUCCESS: Job '${jobData.jobTitle}' added!`;
+            statusMessage.textContent = `SUCCESS: '${jobData.jobTitle}' added!`;
             document.getElementById('jobFormContainer').classList.add('hidden');
             document.getElementById('initiateBtn').disabled = false;
         } else if (response.status === 401) {
@@ -206,6 +206,39 @@ function contentScriptFunction() {
         return jobData;
     }
 
+    function scrapeIndeed(jobData) {
+        try {
+            const titleElement = document.querySelector('[data-testid="jobsearch-JobInfoHeader-title"] span');
+            if (titleElement) {
+                let title = titleElement.textContent.trim();
+                title = title.replace(/\s*[-\(]?\s*job post\s*[\)]?/i, '').trim(); 
+        
+                jobData.jobTitle = title;
+            }
+
+            const companyElement = document.querySelector('[data-testid="inlineHeader-companyName"] a');
+            if (companyElement) {
+                let name = companyElement.textContent.trim();
+                
+                const parentSpan = companyElement.closest('span');
+                if (parentSpan) {
+                     name = parentSpan.textContent.trim();
+                     name = name.replace(/View all jobs/i, '').trim(); 
+                }
+                
+                jobData.companyName = name;
+            } else {
+                const companySpan = document.querySelector('[data-testid="inlineHeader-companyName"] span');
+                if (companySpan) {
+                    jobData.companyName = companySpan.textContent.trim();
+                }
+            }
+        } catch (e) {
+            console.error("Indeed scraping failed:", e);
+        }
+        return jobData;
+    }
+
     function scrapeGeneric(jobData) {
         jobData.jobTitle = document.title.split('|')[0].trim() || 'Unknown Job Title';
         
@@ -229,6 +262,8 @@ function contentScriptFunction() {
         jobData = scrapeLinkedIn(jobData);
     } else if (hostname.includes('seek.com.au')) {
         jobData = scrapeSeek(jobData);
+    } else if (hostname.includes('indeed.com')) {
+        jobData = scrapeIndeed(jobData);
     } else {
         jobData = scrapeGeneric(jobData);
     }

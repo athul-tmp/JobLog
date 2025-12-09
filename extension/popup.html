@@ -3,9 +3,9 @@
 <head>
     <title>JobLog Quick Add</title>
     <style>
-        body { width: 250px; font-family: Arial, sans-serif; padding: 10px; }
+        body { width: 300px; font-family: Arial, sans-serif; padding: 10px; }
         h3 { color: #333; margin-bottom: 10px; }
-        button {
+        #initiateBtn {
             width: 100%;
             padding: 10px;
             background-color: #7e22ce;
@@ -13,13 +13,54 @@
             border: none;
             border-radius: 4px;
             cursor: pointer;
+            margin-bottom: 10px;
         }
+        #jobForm {
+            border-top: 1px solid #ddd;
+            padding-top: 10px;
+        }
+        label { display: block; margin-top: 8px; font-weight: bold; font-size: 0.9em;}
+        input[type="text"] {
+            width: calc(100% - 10px);
+            padding: 5px;
+            margin-top: 4px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+        #submitBtn {
+            width: 100%;
+            padding: 10px;
+            background-color: #7e22ce;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+        #statusMessage { margin-top: 10px; color: #333; }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
     <h3>JobLog Tracker</h3>
-    <button id="quickAddBtn">Quick Add to JobLog</button>
-    <p id="statusMessage" style="margin-top: 10px; color: green;"></p>
+    <button id="initiateBtn">1. Scrape Job Details</button>
+
+    <div id="jobFormContainer" class="hidden">
+        <form id="jobForm">
+            <label for="company">Company</label>
+            <input type="text" id="company" name="company" required>
+
+            <label for="role">Role / Title</label>
+            <input type="text" id="role" name="role" required>
+
+            <label for="link">Job Posting URL</label>
+            <input type="text" id="link" name="link" required>
+            
+            <button type="submit" id="submitBtn">2. Save to JobLog</button>
+        </form>
+    </div>
+    
+    <p id="statusMessage"></p>
     <script src="popup.js"></script>
 </body>
 </html>

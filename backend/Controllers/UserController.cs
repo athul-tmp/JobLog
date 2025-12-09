@@ -107,6 +107,7 @@ public class UserController : ControllerBase
       message = "Login successful",
       email = user.Email,
       firstName = user.FirstName,
+      token = token,
       // Return ISO 8601 string for frontend countdown only if it's the demo user
       tokenExpiration = isDemoUser ? tokenExpiryTime.ToString("o") : null
     });

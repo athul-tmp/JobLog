@@ -87,7 +87,7 @@ async function sendToBackend(jobData) {
         const payload = {
             company: jobData.companyName,
             role: jobData.jobTitle,
-            jobpostingurl: jobData.jobURL,
+            jobPostingUrl: jobData.jobURL,
             status: 'Applied', 
             dateApplied: new Date().toISOString().substring(0, 10) 
         };
@@ -124,36 +124,119 @@ async function sendToBackend(jobData) {
 }
 
 function contentScriptFunction() {
-    let jobTitle = null;
-    let companyName = null;
-    const jobURL = window.location.href;
 
-    try {
-        const titleElement = document.querySelector('div.job-details-jobs-unified-top-card__job-title h1 a');
-        if (titleElement) {
-            jobTitle = titleElement.innerText.trim();
+    function scrapeLinkedIn(jobData) {
+        try {
+            const titleContainer = document.querySelector('div.job-details-jobs-unified-top-card__job-title');
+            if (titleContainer) {
+                const h1 = titleContainer.querySelector('h1.t-24.t-bold.inline');
+                if (h1) {
+                    jobData.jobTitle = h1.textContent.trim();
+                }
+            }
+            
+            const companyContainer = document.querySelector('div.job-details-jobs-unified-top-card__company-name');
+            if (companyContainer) {
+                const companyLink = companyContainer.querySelector('a');
+                if (companyLink) {
+                    jobData.companyName = companyLink.textContent.trim().replace(/\s+/g, ' '); 
+                }
+            }
+
+            if (!jobData.jobTitle) {
+                const altTitleElement = document.querySelector('h2.top-card-layout__title');
+                if (altTitleElement) {
+                    jobData.jobTitle = altTitleElement.textContent.trim();
+                }
+            }
+            if (!jobData.companyName) {
+                const altCompanyElement = document.querySelector('a.topcard__flavor--link');
+                if (altCompanyElement) {
+                    jobData.companyName = altCompanyElement.textContent.trim();
+                }
+            }
+
+        } catch (e) {
+            console.error("LinkedIn scraping failed:", e);
         }
-        
-        const companyElement = document.querySelector('div.job-details-jobs-unified-top-card__company-name a');
-        if (companyElement) {
-            companyName = companyElement.innerText.trim();
-        }
-    } catch (e) {
-        console.error("LinkedIn primary selectors failed:", e);
+        return jobData;
     }
 
-    if (!jobTitle) {
-        jobTitle = document.title.split('|')[0].trim() || 'Unknown Job Title';
+    function scrapeSeek(jobData) {
+        try {
+            let titleElement = document.querySelector('[data-automation="job-detail-title"]');
+            let companyElement = document.querySelector('[data-automation="advertiser-name"]');
+
+            if (!titleElement || !companyElement) {
+                titleElement = document.querySelector('h3._1dyjaus0');
+                
+                if (titleElement) {
+                    companyElement = titleElement.nextElementSibling;
+                }
+            }
+
+            if (titleElement) {
+                jobData.jobTitle = titleElement.innerText.trim();
+            }
+
+            if (companyElement && companyElement.tagName === 'SPAN') {
+                let name = '';
+
+                name = companyElement.textContent;
+                
+                if (name) {
+                    name = name.trim();
+                    
+                    name = name.replace(/\s\(\w{3}\)$/i, '').trim(); 
+                    name = name.replace(/Verified$/i, '').trim(); 
+                }
+                
+                if (name.length <= 1) {
+                    jobData.companyName = 'Unknown Company';
+                } else {
+                    jobData.companyName = name;
+                }
+            } else {
+                 jobData.companyName = 'Unknown Company';
+            }
+
+        } catch (e) {
+            console.error("Seek scraping failed:", e);
+        }
+        return jobData;
+    }
+
+    function scrapeGeneric(jobData) {
+        jobData.jobTitle = document.title.split('|')[0].trim() || 'Unknown Job Title';
+        
+        if (!jobData.companyName) {
+            const match = document.title.match(/ at (.*?) \|/); 
+            jobData.companyName = match ? match[1].trim() : 'Unknown Company';
+        }
+        return jobData;
     }
     
-    if (!companyName) {
-        const match = document.title.match(/ at (.*?) \|/); 
-        companyName = match ? match[1].trim() : 'Unknown Company';
+    const jobURL = window.location.href;
+    const hostname = window.location.hostname;
+
+    let jobData = {
+        jobTitle: null,
+        companyName: null,
+        jobURL: jobURL,
+    };
+
+    if (hostname.includes('linkedin.com')) {
+        jobData = scrapeLinkedIn(jobData);
+    } else if (hostname.includes('seek.com.au')) {
+        jobData = scrapeSeek(jobData);
+    } else {
+        jobData = scrapeGeneric(jobData);
     }
+    
+    jobData.jobURL = jobURL;
 
-    return { jobTitle, companyName, jobURL };
+    return jobData;
 }
-
 
 document.addEventListener('DOMContentLoaded', () => {
     checkAuthAndRender(); 

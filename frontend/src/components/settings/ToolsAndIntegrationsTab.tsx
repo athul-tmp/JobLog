@@ -7,7 +7,7 @@ export const ToolsAndIntegrationsTab = () => {
             <h2 className="text-xl font-bold tracking-tight">Extension</h2>
             <Card>
                 <CardContent className="p-6">
-                    <p className="text-lg font-semibold mb-2">Browser Extension (Coming Soon)</p>
+                    <p className="text-lg font-semibold mb-2">Browser Extension: Quick Add (Coming Soon)</p>
                     <p className="text-muted-foreground">
                         A browser extension that will allow you to add job details directly from job board websites and save them straight into your JobLog account is coming soon. Stay tuned!
                     </p>

@@ -5,7 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, KeyRound, Database, AlertTriangle } from "lucide-react"; 
+import { ArrowLeft, KeyRound, Database, AlertTriangle, Zap } from "lucide-react"; 
 import { Spinner } from "@/components/ui/spinner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
@@ -18,8 +18,7 @@ import { DemoAlert } from "@/components/DemoAlert";
 const settingsNav = [
     { id: 'account', title: 'Account', icon: KeyRound },
     { id: 'data', title: 'Data', icon: Database },
-    // Will be added in later
-    // { id: 'tools', title: 'Extension', icon: Zap }, 
+    { id: 'tools', title: 'Extension', icon: Zap }, 
 ];
 
 

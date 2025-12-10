@@ -1,11 +1,13 @@
 # JobLog: A Modern Job Application Tracker
 
-[![React](https://img.shields.io/badge/React-20232A?style=flat-square&logo=react&logoColor=61DAFB)](https://reactjs.org/) [![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=fff)](https://www.typescriptlang.org/) [![Next.js](https://img.shields.io/badge/Next.js-000000?style=flat-square&logo=next.js&logoColor=white)](https://nextjs.org/) [![shadcn/ui](https://img.shields.io/badge/shadcn%2Fui-000?logo=shadcnui&logoColor=fff)](https://ui.shadcn.com/) [![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-%2338B2AC.svg?logo=tailwind-css&logoColor=white)](https://tailwindcss.com/) [![.NET 8](https://img.shields.io/badge/.NET_8-512BD4?style=flat-square&logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/) [![C#](https://custom-icon-badges.demolab.com/badge/C%23-%23239120.svg?logo=cshrp&logoColor=white)](https://dotnet.microsoft.com/) [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-%23316192.svg?logo=postgresql&logoColor=white)](https://www.postgresql.org/) [![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=fff)](https://www.docker.com/) [![Google Cloud](https://img.shields.io/badge/Google%20Cloud-%234285F4.svg?logo=google-cloud&logoColor=white)](https://cloud.google.com/run) 	[![Vercel](https://img.shields.io/badge/Vercel-%23000000.svg?logo=vercel&logoColor=white)](https://vercel.com/) [![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?logo=github-actions&logoColor=white)](https://docs.github.com/en/actions)
+[![React](https://img.shields.io/badge/React-20232A?style=flat-square&logo=react&logoColor=61DAFB)](https://reactjs.org/) [![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=fff)](https://www.typescriptlang.org/) [![Next.js](https://img.shields.io/badge/Next.js-000000?style=flat-square&logo=next.js&logoColor=white)](https://nextjs.org/) [![shadcn/ui](https://img.shields.io/badge/shadcn%2Fui-000?logo=shadcnui&logoColor=fff)](https://ui.shadcn.com/) [![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-%2338B2AC.svg?logo=tailwind-css&logoColor=white)](https://tailwindcss.com/) [![.NET 8](https://img.shields.io/badge/.NET_8-512BD4?style=flat-square&logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/) [![C#](https://custom-icon-badges.demolab.com/badge/C%23-%23239120.svg?logo=cshrp&logoColor=white)](https://dotnet.microsoft.com/) [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-%23316192.svg?logo=postgresql&logoColor=white)](https://www.postgresql.org/) [![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=fff)](https://www.docker.com/) [![Google Cloud](https://img.shields.io/badge/Google%20Cloud-%234285F4.svg?logo=google-cloud&logoColor=white)](https://cloud.google.com/run) 	[![Vercel](https://img.shields.io/badge/Vercel-%23000000.svg?logo=vercel&logoColor=white)](https://vercel.com/) [![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?logo=github-actions&logoColor=white)](https://docs.github.com/en/actions) [![Chrome Web Store](https://img.shields.io/badge/Chrome%20Web%20Store-4285F4?style=flat-square&logo=googlechrome&logoColor=white)]([CWS_LINK_HERE])
 
 JobLog is a full-stack web application for tracking job applications and monitoring job-search progress through structured data and visual analytics.
 It is designed to provide clarity, organisation, and insights throughout the job application process.
 
 🌐 **Live Site:** [https://joblog.athulthampan.com/](https://joblog.athulthampan.com/)
+
+⚙️ **Browser Extension:** [Chrome Web Store](https://joblog.athulthampan.com/)
 
 --- 
 
@@ -47,6 +49,11 @@ It is designed to provide clarity, organisation, and insights throughout the job
 ### Account Management
 * **Settings:** Comprehensive settings for changing name, email, and password (all requiring current password/email verification).
 * **Data Control:** Option to clear all job applications and analytics data, and delete the account.
+
+### Browser Extension (Quick Add)
+* **Seamless Capture:** One-click scraping of job details (Company, Role, URL) from major boards like LinkedIn, Seek, and Indeed.
+* **Secure Integration:** Directly communicates with the JobLog API using stored JWT tokens to log applications immediately.
+* **User Experience:** Includes theme syncing (Dark/Light Mode) and auto-closing on successful submission.
 
 ### UI / UX
 * **Modern Design:** Built with **Tailwind CSS** and **shadcn/ui**.
@@ -104,6 +111,16 @@ The core table view for logging, managing, and quickly updating all job applicat
   <img src="frontend/public/images/applications-dark.png" alt="Job Application Tracking Table with Filters and Sorting Screenshot" width="600">
 </div>
 
+### Browser Extension (Quick Add)
+
+The extension popup, demonstrating successful data capture and theme responsiveness.
+
+<div align="center">
+  <img src="frontend/public/images/extension_dark_mode.png" alt="Extension Dark Mode Screenshot" width="300">
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="frontend/public/images/extension_light_mode.png" alt="Extension Light Mode Screenshot" width="300">
+</div>
+
 ---
 ## 💻 Tech Stack <a id="tech-stack"></a>
 
@@ -115,6 +132,7 @@ The core table view for logging, managing, and quickly updating all job applicat
 | **Database** | `PostgreSQL` (via EF Core) | Hosted on **Neon** (serverless PostgreSQL). |
 | **Authentication** | `JWT` (HttpOnly Cookies), `BCrypt` | Stateless API with secure password hashing. |
 | **Email** | `Brevo SMTP` | For user verification and password reset flows. |
+| **Extension** | `HTML`, `CSS`, `Vanilla JavaScript` | Browser-specific APIs (chrome.scripting, chrome.storage). |
 
 ---
 
@@ -215,12 +233,16 @@ For local development, JobLog uses **Docker Compose** to run the PostgreSQL data
 
 The application will be accessible at `http://localhost:3000`.
 
---- 
+### 4. Browser Extension Setup (Optional)
 
-## 💭 Planned Enhancement <a id="planned-enhancement"></a>
+If you wish to test the browser extension locally:
 
-- **Browser Extension** for seamless job post auto-capture and application logging.
-  
+1.  **Package:** Navigate to the extension directory (e.g., `extension/`) and ensure all necessary files (`manifest.json`, `popup.html`, `popup.js`, `images/`) are present.
+2.  **Open Chrome Extensions:** Go to `chrome://extensions`.
+3.  **Enable Developer Mode:** Toggle the switch in the top-right corner.
+4.  **Load Unpacked:** Click the **"Load unpacked"** button and select the extension folder (e.g., `extension/`).
+5.  **Testing:** The extension icon will appear. It is now running against your local or live API endpoints defined in `popup.js`.
+
 ---
 ## 📃 License <a id="license"></a>
 

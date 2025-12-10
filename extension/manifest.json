@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "JobLog Quick Add",
-    "version": "1.0",
+    "version": "1.0.0",
     "description": "Quickly add job applications to JobLog from any job board.",
     "icons": {
         "16": "images/icon-16.png",
@@ -21,6 +21,9 @@
         "storage"
     ],
     "host_permissions": [
-        "<all_urls>"
+        "*://*.linkedin.com/*",
+        "*://*.seek.com.au/*",
+        "*://*.indeed.com/*",
+        "https://api.joblog.athulthampan.com/*"
     ]
 }

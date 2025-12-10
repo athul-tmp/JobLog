@@ -256,7 +256,11 @@ function contentScriptFunction() {
             const titleContainer = document.querySelector('div.job-details-jobs-unified-top-card__job-title');
             if (titleContainer) {
                 const h1 = titleContainer.querySelector('h1.t-24.t-bold.inline');
-                if (h1) {
+                const titleLink = h1.querySelector('a');
+                if (titleLink) {
+                    jobData.jobTitle = titleLink.textContent.trim();
+                } 
+                else {
                     jobData.jobTitle = h1.textContent.trim();
                 }
             }

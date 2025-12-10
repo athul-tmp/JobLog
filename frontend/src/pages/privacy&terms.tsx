@@ -24,7 +24,7 @@ export default function PrivacyAndTermsPage() {
                         Back
                     </Button>
                     <h1 className="text-3xl font-extrabold tracking-tight">Privacy & Terms</h1>
-                    <p className="text-l mb-6 mt-2 text-foreground">Last updated: October 2025</p>
+                    <p className="text-l mb-6 mt-2 text-foreground">Last updated: December 2025</p>
                     
                     <h2 className="text-3xl font-extrabold tracking-tight mb-6">1. Privacy Policy</h2>
                     <div className="space-y-6 text-muted-foreground">
@@ -35,7 +35,10 @@ export default function PrivacyAndTermsPage() {
                             JobLog collects only the information you choose to provide, such as your name, email address, and job-related details (e.g., company, role, status, notes). Your email may be used for account authentication, including registration confirmation, login, and password reset.
                         </p>
                         <p>
-                            Authentication tokens are stored securely in cookies. Your name and email may be stored locally in your browser for display purposes. All passwords are encrypted using strong hashing techniques (BCrypt).
+                            The JobLog: Quick Add Chrome Extension collects job-related details (Role, Company, and URL) by scraping the content of supported third-party job board websites (e.g., LinkedIn, Seek, Indeed) at the user&apos;s request. This scraped data is immediately transmitted via secure HTTPS to the JobLog API for storage in the user&apos;s private account.
+                        </p>
+                        <p>
+                            Authentication tokens are stored securely in cookies. For the Extension, this token is stored securely in the browser&apos;s dedicated extension storage (chrome.storage.local) to maintain user authentication. Your name and email may be stored locally in your browser for display purposes. All passwords are encrypted using strong hashing techniques (BCrypt).
                         </p>
                         <p>
                             JobLog does not use advertising or tracking services, and no personal information is shared with third parties.

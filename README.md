@@ -7,7 +7,7 @@ It is designed to provide clarity, organisation, and insights throughout the job
 
 🌐 **Live Site:** [https://joblog.athulthampan.com/](https://joblog.athulthampan.com/)
 
-⚙️ **Browser Extension:** [Chrome Web Store](https://joblog.athulthampan.com/)
+⚙️ **Browser Extension:** [Chrome Web Store](https://chromewebstore.google.com/detail/mbbminokbdldbonjhceefnjncgadogcj?utm_source=item-share-cb)
 
 --- 
 

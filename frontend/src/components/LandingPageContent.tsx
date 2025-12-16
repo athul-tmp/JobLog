@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
-import { ArrowUpRight } from "lucide-react"; 
+import { ArrowUpRight, Chrome } from "lucide-react"; 
 
 import { useAuth } from "@/context/AuthContext";
 import Header from "@/components/Header";
@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button";
 import { ScreenshotCarousel } from "@/components/ScreenshotCarousel";
 import { toast } from "sonner";
 import { Spinner } from "@/components/ui/spinner";
+
+const CHROME_EXTENSION_URL = "https://chromewebstore.google.com/detail/mbbminokbdldbonjhceefnjncgadogcj?utm_source=item-share-cb";
 
 export default function LandingPageContent() {
   const { isAuthenticated, authLoading, login, demoEmail, demoPassword } = useAuth();
@@ -66,23 +68,42 @@ export default function LandingPageContent() {
                       JobLog is a job application tracker with detailed analytics that helps you stay organised and focused while you apply for jobs. 
                       Track every application, stay on top of interviews, and turn your job search into a clear, data-driven journey.
                   </p>
+                  <p className="mt-4 text-lg md:text-xl text-muted-foreground">
+                      Power your search with the official JobLog: Quick Add Chrome Extension.
+                  </p>
                   
-                  <div className="mt-8 flex justify-center md:justify-start space-x-4">
-                      <Link href="/register" passHref>
-                          <Button size="lg" className="h-12 text-lg px-8 shadow-lg transition duration-200 cursor-pointer">
-                              Get Started
+                  <div className="mt-8">
+                      {/* Primary CTAs */}
+                      <div className="flex justify-center md:justify-start space-x-4 mb-4">
+                          <Link href="/register" passHref>
+                              <Button size="lg" className="h-12 text-lg px-8 shadow-lg transition duration-200 cursor-pointer">
+                                  Get Started
+                              </Button>
+                          </Link>
+                          <Button 
+                              size="lg" 
+                              variant="outline" 
+                              className="h-12 text-lg px-8 border-border transition duration-200 cursor-pointer"
+                              onClick={handleDemoLogin}
+                              disabled={authLoading}
+                          >
+                              Try Demo
+                              <ArrowUpRight className="ml-2 h-5 w-5" />
                           </Button>
-                      </Link>
-                      <Button 
-                          size="lg" 
-                          variant="outline" 
-                          className="h-12 text-lg px-8 border-border transition duration-200 cursor-pointer"
-                          onClick={handleDemoLogin}
-                          disabled={authLoading}
-                      >
-                          Try Demo
-                          <ArrowUpRight className="ml-2 h-5 w-5" />
-                      </Button>
+                      </div>
+
+                      {/* Secondary CTA: Extension Link */}
+                      <div className="pt-2">
+                        <a 
+                            href={CHROME_EXTENSION_URL} 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                            <Chrome className="mr-2 h-4 w-4 text-purple-500" />
+                            Install the Free JobLog: Quick Add Extension
+                        </a>
+                      </div>
                   </div>
               </div>
 

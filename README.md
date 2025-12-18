@@ -68,7 +68,7 @@ It is designed to provide clarity, organisation, and insights throughout the job
 The application's introduction, highlighting key features and providing access to the live demo or sign-up.
 
 <div align="center">
-  <img src="frontend/public/images/joblog.png?" alt="JobLog Landing Page Screenshot" width="600">
+  <img src="frontend/public/images/dashboard1-dark.png" alt="JobLog Landing Page Screenshot" width="600">
 </div>
 
 ### Dashboard

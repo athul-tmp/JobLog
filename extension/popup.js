@@ -246,8 +246,8 @@ async function sendToBackend(jobData) {
     }
 }
 
-function contentScriptFunction() {
-
+async function contentScriptFunction() {
+    const delay = (ms) => new Promise(res => setTimeout(res, ms));
     // Scraper Functions
     
     // Scraper function for LinkedIn
@@ -381,28 +381,22 @@ function contentScriptFunction() {
         return jobData;
     }
     
-    const jobURL = window.location.href;
     const hostname = window.location.hostname;
+    for (let i = 0; i < 4; i++) {
+        let jobData = { jobTitle: null, companyName: null, jobURL: window.location.href };
 
-    let jobData = {
-        jobTitle: null,
-        companyName: null,
-        jobURL: jobURL,
-    };
+        if (hostname.includes('linkedin.com')) jobData = scrapeLinkedIn(jobData);
+        else if (hostname.includes('seek.com.au')) jobData = scrapeSeek(jobData);
+        else if (hostname.includes('indeed.com')) jobData = scrapeIndeed(jobData);
+        else jobData = scrapeGeneric(jobData);
 
-    if (hostname.includes('linkedin.com')) {
-        jobData = scrapeLinkedIn(jobData);
-    } else if (hostname.includes('seek.com.au')) {
-        jobData = scrapeSeek(jobData);
-    } else if (hostname.includes('indeed.com')) {
-        jobData = scrapeIndeed(jobData);
-    } else {
-        jobData = scrapeGeneric(jobData);
+        // If found, return
+        if (jobData.jobTitle && jobData.jobTitle !== "") return jobData;
+
+        // Otherwise, wait 250ms and try again
+        await delay(250);
     }
-    
-    jobData.jobURL = jobURL;
-
-    return jobData;
+    return scrapeGeneric({ jobTitle: null, companyName: null, jobURL: window.location.href });
 }
 
 
@@ -444,21 +438,21 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Initiate Scrape Button Listener
-    document.getElementById('initiateBtn').addEventListener('click', () => {
+    document.getElementById('initiateBtn').addEventListener('click', async () => {
         const statusMessage = document.getElementById('statusMessage');
-        const initiateBtn = document.getElementById('initiateBtn');
-
         setStatusAlert(statusMessage, 'info', 'Searching for job details...');
-        
         document.getElementById('jobFormContainer').classList.add('hidden');
 
-        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-            if (tabs.length === 0) {
+        try {
+            // 1. Get the active tab using the Promise (no callback)
+            const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
+
+            if (!activeTab) {
                 setStatusAlert(statusMessage, 'error', 'Error: No active tab found.');
                 return;
             }
-            const activeTab = tabs[0];
-            
+
+            // 2. Execute the content script
             chrome.scripting.executeScript({
                 target: { tabId: activeTab.id },
                 function: contentScriptFunction
@@ -470,7 +464,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 const jobData = results[0].result;
                 
-                if (jobData && jobData.jobTitle) {
+                if (jobData && jobData.jobTitle && jobData.jobTitle !== "Unknown Job Title") {
                     setStatusAlert(statusMessage, 'info', `Data extracted. Review and click 'Save'.`);
                     
                     document.getElementById('company').value = jobData.companyName || '';
@@ -478,13 +472,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     document.getElementById('link').value = jobData.jobURL || '';
                     
                     document.getElementById('jobFormContainer').classList.remove('hidden');
-                    
                 } else {
                     setStatusAlert(statusMessage, 'error', 'No job details found on this page. Please enter manually.');
                     document.getElementById('jobFormContainer').classList.remove('hidden');
                 }
             });
-        });
+        } catch (error) {
+            setStatusAlert(statusMessage, 'error', 'Unexpected error occurred.');
+            console.error(error);
+        }
     });
 
     // Job Form Submission Listener

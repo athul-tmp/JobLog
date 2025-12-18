@@ -1,6 +1,6 @@
 {
     "manifest_version": 3,
-    "name": "JobLog Quick Add",
+    "name": "JobLog: Quick Add",
     "version": "1.0.0",
     "description": "Quickly add job applications to JobLog from any job board.",
     "icons": {

@@ -71,7 +71,9 @@ jobs:
           flags: |
             --allow-unauthenticated 
             --max-instances 1
-            --no-cpu-throttling
+            --min-instances 0
+            --cpu-throttling
+            --no-cpu-boost
 
           # Environment secrets
           env_vars: |

@@ -51,12 +51,4 @@ jobs:
           containerAppName: ${{ env.CONTAINER_APP_NAME }}
           imageToDeploy: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
           targetPort: 8080
-          environmentVariables: |
-            ConnectionStrings__DefaultConnection=${{ secrets.NEON_CONNECTION_STRING }}
-            Jwt__Key=${{ secrets.JWT_SECRET }}
-            Jwt__Issuer=https://api.joblog.athulthampan.com
-            Jwt__Audience=https://joblog.athulthampan.com
-            Brevo__ApiKey=${{ secrets.BREVO_API_KEY }}
-            Brevo__SenderEmail=${{ secrets.BREVO_SENDER_EMAIL }}
-            Brevo__SenderName=${{ secrets.BREVO_SENDER_NAME }}
-            FrontendUrl=${{ secrets.FRONTEND_URL }}
+          environmentVariables: ConnectionStrings__DefaultConnection=${{ secrets.NEON_CONNECTION_STRING }} Jwt__Key=${{ secrets.JWT_SECRET }} Jwt__Issuer=https://api.joblog.athulthampan.com Jwt__Audience=https://joblog.athulthampan.com Brevo__ApiKey=${{ secrets.BREVO_API_KEY }} Brevo__SenderEmail=${{ secrets.BREVO_SENDER_EMAIL }} Brevo__SenderName=${{ secrets.BREVO_SENDER_NAME }} FrontendUrl=${{ secrets.FRONTEND_URL }}

@@ -1,85 +1,59 @@
-name: Deploy JobLog Backend to Cloud Run
+name: Deploy JobLog Backend to Azure
 
 on:
   push:
-    branches:
-      - main
-    paths:
-      - "backend/**"
-  workflow_dispatch:
+    branches: ["main"]
+    paths: ["backend/**"]
 
 env:
-  PROJECT_ID: joblog-athul-2025
-  SERVICE_NAME: joblog-api
-  REGION: australia-southeast1
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}-backend
+  CONTAINER_APP_NAME: joblog-api
+  RESOURCE_GROUP: joblog-resources
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # Authenticate to Google Cloud using the GitHub Secret
-      - id: "auth"
-        uses: "google-github-actions/auth@v2"
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
         with:
-          credentials_json: "${{ secrets.GCP_CREDENTIALS }}"
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      # Setup Google Cloud SDK
-      - name: "Set up Cloud SDK"
-        uses: "google-github-actions/setup-gcloud@v2"
-        with:
-          project_id: ${{ env.PROJECT_ID }}
-
-      # Configure Docker to use Artifact Registry
-      - name: "Configure Docker for Artifact Registry"
-        run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev
-
-      # Create Artifact Registry Repository
-      - name: "Create Artifact Repository"
-        run: |
-          gcloud artifacts repositories create ${{ env.SERVICE_NAME }} \
-            --repository-format=docker \
-            --location=${{ env.REGION }} \
-            --description="JobLog Backend Container Images" || true
-
-      # Build and Push the Docker Image
       - name: Build and Push Docker Image
-        run: |
-          # Define image path dynamically using shell variables
-          IMAGE_PATH="${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}"
-          IMAGE_TAG="${IMAGE_PATH}/${{ env.SERVICE_NAME }}:${{ github.sha }}"
-
-          docker build \
-            --tag $IMAGE_TAG \
-            ./backend 
-            
-          docker push $IMAGE_TAG
-          # Export the image tag so the next step (6) can use it
-          echo "DOCKER_IMAGE=$IMAGE_TAG" >> $GITHUB_ENV
-
-      # Deploy the Container Image to Cloud Run
-      - name: Deploy to Cloud Run
-        uses: google-github-actions/deploy-cloudrun@v2
+        uses: docker/build-push-action@v5
         with:
-          service: ${{ env.SERVICE_NAME }}
-          region: ${{ env.REGION }}
-          image: ${{ env.DOCKER_IMAGE }}
+          context: ./backend
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
 
-          # Pass configuration
-          flags: |
-            --allow-unauthenticated 
-            --max-instances 1
-            --min-instances 0
-            --cpu-throttling
-            --no-cpu-boost
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-          # Environment secrets
-          env_vars: |
+      - name: Deploy to Azure Container Apps
+        uses: azure/container-apps-deploy-action@v2
+        with:
+          resourceGroup: ${{ env.RESOURCE_GROUP }}
+          containerAppName: ${{ env.CONTAINER_APP_NAME }}
+          imageToDeploy: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          targetPort: 8080
+          environmentVariables: |
             ConnectionStrings__DefaultConnection=${{ secrets.NEON_CONNECTION_STRING }}
             Jwt__Key=${{ secrets.JWT_SECRET }}
-            Brevo:ApiKey=${{ secrets.BREVO_API_KEY }}
-            Brevo:SenderEmail=${{ secrets.BREVO_SENDER_EMAIL }}
-            Brevo:SenderName=${{ secrets.BREVO_SENDER_NAME }}
+            Jwt__Issuer=https://api.joblog.athulthampan.com
+            Jwt__Audience=https://joblog.athulthampan.com
+            Brevo__ApiKey=${{ secrets.BREVO_API_KEY }}
+            Brevo__SenderEmail=${{ secrets.BREVO_SENDER_EMAIL }}
+            Brevo__SenderName=${{ secrets.BREVO_SENDER_NAME }}
             FrontendUrl=${{ secrets.FRONTEND_URL }}

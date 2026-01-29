@@ -33,33 +33,8 @@ export default function LandingPage() {
         <meta name="twitter:description" content="Full-stack platform for organising and visualising your job search pipeline." />
         <meta name="twitter:image" content="https://joblog.athulthampan.com/images/joblog.png" />
       </Head>
-      
-      <div style={{ 
-        display: 'flex', 
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: '100vh',
-        width: '100%',
-        background: '#f9fafb' 
-      }}>
-        <div style={{ 
-          maxWidth: '450px', 
-          width: '100%',
-          background: 'white', 
-          padding: '40px', 
-          borderRadius: '16px', 
-          boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
-          textAlign: 'center'
-        }}>
-          <h1 style={{ fontSize: '24px', fontWeight: '700', color: '#111827', margin: '0 0 16px' }}>
-            JobLog will be back soon!
-          </h1>
-          <p style={{ fontSize: '16px', lineHeight: '1.6', color: '#4b5563', margin: '0 0 24px' }}>
-            JobLog is currently undergoing scheduled maintenance to improve services.
-          </p>
-        </div>
-      </div>
-      {/* <DynamicLandingPageContent /> */}
+  
+      <DynamicLandingPageContent />
     </>
   );
 }

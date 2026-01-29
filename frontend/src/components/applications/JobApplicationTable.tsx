@@ -35,19 +35,17 @@ const ALL_STATUSES = [
   'mid-stage interview', 
   'rejected', 
   'ghosted',
-  'oa interview', 
+  'screening interview', 
   'final interview'
 ];
 
 // Helper to format the status string for display with correct capitalisation
 const getDisplayStatus = (status: string) => {
-    if (status.toLowerCase() === 'oa interview') return 'OA Interview';
-    
     return status.replace(/\b\w/g, c => c.toUpperCase());
 };
 
 // Status badge colouring
-const getStatusVariant = (status: string): 'applied' | 'offer' | 'interview' | 'OAInterview' | 'finalInterview' | 'rejected' | 'ghosted' | 'outline' => {
+const getStatusVariant = (status: string): 'applied' | 'offer' | 'interview' | 'screeningInterview' | 'finalInterview' | 'rejected' | 'ghosted' | 'outline' => {
   switch (status.toLowerCase()) {
     case 'offer':
       return 'offer'; 
@@ -59,8 +57,8 @@ const getStatusVariant = (status: string): 'applied' | 'offer' | 'interview' | '
       return 'ghosted';
     case 'applied':
       return 'applied';
-    case 'oa interview':
-      return 'OAInterview';
+    case 'screening interview':
+      return 'screeningInterview';
     case 'final interview':
       return 'finalInterview';
     default:

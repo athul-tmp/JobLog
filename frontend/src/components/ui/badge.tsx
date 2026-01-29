@@ -24,7 +24,7 @@ const badgeVariants = cva(
           "border-transparent bg-green-600 text-primary-foreground",
         interview:
           "border-transparent bg-blue-600 text-primary-foreground",
-        OAInterview:
+        screeningInterview:
           "border-transparent bg-orange-600 text-primary-foreground",
         finalInterview:
           "border-transparent bg-purple-600 text-primary-foreground",

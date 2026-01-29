@@ -48,7 +48,7 @@ export default function InterviewTypesChart({ data }: InterviewTypesChartProps) 
     });
 
     const properOrder = [
-        { key: 'OA Interview', label: 'OA' },
+        { key: 'Screening Interview', label: 'Screening' },
         { key: 'Mid-stage Interview', label: 'Mid-stage' },
         { key: 'Final Interview', label: 'Final' },
     ];

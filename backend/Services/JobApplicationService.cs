@@ -22,10 +22,10 @@ public class JobApplicationService : IJobApplicationService
   // Application stages ranking for validation
   private static readonly Dictionary<string, int> StatusRank = new()
   {
-      { "Applied", 1 }, { "OA Interview", 2 }, { "Mid-stage Interview", 3 },
+      { "Applied", 1 }, { "Screening Interview", 2 }, { "Mid-stage Interview", 3 },
       { "Final Interview", 4 }, { "Offer", 5 }, { "Rejected", 6 }, { "Ghosted", 7 }
   };
-  private static readonly List<string> ProgressionStates = new() { "OA Interview", "Mid-stage Interview", "Final Interview" };
+  private static readonly List<string> ProgressionStates = new() { "Screening Interview", "Mid-stage Interview", "Final Interview" };
   private static readonly List<string> DefinitiveEndStates = new() { "Offer", "Rejected" };
 
   public JobApplicationService(ApplicationDbContext dbContext)

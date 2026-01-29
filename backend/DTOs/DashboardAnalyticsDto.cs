@@ -29,7 +29,7 @@ namespace backend.DTOs
         int TotalPending,        // Status == "Applied"
         int TotalInterviews,     // Total of all interview stages
         int TotalGhosted,        // Status == "Ghosted"
-        int TotalPastInterviews, // Status history == "OA Interview" / "Interview" / "Final Interview"
+        int TotalPastInterviews, // Status history == "Screening Interview" / "Interview" / "Final Interview"
 
         // Interview but Rejection/Ghosted Breakdown
         int InterviewedAndRejected,

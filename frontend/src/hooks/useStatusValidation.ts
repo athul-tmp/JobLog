@@ -2,7 +2,7 @@
 // Mirrors backend status grouping
 const StatusRank: { [key: string]: number } = {
     "Applied": 1,
-    "OA Interview": 2,
+    "Screening Interview": 2,
     "Mid-stage Interview": 3,
     "Final Interview": 4,
     "Offer": 5,
@@ -11,7 +11,7 @@ const StatusRank: { [key: string]: number } = {
 };
 
 const ALL_STATUSES = Object.keys(StatusRank);
-const ProgressionStates = ["OA Interview", "Mid-stage Interview", "Final Interview"];
+const ProgressionStates = ["Screening Interview", "Mid-stage Interview", "Final Interview"];
 const DefinitiveEndStates = ["Offer", "Rejected"];
 
 

@@ -141,10 +141,10 @@ export default function DashboardPage() {
                                     </CardContent>
                                 </Card>
 
-                                {/* Total Interviews Card */}
+                                {/* Active Interviews Card */}
                                 <Card className="ring-1 ring-primary/40">
                                     <CardHeader className="flex flex-row items-center justify-between space-y-0">
-                                        <CardTitle className="text-sm sm:text-base">Total Interviews</CardTitle>
+                                        <CardTitle className="text-sm sm:text-base">Active Interviews</CardTitle>
                                     </CardHeader>
                                     <CardContent>
                                         <div className="text-xl sm:text-2xl font-bold text-blue-600">{stats.totalInterviews}</div>

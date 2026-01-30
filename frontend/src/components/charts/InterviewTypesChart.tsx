@@ -91,5 +91,17 @@ export default function InterviewTypesChart({ data }: InterviewTypesChartProps) 
         },
     };
 
-    return <Pie data={chartData} options={options} />;
+    return (
+        <div className="flex flex-col w-full h-full min-h-[250px] max-h-[350px] overflow-hidden p-2">
+            <div className="relative flex-1" style={{ minHeight: '180px' }}>
+                <Pie data={chartData} options={options} />
+            </div>
+            
+            <div className="mt-5 py-2 border-t border-border/50">
+                <p className="text-center text-sm text-foreground">
+                    Total Active Interviews: <span className="font-bold">{totalActiveInterviews}</span>
+                </p>
+            </div>
+        </div>
+    );
 }

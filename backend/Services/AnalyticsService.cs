@@ -28,7 +28,7 @@ public class AnalyticsService : IAnalyticsService
 
         if (!applications.Any())
         {
-            return new DashboardAnalyticsDto(0, 0, 0, 0, 0, 0, 0, 0, 0, new List<MonthlyApplications>(), new List<InterviewBreakdown>(), new List<ApplicationsPerDay>());
+            return new DashboardAnalyticsDto(0, 0, 0, 0, 0, 0, 0, 0, 0, new List<InterviewBreakdown>(), new List<MonthlyApplications>(), new List<InterviewBreakdown>(), new List<ApplicationsPerDay>());
         }
 
         // Analytics to show
@@ -110,6 +110,19 @@ public class AnalyticsService : IAnalyticsService
             .OrderBy(d => DateTime.ParseExact(d.Date, "MMM dd", null))
             .ToList();
 
+        // Every interview ever
+        var historicalInterviewBreakdown = await _dbContext.JobStatusHistories
+            .Where(h => h.JobApplication.UserId == userId &&
+                (h.Status == "Screening Interview" ||
+                h.Status == "Mid-stage Interview" ||
+                h.Status == "Final Interview"))
+            .GroupBy(h => h.Status)
+            .Select(g => new InterviewBreakdown(
+                g.Key,
+                g.Count()
+            ))
+            .ToListAsync();
+
 
         // Return Final DTO
         return new DashboardAnalyticsDto(
@@ -122,6 +135,7 @@ public class AnalyticsService : IAnalyticsService
             TotalPastInterviews: totalPastInterviews,
             InterviewedAndRejected: interviewedAndRejected,
             InterviewedAndGhosted: interviewedAndGhosted,
+            HistoricalInterviewBreakdown: historicalInterviewBreakdown,
             MonthlyTrend: monthlyTrend,
             InterviewTypeBreakdown: interviewTypeBreakdown,
             ApplicationsPerDay: applicationsPerDay

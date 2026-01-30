@@ -86,6 +86,7 @@ export interface DashboardAnalytics {
   interviewedAndRejected: number;
   interviewedAndGhosted: number;
 
+  historicalInterviewBreakdown: InterviewBreakdown[];
   interviewTypeBreakdown: InterviewBreakdown[];
   monthlyTrend: MonthlyApplications[];
   applicationsPerDay: ApplicationsPerDay[];

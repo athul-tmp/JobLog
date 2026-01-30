@@ -13,7 +13,8 @@ import { Spinner } from "@/components/ui/spinner"
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ArrowUp, ArrowDown } from "lucide-react";
 
-import StageBreakdownChart from "@/components/charts/StageBreakdownChart";
+// import StageBreakdownChart from "@/components/charts/StageBreakdownChart";
+import HistoricalInterviewsChart from "@/components/charts/HistoricalInterviewsChart";
 import InterviewOutcomesChart from "@/components/charts/InterviewOutcomesChart";
 import InterviewTypesChart from "@/components/charts/InterviewTypesChart";
 import DailyTrendChart from "@/components/charts/DailyTrendChart";
@@ -189,13 +190,23 @@ export default function DashboardPage() {
                             
                             {/* Pie Charts Section */}
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {/* Application Breakdown Chart */}
+                                {/* Active Interview Types */}
                                 <Card className="ring-1 ring-primary/40">
                                     <CardHeader>
-                                        <CardTitle className="text-sm sm:text-base text-center sm:text-left">Application Stages Breakdown</CardTitle>
+                                        <CardTitle className="text-sm sm:text-base text-center sm:text-left">Active Interview Stages Breakdown</CardTitle>
                                     </CardHeader>
                                     <CardContent className="h-[250px] sm:h-[300px] flex items-center justify-center">
-                                        <StageBreakdownChart data={stats} />
+                                        <InterviewTypesChart data={stats.interviewTypeBreakdown} /> 
+                                    </CardContent>
+                                </Card>
+
+                                {/* All Interview Types */}
+                                <Card className="ring-1 ring-primary/40">
+                                    <CardHeader>
+                                        <CardTitle className="text-sm sm:text-base text-center sm:text-left">All Interview Stages Breakdown</CardTitle>
+                                    </CardHeader>
+                                    <CardContent className="h-[250px] sm:h-[300px] flex items-center justify-center">
+                                        <HistoricalInterviewsChart data={stats.historicalInterviewBreakdown} />
                                     </CardContent>
                                 </Card>
 
@@ -206,16 +217,6 @@ export default function DashboardPage() {
                                     </CardHeader>
                                     <CardContent className="h-[250px] sm:h-[300px] flex items-center justify-center">
                                         <InterviewOutcomesChart data={stats} /> 
-                                    </CardContent>
-                                </Card>
-
-                                {/* Interview Types */}
-                                <Card className="ring-1 ring-primary/40">
-                                    <CardHeader>
-                                        <CardTitle className="text-sm sm:text-base text-center sm:text-left">Active Interview Breakdown</CardTitle>
-                                    </CardHeader>
-                                    <CardContent className="h-[250px] sm:h-[300px] flex items-center justify-center">
-                                        <InterviewTypesChart data={stats.interviewTypeBreakdown} /> 
                                     </CardContent>
                                 </Card>
                             </div>

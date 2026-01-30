@@ -36,6 +36,7 @@ namespace backend.DTOs
         int InterviewedAndGhosted,
 
         // Chart Data
+        List<InterviewBreakdown> HistoricalInterviewBreakdown,
         List<MonthlyApplications> MonthlyTrend,
         List<InterviewBreakdown> InterviewTypeBreakdown,
         List<ApplicationsPerDay> ApplicationsPerDay

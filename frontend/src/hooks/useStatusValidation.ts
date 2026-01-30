@@ -11,9 +11,7 @@ const StatusRank: { [key: string]: number } = {
 };
 
 const ALL_STATUSES = Object.keys(StatusRank);
-const ProgressionStates = ["Screening Interview", "Mid-stage Interview", "Final Interview"];
-const DefinitiveEndStates = ["Offer", "Rejected"];
-
+const DefinitiveEndStates = ["Offer", "Rejected", "Ghosted"];
 
 export const useStatusValidation = () => {
 
@@ -25,9 +23,8 @@ export const useStatusValidation = () => {
 
         // Block movement out of definitive end states
         if (DefinitiveEndStates.includes(currentStatus)) {
-            return DefinitiveEndStates.filter(s => s !== currentStatus);
+            return [currentStatus];
         }
-
         
         const validNextStatuses = ALL_STATUSES.filter(newStatus => {
             const newRank = StatusRank[newStatus];
@@ -36,23 +33,8 @@ export const useStatusValidation = () => {
                 return false;
             }
 
-            // Block backward movement within Interview states
-            if (ProgressionStates.includes(currentStatus) && ProgressionStates.includes(newStatus)) {
-                return newRank >= currentRank;
-            }
-            
-            // Allow movement out of Ghosted to any ProgressionStates or DefinitiveEndStates
-            if (currentStatus === "Ghosted") {
-                return true; 
-            }
-
-            // Applied moving to any status allowed
-            if (currentRank < newRank) {
-                return true;
-            }
-            
-            // Allow moving from any status to an End State (Offer/Rejected/Ghosted)
-            if (DefinitiveEndStates.includes(newStatus) || newStatus === "Ghosted") {
+            // Only allow moving to any "higher" rank status (Forward progression)
+            if (newRank > currentRank) {
                 return true;
             }
 

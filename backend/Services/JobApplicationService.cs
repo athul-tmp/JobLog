@@ -129,22 +129,54 @@ public class JobApplicationService : IJobApplicationService
         throw new InvalidOperationException($"Invalid status value: {newStatus}.");
       }
 
-      // Block status movement back to applied 
+      // // Block status movement back to applied 
+      // if (newStatus == "Applied")
+      // {
+      //   throw new InvalidOperationException("Cannot move status back to 'Applied' from any progressed stage.");
+      // }
+
+      // // Block status movement out of end states (Offer / Rejected)
+      // if (DefinitiveEndStates.Contains(currentStatus))
+      // {
+      //   if (!DefinitiveEndStates.Contains(newStatus))
+      //   {
+      //     throw new InvalidOperationException($"Cannot move application out of definitive end state: {currentStatus}. Only transition between Offer and Rejected is allowed.");
+      //   }
+      // }
+
+      // // Block backward progression within interviews
+      // if (ProgressionStates.Contains(currentStatus) && ProgressionStates.Contains(newStatus))
+      // {
+      //   var currentRank = StatusRank[currentStatus];
+      //   var newRank = StatusRank[newStatus];
+
+      //   if (newRank < currentRank)
+      //   {
+      //     throw new InvalidOperationException($"Cannot move backward from {currentStatus} to {newStatus}.");
+      //   }
+      // }
+
+      // If current state is an End State, no manual updates allowed.
+      // End States: Offer, Rejected, Ghosted
+      var isCurrentEndState = currentStatus == "Offer" ||
+                              currentStatus == "Rejected" ||
+                              currentStatus == "Ghosted";
+
+      if (isCurrentEndState)
+      {
+        throw new InvalidOperationException(
+            $"Application is in a definitive state ({currentStatus}). " +
+            "Manual transitions are disabled. Use 'Undo' to revert to a previous stage.");
+      }
+
+      // Moving back to "Applied"
       if (newStatus == "Applied")
       {
-        throw new InvalidOperationException("Cannot move status back to 'Applied' from any progressed stage.");
+        throw new InvalidOperationException("Cannot move status back to 'Applied'. Use 'Undo' instead.");
       }
 
-      // Block status movement out of end states (Offer / Rejected)
-      if (DefinitiveEndStates.Contains(currentStatus))
-      {
-        if (!DefinitiveEndStates.Contains(newStatus))
-        {
-          throw new InvalidOperationException($"Cannot move application out of definitive end state: {currentStatus}. Only transition between Offer and Rejected is allowed.");
-        }
-      }
-
-      // Block backward progression within interviews
+      // Backward progression within Interview stages
+      // (e.g., Final -> Mid-stage is blocked)
       if (ProgressionStates.Contains(currentStatus) && ProgressionStates.Contains(newStatus))
       {
         var currentRank = StatusRank[currentStatus];

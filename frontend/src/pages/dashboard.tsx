@@ -96,7 +96,7 @@ export default function DashboardPage() {
     const MonthlyTrendIcon = MonthlyIncrease > 0 ? ArrowUp : ArrowDown;
     const monthlyColor = MonthlyIncrease > 0 ? "text-green-600" : "text-red-600";
     
-
+    console.log("Full Stats Object:", stats);
     return (
         <>
             <Head>

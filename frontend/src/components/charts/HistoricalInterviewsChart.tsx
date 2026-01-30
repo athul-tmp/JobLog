@@ -83,8 +83,8 @@ export default function HistoricalInterviewsChart({ data }: HistoricalInterviews
             },
         },
     };
-
-    return (
+    
+    return (    
         <div className="flex flex-col w-full h-full min-h-[250px] max-h-[350px] overflow-hidden p-2">
             <div className="relative flex-1" style={{ minHeight: '180px' }}>
                 <Pie data={chartData} options={options} />

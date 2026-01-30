@@ -112,17 +112,13 @@ public class AnalyticsService : IAnalyticsService
 
         // Every interview ever
         var historicalInterviewBreakdown = await _dbContext.JobStatusHistories
-            .Where(h => h.JobApplication.UserId == userId &&
-                (h.Status == "Screening Interview" ||
-                h.Status == "Mid-stage Interview" ||
-                h.Status == "Final Interview"))
+            .Where(h => h.JobApplication.UserId == userId && h.Status.Contains("Interview"))
             .GroupBy(h => h.Status)
             .Select(g => new InterviewBreakdown(
                 g.Key,
                 g.Count()
             ))
             .ToListAsync();
-
 
         // Return Final DTO
         return new DashboardAnalyticsDto(

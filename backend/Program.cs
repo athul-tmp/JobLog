@@ -103,20 +103,20 @@ builder.Services.Configure<CookiePolicyOptions>(options =>
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    try
-    {
-        var dbContext = services.GetRequiredService<ApplicationDbContext>();
-        dbContext.Database.Migrate();
-        Console.WriteLine("INFO: Successfully applied Entity Framework Core migrations.");
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"ERROR: Failed to apply migrations. {ex.Message}");
-    }
-}
+// using (var scope = app.Services.CreateScope())
+// {
+//     var services = scope.ServiceProvider;
+//     try
+//     {
+//         var dbContext = services.GetRequiredService<ApplicationDbContext>();
+//         dbContext.Database.Migrate();
+//         Console.WriteLine("INFO: Successfully applied Entity Framework Core migrations.");
+//     }
+//     catch (Exception ex)
+//     {
+//         Console.WriteLine($"ERROR: Failed to apply migrations. {ex.Message}");
+//     }
+// }
 
 app.UseForwardedHeaders();
 

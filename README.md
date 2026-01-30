@@ -35,7 +35,7 @@ It is designed to provide clarity, organisation, and insights throughout the job
 ### Dashboard & Analytics
 * **Key Metrics:** Track total applications, offers, rejections, interviews, etc.
 * **Visual Insights:**
-    * Application Stage Breakdown, Interview Type Breakdown & Interview Outcomes (Chart.js Pie Charts).
+    * Active Interview Type Breakdown, Past Interview Type Breakdown and Interview Outcomes (Chart.js Pie Charts).
     * Daily Application Trend Line Chart with monthly comparison.
     * Application Flow Visualisation (Google Charts Sankey).
  
@@ -77,7 +77,7 @@ The analytics hub where you can visualise your job search.
 
 **1. Key metrics, Stages, & Outcomes**
 
-The high-level summary of all activity, coupled with application stage breakdowns and interview outcomes.
+The high-level summary of all activity, coupled with interview stage breakdowns and interview outcomes.
 
 <div align="center">
   <img src="frontend/public/images/dashboard1-dark.png" alt="Dashboard Metrics and Pie Charts Screenshot" width="600">

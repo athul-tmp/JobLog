@@ -196,7 +196,7 @@ export default function DashboardPage() {
                                         <CardTitle className="text-sm sm:text-base text-center sm:text-left">Active Interview Stages Breakdown</CardTitle>
                                     </CardHeader>
                                     <CardContent className="h-[250px] sm:h-[300px] flex items-center justify-center">
-                                        <InterviewTypesChart data={stats.interviewTypeBreakdown} /> 
+                                        <InterviewTypesChart data={stats.interviewTypeBreakdown || []} /> 
                                     </CardContent>
                                 </Card>
 
@@ -206,7 +206,7 @@ export default function DashboardPage() {
                                         <CardTitle className="text-sm sm:text-base text-center sm:text-left">All Interview Stages Breakdown</CardTitle>
                                     </CardHeader>
                                     <CardContent className="h-[250px] sm:h-[300px] flex items-center justify-center">
-                                        <HistoricalInterviewsChart data={stats.historicalInterviewBreakdown} />
+                                        <HistoricalInterviewsChart data={stats.historicalInterviewBreakdown || [] } />
                                     </CardContent>
                                 </Card>
 
@@ -216,7 +216,7 @@ export default function DashboardPage() {
                                         <CardTitle className="text-sm sm:text-base text-center sm:text-left">All Interview Outcomes</CardTitle>
                                     </CardHeader>
                                     <CardContent className="h-[250px] sm:h-[300px] flex items-center justify-center">
-                                        <InterviewOutcomesChart data={stats} /> 
+                                        <InterviewOutcomesChart data={stats || []} /> 
                                     </CardContent>
                                 </Card>
                             </div>

@@ -64,8 +64,8 @@ export default function InterviewTypesChart({ data }: InterviewTypesChartProps) 
                 label: 'Interview Types',
                 data: properCount,
                 backgroundColor: TYPE_COLORS,
-                borderColor: ['#000000'], 
-                borderWidth: 1,
+                borderColor: themeKey === 'dark' ? '#1e293b' : '#ffffff',
+                borderWidth: 2,
             },
         ],
     };
@@ -78,13 +78,13 @@ export default function InterviewTypesChart({ data }: InterviewTypesChartProps) 
                 position: 'right' as const,
                 labels: {
                     color: themeColors.textColor,
+                    font: { size: 12 }
                 },
             },
             tooltip: {
                 callbacks: {
                     label: ({ label, raw }: TooltipItem<'pie'>) => {
-                        const count = raw as number;
-                        return `${label}: ${count} jobs`;
+                        return ` ${label}: ${raw} total`;
                     },
                 },
             },

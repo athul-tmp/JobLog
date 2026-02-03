@@ -103,6 +103,7 @@ builder.Services.Configure<CookiePolicyOptions>(options =>
 
 var app = builder.Build();
 
+// For local dev
 // using (var scope = app.Services.CreateScope())
 // {
 //     var services = scope.ServiceProvider;

@@ -49,16 +49,25 @@ jobs:
         with:
           inlineScript: |
             az extension add --name containerapp --upgrade
+
+            az containerapp secret set \
+              --name ${{ env.CONTAINER_APP_NAME }} \
+              --resource-group ${{ env.RESOURCE_GROUP }} \
+              --secrets \
+                "db-conn=${{ secrets.NEON_CONNECTION_STRING }}" \
+                "jwt-key=${{ secrets.JWT_SECRET }}" \
+                "brevo-key=${{ secrets.BREVO_API_KEY }}"
+
             az containerapp update \
               --name ${{ env.CONTAINER_APP_NAME }} \
               --resource-group ${{ env.RESOURCE_GROUP }} \
               --image ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest \
               --replace-env-vars \
-                "ConnectionStrings__DefaultConnection=${{ secrets.NEON_CONNECTION_STRING }}" \
-                "Jwt__Key=${{ secrets.JWT_SECRET }}" \
+                "ConnectionStrings__DefaultConnection=secretref:db-conn" \
+                "Jwt__Key=secretref:jwt-key" \
+                "Brevo__ApiKey=secretref:brevo-key" \
                 "Jwt__Issuer=https://api.joblog.athulthampan.com" \
                 "Jwt__Audience=https://joblog.athulthampan.com" \
-                "Brevo__ApiKey=${{ secrets.BREVO_API_KEY }}" \
                 "Brevo__SenderEmail=${{ secrets.BREVO_SENDER_EMAIL }}" \
                 "Brevo__SenderName=${{ secrets.BREVO_SENDER_NAME }}" \
                 "FrontendUrl=${{ secrets.FRONTEND_URL }}"

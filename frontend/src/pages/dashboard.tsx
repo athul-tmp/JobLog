@@ -77,16 +77,29 @@ export default function DashboardPage() {
     const isReady = !isDataLoading && stats;
 
     // Variables for retrieving month data 
+    const realTimeMonth = new Date().toLocaleDateString('en-US', { 
+        month: 'short', 
+        year: 'numeric' 
+    });
+
     const monthlyTrendArray = stats?.monthlyTrend ?? [];
-    const monthlyTrendLength = monthlyTrendArray.length;
+    const lastEntry = monthlyTrendArray[monthlyTrendArray.length - 1];
 
-    const currentMonthData = monthlyTrendLength > 0 ? monthlyTrendArray[monthlyTrendLength - 1] : null;
-    const previousMonthData = monthlyTrendLength > 1 ? monthlyTrendArray[monthlyTrendLength - 2] : null;
+    // Check if the database's latest entry matches the real-world month
+    const isDataUpToDate = lastEntry?.monthYear === realTimeMonth;
 
-    const currentMonthName = currentMonthData?.monthYear ?? 'Current Month';
-    const previousMonthName = previousMonthData?.monthYear ?? 'Previous Month';
-    const currentMonthCount = currentMonthData?.count ?? 0;
+    // If the DB is up to date, use the last entry. Otherwise, it's 0 apps for this month.
+    const currentMonthCount = isDataUpToDate ? lastEntry.count : 0;
+    const currentMonthName = realTimeMonth;
+
+    // If the DB is up to date, the previous month is the 2nd to last item.
+    // If the DB hasn't started this month yet, the "lastEntry" is the previous month.
+    const previousMonthData = isDataUpToDate 
+        ? (monthlyTrendArray[monthlyTrendArray.length - 2] ?? null)
+        : lastEntry;
+
     const previousMonthCount = previousMonthData?.count ?? 0;
+    const previousMonthName = previousMonthData?.monthYear ?? 'Previous Month';
 
     // Monthly Increase Calculation 
     const MonthlyIncrease = previousMonthCount > 0

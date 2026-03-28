@@ -174,7 +174,7 @@ export default function AddJobApplicationDialog({ onJobAdded }: AddJobApplicatio
                                 <FormItem>
                                     <FormLabel>Notes (Optional)</FormLabel>
                                     <FormControl>
-                                        <Textarea {...field} />
+                                        <Textarea placeholder="Location, salary, or other details (optional)" {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>

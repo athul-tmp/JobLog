@@ -179,7 +179,7 @@ export default function EditJobApplicationDialog({ job, isOpen, onClose, onJobUp
                                 <FormItem>
                                     <FormLabel>Notes (Optional)</FormLabel>
                                     <FormControl>
-                                        <Textarea rows={4} {...field} />
+                                        <Textarea placeholder="Location, salary, or other details (optional)" rows={4} {...field} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>

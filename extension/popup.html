@@ -362,13 +362,16 @@
         <div id="jobFormContainer" class="hidden">
             <form id="jobForm">
                 <label for="company">Company</label>
-                <input type="text" id="company" name="company"> <span id="companyError" class="validation-error hidden"></span>
+                <input type="text" id="company" name="company" placeholder="Company Name"> <span id="companyError" class="validation-error hidden"></span>
 
-                <label for="role">Role / Title</label>
-                <input type="text" id="role" name="role"> <span id="roleError" class="validation-error hidden"></span>
+                <label for="role">Role/Title</label>
+                <input type="text" id="role" name="role" placeholder="Job Title"> <span id="roleError" class="validation-error hidden"></span>
 
-                <label for="link">Job Posting URL</label>
-                <input type="text" id="link" name="link"> <span id="linkError" class="validation-error hidden"></span>
+                <label for="link">Job Posting URL (Optional)</label>
+                <input type="text" id="link" name="link" placeholder="https://..">
+
+                <label for="notes">Notes (Optional)</label>
+                <input type="text" id="notes" name="notes" placeholder="Location, salary, or other details (optional)">
                 
                 <button type="submit" id="submitBtn">Save Application</button>
             </form>

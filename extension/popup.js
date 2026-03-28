@@ -79,7 +79,6 @@ function clearAllFormErrors(formType) {
     } else if (formType === 'job') {
         setInputError('companyError', '');
         setInputError('roleError', '');
-        setInputError('linkError', '');
         document.getElementById('statusMessage').classList.add('hidden');
     }
 }
@@ -201,6 +200,7 @@ async function sendToBackend(jobData) {
             company: jobData.companyName,
             role: jobData.jobTitle,
             jobPostingUrl: jobData.jobURL,
+            notes: jobData.notes || '',
             status: finalStatus, 
             dateApplied: new Date().toISOString().substring(0, 10) 
         };
@@ -493,6 +493,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const company = document.getElementById('company').value.trim();
         const role = document.getElementById('role').value.trim();
         const link = document.getElementById('link').value.trim();
+        const notes = document.getElementById('notes').value.trim();
 
         let hasError = false;
         if (!company) {
@@ -501,10 +502,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (!role) {
             setInputError('roleError', "Role/Title is required.");
-            hasError = true;
-        }
-        if (!link) {
-            setInputError('linkError', "Job URL is required.");
             hasError = true;
         }
 
@@ -518,7 +515,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const finalJobData = {
             companyName: company,
             jobTitle: role,
-            jobURL: link
+            jobURL: link,
+            notes: notes
         };
 
         sendToBackend(finalJobData);

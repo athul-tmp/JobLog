@@ -386,7 +386,7 @@ async function contentScriptFunction() {
         let jobData = { jobTitle: null, companyName: null, jobURL: window.location.href };
 
         if (hostname.includes('linkedin.com')) jobData = scrapeLinkedIn(jobData);
-        else if (hostname.includes('seek.com.au')) jobData = scrapeSeek(jobData);
+        else if (hostname.includes('seek.com')) jobData = scrapeSeek(jobData);
         else if (hostname.includes('indeed.com')) jobData = scrapeIndeed(jobData);
         else jobData = scrapeGeneric(jobData);
 

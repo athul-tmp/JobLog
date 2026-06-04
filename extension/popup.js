@@ -215,16 +215,13 @@ async function sendToBackend(jobData) {
         });
 
         if (response.ok) {
-            // Hide all job interaction elements, only show the success message.
             setStatusAlert(statusMessage, 'success', `SUCCESS: Job '${jobData.jobTitle}' added!`);
             
             jobFormContainer.classList.add('hidden');
             initiateBtn.classList.add('hidden');
             
-            // Re-enable the submit button for the next time the form is used
             submitBtn.disabled = false; 
 
-            // Automatically close the window after a delay
             setTimeout(() => {
                 window.close(); 
             }, 1500);
@@ -239,7 +236,6 @@ async function sendToBackend(jobData) {
     } catch (error) {
         setStatusAlert(statusMessage, 'error', `Network Error: Could not reach JobLog API.`);
     } finally {
-        // Only re-enable the submit button on failure
         if (!statusMessage.classList.contains('alert-success')) {
             submitBtn.disabled = false;
         }
@@ -253,7 +249,6 @@ async function contentScriptFunction() {
     // Scraper function for LinkedIn
     function scrapeLinkedIn(jobData) {
         try {
-            // Target the right-hand panel in split views, or fallback to the full document
             const panel = document.querySelector('.job-view-layout, .jobs-search__job-details--container') || document;
 
             // 1. Extract Job Title
@@ -270,7 +265,6 @@ async function contentScriptFunction() {
                 }
             }
 
-            // Fallback to checking classes and company links
             if (!jobData.companyName) {
                 const companySelectors = [
                     '.job-details-jobs-unified-top-card__company-name a',
@@ -285,7 +279,6 @@ async function contentScriptFunction() {
                     const el = panel.querySelector(selector);
                     if (el && el.textContent.trim()) {
                         const text = el.textContent.replace(/\s+/g, ' ').trim();
-                        // Ignore standard buttons
                         if (text && !['Save', 'Apply'].includes(text)) {
                             jobData.companyName = text;
                             break;
@@ -294,7 +287,22 @@ async function contentScriptFunction() {
                 }
             }
 
-            // Fallack: Extract from Document Title
+            // 3. Extract Location
+            const locationSelectors = [
+                '.job-details-jobs-unified-top-card__primary-description span:nth-of-type(2)',
+                '.job-details-jobs-unified-top-card__subtitle-primary-grouping span:nth-of-type(2)',
+                '.topcard__flavor--bullet:nth-of-type(2)',
+                'span.job-details-jobs-unified-top-card__bullet'
+            ];
+            for (const selector of locationSelectors) {
+                const el = panel.querySelector(selector);
+                if (el && el.textContent.trim() && !el.textContent.includes('·')) {
+                    jobData.location = el.textContent.trim();
+                    break;
+                }
+            }
+
+            // Fallback: Extract from Document Title
             if (!jobData.companyName || !jobData.jobTitle) {
                 const docTitle = document.title.replace(/^\(\d+\)\s*/, '');
                 
@@ -331,7 +339,6 @@ async function contentScriptFunction() {
 
             if (!titleElement || !companyElement) {
                 titleElement = document.querySelector('h3._1dyjaus0');
-                
                 if (titleElement) {
                     companyElement = titleElement.nextElementSibling;
                 }
@@ -342,12 +349,9 @@ async function contentScriptFunction() {
             }
 
             if (companyElement && companyElement.tagName === 'SPAN') {
-                let name = '';
-                name = companyElement.textContent;
-                
+                let name = companyElement.textContent;
                 if (name) {
                     name = name.trim();
-                    
                     name = name.replace(/\s\(\w{3}\)$/i, '').trim(); 
                     name = name.replace(/Verified$/i, '').trim(); 
                 }
@@ -359,6 +363,12 @@ async function contentScriptFunction() {
                 }
             } else {
                  jobData.companyName = 'Unknown Company';
+            }
+
+            // Extract Location
+            const locationElement = document.querySelector('[data-automation="job-detail-location"]');
+            if (locationElement) {
+                jobData.location = locationElement.textContent.trim();
             }
 
         } catch (e) {
@@ -374,26 +384,29 @@ async function contentScriptFunction() {
             if (titleElement) {
                 let title = titleElement.textContent.trim();
                 title = title.replace(/\s*[-\(]?\s*job post\s*[\)]?/i, '').trim(); 
-        
                 jobData.jobTitle = title;
             }
 
             const companyElement = document.querySelector('[data-testid="inlineHeader-companyName"] a');
             if (companyElement) {
                 let name = companyElement.textContent.trim();
-                
                 const parentSpan = companyElement.closest('span');
                 if (parentSpan) {
                      name = parentSpan.textContent.trim();
                      name = name.replace(/View all jobs/i, '').trim(); 
                 }
-                
                 jobData.companyName = name;
             } else {
                 const companySpan = document.querySelector('[data-testid="inlineHeader-companyName"] span');
                 if (companySpan) {
                     jobData.companyName = companySpan.textContent.trim();
                 }
+            }
+
+            // Extract Location
+            const locationElement = document.querySelector('[data-testid="inlineHeader-companyLocation"]');
+            if (locationElement) {
+                jobData.location = locationElement.textContent.trim();
             }
         } catch (e) {
             console.error("Indeed scraping failed:", e);
@@ -414,20 +427,18 @@ async function contentScriptFunction() {
     
     const hostname = window.location.hostname;
     for (let i = 0; i < 4; i++) {
-        let jobData = { jobTitle: null, companyName: null, jobURL: window.location.href };
+        let jobData = { jobTitle: null, companyName: null, jobURL: window.location.href, location: null };
 
         if (hostname.includes('linkedin.com')) jobData = scrapeLinkedIn(jobData);
         else if (hostname.includes('seek.com')) jobData = scrapeSeek(jobData);
         else if (hostname.includes('indeed.com')) jobData = scrapeIndeed(jobData);
         else jobData = scrapeGeneric(jobData);
 
-        // If found, return
         if (jobData.jobTitle && jobData.jobTitle !== "") return jobData;
 
-        // Otherwise, wait 250ms and try again
         await delay(250);
     }
-    return scrapeGeneric({ jobTitle: null, companyName: null, jobURL: window.location.href });
+    return scrapeGeneric({ jobTitle: null, companyName: null, jobURL: window.location.href, location: null });
 }
 
 
@@ -435,26 +446,20 @@ async function contentScriptFunction() {
 document.addEventListener('DOMContentLoaded', () => {
     checkAuthAndRender(); 
     
-    // Theme Toggle Listener
     const themeToggleBtn = document.getElementById('theme-toggle-btn');
     if (themeToggleBtn) {
         themeToggleBtn.addEventListener('click', toggleTheme);
     }
     
-    // Login Form Listener
     document.getElementById('loginForm').addEventListener('submit', handleLogin);
-    
-    // Logout Button Listener
     document.getElementById('header-logout-btn').addEventListener('click', handleLogout);
 
-    // Password Toggle Listener
     const passwordInput = document.getElementById('password');
     const passwordToggleBtn = document.getElementById('password-toggle');
     const eyeIcon = document.getElementById('eye-icon');
     const eyeOffIcon = document.getElementById('eye-off-icon');
 
     passwordToggleBtn.addEventListener('click', () => {
-        // Toggle the input type and icon
         if (passwordInput.type === 'password') {
             passwordInput.type = 'text';
             eyeIcon.classList.add('hidden');
@@ -475,7 +480,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('jobFormContainer').classList.add('hidden');
 
         try {
-            // 1. Get the active tab using the Promise (no callback)
             const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
             if (!activeTab) {
@@ -483,7 +487,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // 2. Execute the content script
             chrome.scripting.executeScript({
                 target: { tabId: activeTab.id },
                 function: contentScriptFunction
@@ -501,6 +504,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     document.getElementById('company').value = jobData.companyName || '';
                     document.getElementById('role').value = jobData.jobTitle || '';
                     document.getElementById('link').value = jobData.jobURL || '';
+                    
+                    // Pre-fill location into the notes field if it's found
+                    if (jobData.location) {
+                        document.getElementById('notes').value = `${jobData.location}`;
+                    } else {
+                        document.getElementById('notes').value = '';
+                    }
                     
                     document.getElementById('jobFormContainer').classList.remove('hidden');
                 } else {

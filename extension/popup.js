@@ -253,39 +253,70 @@ async function contentScriptFunction() {
     // Scraper function for LinkedIn
     function scrapeLinkedIn(jobData) {
         try {
-            const titleContainer = document.querySelector('div.job-details-jobs-unified-top-card__job-title');
-            if (titleContainer) {
-                const h1 = titleContainer.querySelector('h1.t-24.t-bold.inline');
-                const titleLink = h1.querySelector('a');
-                if (titleLink) {
-                    jobData.jobTitle = titleLink.textContent.trim();
-                } 
-                else {
-                    jobData.jobTitle = h1.textContent.trim();
-                }
+            // Target the right-hand panel in split views, or fallback to the full document
+            const panel = document.querySelector('.job-view-layout, .jobs-search__job-details--container') || document;
+
+            // 1. Extract Job Title
+            const titleEl = panel.querySelector('h1 a, h1, h2.top-card-layout__title, .job-details-jobs-unified-top-card__job-title');
+            if (titleEl) {
+                jobData.jobTitle = titleEl.textContent.trim();
             }
-            
-            const companyContainer = document.querySelector('div.job-details-jobs-unified-top-card__company-name');
-            if (companyContainer) {
-                const companyLink = companyContainer.querySelector('a');
-                if (companyLink) {
-                    jobData.companyName = companyLink.textContent.trim().replace(/\s+/g, ' '); 
+
+            // 2. Extract Company Name
+            for (const el of panel.querySelectorAll('[aria-label^="Company, "]')) {
+                if (el.tagName !== 'svg') {
+                    jobData.companyName = el.getAttribute('aria-label').replace(/^Company,\s*/, '').replace(/\.$/, '').trim();
+                    break;
                 }
             }
 
-            if (!jobData.jobTitle) {
-                const altTitleElement = document.querySelector('h2.top-card-layout__title');
-                if (altTitleElement) {
-                    jobData.jobTitle = altTitleElement.textContent.trim();
-                }
-            }
+            // Fallback to checking classes and company links
             if (!jobData.companyName) {
-                const altCompanyElement = document.querySelector('a.topcard__flavor--link');
-                if (altCompanyElement) {
-                    jobData.companyName = altCompanyElement.textContent.trim();
+                const companySelectors = [
+                    '.job-details-jobs-unified-top-card__company-name a',
+                    '.job-details-jobs-unified-top-card__company-name',
+                    '.job-details-jobs-unified-top-card__primary-description a.app-aware-link',
+                    '.job-details-jobs-unified-top-card__subtitle-primary-grouping a.app-aware-link',
+                    'a.topcard__flavor--link',
+                    'a.topcard__org-name-link',
+                    '.job-details-jobs-unified-top-card a[href*="/company/"]'
+                ];
+                for (const selector of companySelectors) {
+                    const el = panel.querySelector(selector);
+                    if (el && el.textContent.trim()) {
+                        const text = el.textContent.replace(/\s+/g, ' ').trim();
+                        // Ignore standard buttons
+                        if (text && !['Save', 'Apply'].includes(text)) {
+                            jobData.companyName = text;
+                            break;
+                        }
+                    }
                 }
             }
 
+            // Fallack: Extract from Document Title
+            if (!jobData.companyName || !jobData.jobTitle) {
+                const docTitle = document.title.replace(/^\(\d+\)\s*/, '');
+                
+                if (!docTitle.toLowerCase().includes(' jobs ')) {
+                    const matchAt = docTitle.match(/(.*?)\s+at\s+(.*?)(?:\s+|\|)/i);
+                    const matchHiring = docTitle.match(/(.*?)\s+hiring\s+(.*?)\s+in\s+/i);
+                    
+                    if (matchAt) {
+                        jobData.jobTitle = jobData.jobTitle || matchAt[1].trim();
+                        jobData.companyName = jobData.companyName || matchAt[2].trim();
+                    } else if (matchHiring) {
+                        jobData.companyName = jobData.companyName || matchHiring[1].trim();
+                        jobData.jobTitle = jobData.jobTitle || matchHiring[2].trim();
+                    } else {
+                        const parts = docTitle.split('|').map(p => p.trim());
+                        if (parts.length >= 2) {
+                            jobData.jobTitle = jobData.jobTitle || parts[0];
+                            jobData.companyName = jobData.companyName || parts[1];
+                        }
+                    }
+                }
+            }
         } catch (e) {
             console.error("LinkedIn scraping failed:", e);
         }

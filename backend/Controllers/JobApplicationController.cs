@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using System.Security.Claims;
 using backend.DTOs;
+using backend.Hubs;
 using backend.Models;
 
 [Authorize] // JWT Auth
@@ -10,10 +12,14 @@ using backend.Models;
 public class JobApplicationController : ControllerBase
 {
   private readonly IJobApplicationService _jobApplicationService;
+  private readonly IHubContext<JobApplicationHub> _hubContext;
 
-  public JobApplicationController(IJobApplicationService jobApplicationService)
+  public JobApplicationController(
+    IJobApplicationService jobApplicationService,
+    IHubContext<JobApplicationHub> hubContext)
   {
     _jobApplicationService = jobApplicationService;
+    _hubContext = hubContext;
   }
 
   // Get user ID from JWT
@@ -66,6 +72,10 @@ public class JobApplicationController : ControllerBase
 
       var newApplicationDto = JobApplicationDto.FromEntity(newApplication);
 
+      await _hubContext.Clients
+        .Group($"user_{userId}")
+        .SendAsync("JobApplicationCreated", newApplicationDto);
+
       return CreatedAtAction(nameof(GetAllUserApplications), new { id = newApplicationDto.Id }, newApplicationDto);
     }
     catch (UnauthorizedAccessException ex)
@@ -78,7 +88,7 @@ public class JobApplicationController : ControllerBase
     }
   }
 
-  // Update job application | Route: PUT /api/JobApplication (FIXED)
+  // Update job application | Route: PUT /api/JobApplication
   [HttpPut]
   public async Task<IActionResult> UpdateApplication([FromBody] JobApplicationUpdateRequest request)
   {

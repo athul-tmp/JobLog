@@ -14,6 +14,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import AddJobApplicationDialog from "@/components/applications/AddJobApplicationDialog"; 
 import EditJobApplicationDialog from "@/components/applications/EditJobApplicationDialog";
 import { JobApplicationService } from "@/services/api"; 
+import { buildJobApplicationHubConnection, isBenignSignalRError } from "@/services/signalr";
 import { JobApplication } from "@/types/types"; 
 
 import { JobApplicationTable } from "@/components/applications/JobApplicationTable"; 
@@ -73,9 +74,33 @@ function useApplicationData() {
     }, [fetchApplications]);
 
     const handleJobAdded = useCallback((newJob: JobApplication) => {
-        // Add the new job to the top of the list 
-        setApplications(prev => sortApplications([newJob, ...prev]));
+        setApplications(prev => {
+            if (prev.some(job => job.id === newJob.id)) return prev;
+            return sortApplications([newJob, ...prev]);
+        });
     }, []);
+
+    // Listen for jobs added via the browser extension (or other tabs)
+    useEffect(() => {
+        if (!isAuthenticated) return;
+
+        const connection = buildJobApplicationHubConnection(handleJobAdded);
+        let disposed = false;
+
+        void (async () => {
+            try {
+                await connection.start();
+            } catch (error) {
+                if (disposed || isBenignSignalRError(error)) return;
+                console.error("SignalR connection failed:", error);
+            }
+        })();
+
+        return () => {
+            disposed = true;
+            void connection.stop().catch(() => {});
+        };
+    }, [isAuthenticated, handleJobAdded]);
 
     const handleJobUpdated = useCallback((updatedJob: JobApplication) => {
         setApplications(prev => {

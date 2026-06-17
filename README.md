@@ -53,6 +53,7 @@ It is designed to provide clarity, organisation, and insights throughout the job
 ### Browser Extension (Quick Add)
 * **Seamless Capture:** One-click scraping of job details (Company, Role, URL) from major boards like LinkedIn, Seek, and Indeed.
 * **Secure Integration:** Directly communicates with the JobLog API using stored JWT tokens to log applications immediately.
+* **Live Sync:** New applications added via the extension appear on the open Applications page without a manual refresh (SignalR).
 * **User Experience:** Includes theme syncing (Dark/Light Mode) and auto-closing on successful submission.
 
 ### UI / UX
@@ -128,7 +129,7 @@ The extension popup, demonstrating successful data capture and theme responsiven
 | :--- | :--- | :--- |
 | **Frontend** | `Next.js` , `React`, `TypeScript` | Responsive UI with Zod validation, TanStack Table. |
 | **Styling** | `Tailwind CSS`, `shadcn/ui` | Modern, utility-first styling. |
-| **Backend** | `C# / ASP.NET Core 8.0` | RESTful Web API. |
+| **Backend** | `C# / ASP.NET Core 8.0` | RESTful Web API with SignalR for real-time updates. |
 | **Database** | `PostgreSQL` (via EF Core) | Hosted on **Neon** (serverless PostgreSQL). |
 | **Authentication** | `JWT` (HttpOnly Cookies), `BCrypt` | Stateless API with secure password hashing. |
 | **Email** | `Brevo SMTP` | For user verification and password reset flows. |
@@ -156,6 +157,7 @@ The **ASP.NET Core Web API** is organised using a layered architecture pattern:
 | Directory | Purpose |
 | :--- | :--- |
 | `Controllers/` | **Entry Point:** Handles HTTP requests and delegates tasks. |
+| `Hubs/` | **Real-Time:** SignalR hub for user-scoped job creation notifications. |
 | `Services/` | **Business Logic:** Contains core application logic. |
 | `Models/` | **Data Entities:** C# classes representing database tables (`User`, `JobApplication`, etc.). |
 | `DTOs/` | **Data Transfer Objects:** Schemas used for API requests and responses. |

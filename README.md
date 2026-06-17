@@ -19,7 +19,6 @@ It is designed to provide clarity, organisation, and insights throughout the job
 * [Infrastructure & Deployment](#infrastructure--deployment)
 * [Project Structure](#project-structure)
 * [Local Development Setup](#local-development-setup)
-* [Planned Enhancement](#planned-enhancement)
 * [License](#license)
 * [Developer](#developer)
 

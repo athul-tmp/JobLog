@@ -1,4 +1,5 @@
 using backend.Data;
+using backend.Hubs;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -69,12 +70,21 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 if (context.Request.Cookies.TryGetValue("joblog_jwt_token", out var token))
                 {
                     context.Token = token;
+                    return Task.CompletedTask;
                 }
+
+                var authHeader = context.Request.Headers.Authorization.ToString();
+                if (authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+                {
+                    context.Token = authHeader["Bearer ".Length..];
+                }
+
                 return Task.CompletedTask;
             }
         };
     });
 
+builder.Services.AddSignalR();
 builder.Services.AddControllers();
 
 builder.Services.AddEndpointsApiExplorer();
@@ -133,5 +143,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<JobApplicationHub>("/hubs/jobapplications");
 
 app.Run();

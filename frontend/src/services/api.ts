@@ -46,19 +46,74 @@ const handleApiError = (error: unknown, defaultMessage: string): Promise<never> 
     return Promise.reject(defaultMessage + '. An unexpected error occurred.');
 };
 
+const LOGIN_MAX_RETRIES = 3;
+const LOGIN_RETRY_DELAY_MS = 2000;
+const LOGIN_TIMEOUT_MS = 60_000;
+
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const isRetriableConnectionError = (error: unknown): boolean => {
+    if (!axios.isAxiosError(error)) {
+        return false;
+    }
+    if (!error.response) {
+        return true;
+    }
+    const status = error.response.status;
+    return status === 502 || status === 503 || status === 504;
+};
+
+const getLoginErrorMessage = (error: unknown): string => {
+    if (!axios.isAxiosError(error)) {
+        return "An unexpected error occurred during login.";
+    }
+
+    if (!error.response) {
+        if (error.code === "ECONNABORTED") {
+            return "The request timed out. The server may still be starting up.";
+        }
+        return "Unable to reach the server. It may still be starting up.";
+    }
+
+    const { status, data } = error.response;
+
+    if (status === 401) {
+        return data?.message || "Invalid email or password.";
+    }
+
+    if (status >= 500) {
+        return "The server is temporarily unavailable. It may still be starting up.";
+    }
+
+    return data?.message || "Login failed. Please check your details.";
+};
+
 export const AuthService = {
   // Login method
   login: async (email: string, password: string): Promise<LoginResponse> => {
-    try {
-      const response = await apiClient.post<LoginResponse>("/User/login", { email, password });
-      return response.data;
-    } 
-    catch (error) {
-      if (axios.isAxiosError(error) && error.response) {
-        return Promise.reject(error.response.data.message || "Invalid credentials.");
+    let lastError: unknown;
+
+    for (let attempt = 0; attempt < LOGIN_MAX_RETRIES; attempt++) {
+      try {
+        const response = await apiClient.post<LoginResponse>(
+          "/User/login",
+          { email, password },
+          { timeout: LOGIN_TIMEOUT_MS }
+        );
+        return response.data;
+      } catch (error) {
+        lastError = error;
+
+        if (attempt < LOGIN_MAX_RETRIES - 1 && isRetriableConnectionError(error)) {
+          await delay(LOGIN_RETRY_DELAY_MS * (attempt + 1));
+          continue;
+        }
+
+        return Promise.reject(getLoginErrorMessage(error));
       }
-      return Promise.reject("An unexpected error occurred during login.");
     }
+
+    return Promise.reject(getLoginErrorMessage(lastError));
   },
 
   // Logout method to call backend to clear the HttpOnly cookie

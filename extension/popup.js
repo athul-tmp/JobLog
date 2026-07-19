@@ -86,6 +86,10 @@ function clearAllFormErrors(formType) {
 // Helper regex for email check
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+function scheduleWakingUpMessage(element) {
+    return setTimeout(() => setStatusAlert(element, 'info', 'Waking up the server...'), 3500);
+}
+
 // Function to check authorisation and render adding data
 async function checkAuthAndRender() {
     const result = await chrome.storage.local.get('jwtToken');
@@ -139,6 +143,8 @@ async function handleLogin(e) {
     loginBtn.disabled = true;
     loginBtn.textContent = 'Logging In...';
 
+    const cancelWakingUp = scheduleWakingUpMessage(loginStatus);
+
     try {
         const response = await fetch(USER_API_ENDPOINT, {
             method: 'POST',
@@ -160,9 +166,10 @@ async function handleLogin(e) {
             setStatusAlert(loginStatus, 'error', data.message || 'Login failed: Invalid email or password.');
         }
     } catch (error) {
-        setStatusAlert(loginStatus, 'error', 'Network Error: Could not reach JobLog API.');
+        setStatusAlert(loginStatus, 'error', 'Could not reach JobLog. The server may still be starting up.');
         console.error('Login fetch error:', error);
     } finally {
+        clearTimeout(cancelWakingUp);
         loginBtn.disabled = false;
         loginBtn.textContent = 'Log In';
     }
@@ -186,10 +193,13 @@ async function sendToBackend(jobData) {
 
     submitBtn.disabled = true;
 
+    const cancelWakingUp = scheduleWakingUpMessage(statusMessage);
+
     const result = await chrome.storage.local.get('jwtToken');
     const jwtToken = result.jwtToken;
 
     if (!jwtToken) {
+        clearTimeout(cancelWakingUp);
         setStatusAlert(statusMessage, 'error', 'Error: Not logged in. Please log in first.');
         submitBtn.disabled = false;
         return;
@@ -234,8 +244,9 @@ async function sendToBackend(jobData) {
             setStatusAlert(statusMessage, 'error', `API Error (${response.status}): ${errorBody.message.substring(0, 50)}...`);
         }
     } catch (error) {
-        setStatusAlert(statusMessage, 'error', `Network Error: Could not reach JobLog API.`);
+        setStatusAlert(statusMessage, 'error', 'Could not reach JobLog. The server may still be starting up.');
     } finally {
+        clearTimeout(cancelWakingUp);
         if (!statusMessage.classList.contains('alert-success')) {
             submitBtn.disabled = false;
         }

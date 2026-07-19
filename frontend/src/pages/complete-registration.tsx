@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { WakingUpMessage } from "@/components/LoadingScreen";
 import { PasswordInput } from "@/components/ui/PasswordInput";
 
 const PasswordRequirement = ({ met, text }: { met: boolean; text: string }) => {
@@ -109,7 +110,7 @@ export default function CompleteRegistrationPage() {
     if (isInitialLoad) {
         return (
             <div className="flex justify-center items-center h-screen bg-background">
-                <Loader2 className="size-15 animate-spin"/>
+                <Loader2 className="size-15 animate-spin" />
             </div>
         );
     }
@@ -226,8 +227,16 @@ export default function CompleteRegistrationPage() {
                                 className="w-full cursor-pointer" 
                                 disabled={!canSubmit} 
                             >
-                                {isLoading ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating Account...</>) : "Create Account & Login"}
+                                {isLoading ? (
+                                    <>
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                        Creating Account...
+                                    </>
+                                ) : (
+                                    "Create Account & Login"
+                                )}
                             </Button>
+                            <WakingUpMessage isActive={isLoading} />
                         </CardFooter>
                     </form>
                 </Card>

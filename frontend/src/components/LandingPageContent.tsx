@@ -9,7 +9,7 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { ScreenshotCarousel } from "@/components/ScreenshotCarousel";
 import { toast } from "sonner";
-import { Spinner } from "@/components/ui/spinner";
+import { WakingUpMessage } from "@/components/LoadingScreen";
 
 const CHROME_EXTENSION_URL = "https://chromewebstore.google.com/detail/mbbminokbdldbonjhceefnjncgadogcj?utm_source=item-share-cb";
 
@@ -23,14 +23,6 @@ export default function LandingPageContent() {
       router.push("/dashboard");
     }
   }, [isAuthenticated, authLoading, router]);
-
-  if (authLoading) {
-    return (
-      <div className="flex justify-center items-center h-screen bg-background text-foreground">
-        <Spinner className="size-15"/>
-      </div>
-    );
-  }
 
   // Auto-login handler for the demo
   const handleDemoLogin = async () => {
@@ -87,10 +79,11 @@ export default function LandingPageContent() {
                               onClick={handleDemoLogin}
                               disabled={authLoading}
                           >
-                              Try Demo
+                              {authLoading ? "Logging In..." : "Try Demo"}
                               <ArrowUpRight className="ml-2 h-5 w-5" />
                           </Button>
                       </div>
+                      <WakingUpMessage isActive={authLoading} />
 
                       {/* Secondary CTA: Extension Link */}
                       <div className="pt-2">

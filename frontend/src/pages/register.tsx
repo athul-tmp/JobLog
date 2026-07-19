@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { WakingUpMessage } from "@/components/LoadingScreen";
 
 // Email validation helper using regex
 const isEmailValidFormat = (email: string) => {
@@ -202,6 +203,7 @@ export default function RegisterPage() {
                             >
                                 {isLoading ? "Sending Link..." : "Send Verification Link"}
                             </Button>
+                            <WakingUpMessage isActive={isLoading} />
                             <div className="text-sm text-center text-muted-foreground">
                                 Already have an account?{" "}
                                 <Link href="/login" className="font-semibold text-primary hover:underline">

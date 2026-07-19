@@ -12,6 +12,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { CheckCircle } from "lucide-react";
+import { WakingUpMessage } from "@/components/LoadingScreen";
 import { PasswordInput } from "@/components/ui/PasswordInput";
 
 // Email validation helper function
@@ -131,6 +132,7 @@ export default function LoginPage() {
                             <Button type="submit" className="w-full cursor-pointer" disabled={authLoading}>
                                 {authLoading ? "Logging In..." : "Log In"}
                             </Button>
+                            <WakingUpMessage isActive={authLoading} />
                             <div className="text-sm text-center text-muted-foreground">
                                 Don&apos;t have an account?{" "}
                                 <Link href="/register" className="font-semibold text-primary hover:underline">

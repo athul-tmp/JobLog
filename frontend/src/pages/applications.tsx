@@ -6,7 +6,7 @@ import Head from "next/head";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { DashboardNavigation } from "@/components/DashboardNavigation"; 
-import { Spinner } from "@/components/ui/spinner"
+import { LoadingScreen } from "@/components/LoadingScreen";
 import { Card, CardContent } from "@/components/ui/card";
 import { Search } from "lucide-react"; 
 import { Alert, AlertDescription } from "@/components/ui/alert"; 
@@ -162,11 +162,7 @@ export default function ApplicationsPage() {
     
     // Show loading state when logging out / data loading
     if (authLoading || !isAuthenticated || isDataLoading) {
-        return (
-            <div className="flex justify-center items-center h-screen bg-background text-foreground">
-                <Spinner className="size-15"/>
-            </div>
-        );
+        return <LoadingScreen />;
     }
 
     // Only render the main content if authentication and data are ready

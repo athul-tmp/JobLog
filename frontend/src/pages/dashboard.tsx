@@ -8,8 +8,8 @@ import { DashboardAnalytics } from "@/types/types";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { DashboardNavigation } from "@/components/DashboardNavigation";
+import { LoadingScreen } from "@/components/LoadingScreen";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Spinner } from "@/components/ui/spinner"
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ArrowUp, ArrowDown } from "lucide-react";
 
@@ -67,11 +67,7 @@ export default function DashboardPage() {
     
     // Show loading state when logging out / data loading
     if (authLoading || !isAuthenticated || isDataLoading) {
-        return (
-            <div className="flex justify-center items-center h-screen bg-background">
-                <Spinner className="size-15"/>
-            </div>
-        );
+        return <LoadingScreen />;
     }
     
     const isReady = !isDataLoading && stats;

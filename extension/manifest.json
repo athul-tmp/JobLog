@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "JobLog: Quick Add",
-    "version": "1.1.3",
+    "version": "1.2.0",
     "description": "Quickly add job applications to JobLog from any job board.",
     "icons": {
         "16": "images/icon-16.png",
@@ -13,6 +13,15 @@
         "default_popup": "popup.html",
         "default_icon": {
             "16": "images/icon-16.png"
+        }
+    },
+    "commands": {
+        "_execute_action": {
+            "suggested_key": {
+                "default": "Ctrl+J",
+                "mac": "Command+J"
+            },
+            "description": "Open JobLog and scrape job details into the form"
         }
     },
     "permissions": [

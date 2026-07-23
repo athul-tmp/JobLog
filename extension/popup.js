@@ -158,7 +158,8 @@ async function handleLogin(e) {
             if (data.token) {
                 await chrome.storage.local.set({ jwtToken: data.token });
                 setStatusAlert(loginStatus, 'success', 'Login successful!');
-                checkAuthAndRender();
+                await checkAuthAndRender();
+                await scrapeAndFillForm();
             } else {
                 setStatusAlert(loginStatus, 'error', 'Login failed. Server did not return a token. (Check C# API)');
             }
@@ -253,22 +254,18 @@ async function sendToBackend(jobData) {
     }
 }
 
-async function contentScriptFunction() {
+async function scrapeJobFromPage() {
     const delay = (ms) => new Promise(res => setTimeout(res, ms));
-    // Scraper Functions
-    
-    // Scraper function for LinkedIn
+
     function scrapeLinkedIn(jobData) {
         try {
             const panel = document.querySelector('.job-view-layout, .jobs-search__job-details--container') || document;
 
-            // 1. Extract Job Title
             const titleEl = panel.querySelector('h1 a, h1, h2.top-card-layout__title, .job-details-jobs-unified-top-card__job-title');
             if (titleEl) {
                 jobData.jobTitle = titleEl.textContent.trim();
             }
 
-            // 2. Extract Company Name
             for (const el of panel.querySelectorAll('[aria-label^="Company, "]')) {
                 if (el.tagName !== 'svg') {
                     jobData.companyName = el.getAttribute('aria-label').replace(/^Company,\s*/, '').replace(/\.$/, '').trim();
@@ -298,7 +295,6 @@ async function contentScriptFunction() {
                 }
             }
 
-            // 3. Extract Location
             const locationSelectors = [
                 '.job-details-jobs-unified-top-card__primary-description span:nth-of-type(2)',
                 '.job-details-jobs-unified-top-card__subtitle-primary-grouping span:nth-of-type(2)',
@@ -313,14 +309,13 @@ async function contentScriptFunction() {
                 }
             }
 
-            // Fallback: Extract from Document Title
             if (!jobData.companyName || !jobData.jobTitle) {
                 const docTitle = document.title.replace(/^\(\d+\)\s*/, '');
-                
+
                 if (!docTitle.toLowerCase().includes(' jobs ')) {
                     const matchAt = docTitle.match(/(.*?)\s+at\s+(.*?)(?:\s+|\|)/i);
                     const matchHiring = docTitle.match(/(.*?)\s+hiring\s+(.*?)\s+in\s+/i);
-                    
+
                     if (matchAt) {
                         jobData.jobTitle = jobData.jobTitle || matchAt[1].trim();
                         jobData.companyName = jobData.companyName || matchAt[2].trim();
@@ -342,7 +337,6 @@ async function contentScriptFunction() {
         return jobData;
     }
 
-    // Scraper function for SEEK
     function scrapeSeek(jobData) {
         try {
             let titleElement = document.querySelector('[data-automation="job-detail-title"]');
@@ -363,38 +357,31 @@ async function contentScriptFunction() {
                 let name = companyElement.textContent;
                 if (name) {
                     name = name.trim();
-                    name = name.replace(/\s\(\w{3}\)$/i, '').trim(); 
-                    name = name.replace(/Verified$/i, '').trim(); 
+                    name = name.replace(/\s\(\w{3}\)$/i, '').trim();
+                    name = name.replace(/Verified$/i, '').trim();
                 }
-                
-                if (name.length <= 1) {
-                    jobData.companyName = 'Unknown Company';
-                } else {
-                    jobData.companyName = name;
-                }
+
+                jobData.companyName = name.length <= 1 ? 'Unknown Company' : name;
             } else {
-                 jobData.companyName = 'Unknown Company';
+                jobData.companyName = 'Unknown Company';
             }
 
-            // Extract Location
             const locationElement = document.querySelector('[data-automation="job-detail-location"]');
             if (locationElement) {
                 jobData.location = locationElement.textContent.trim();
             }
-
         } catch (e) {
             console.error("Seek scraping failed:", e);
         }
         return jobData;
     }
 
-    // Scraper function for Indeed
     function scrapeIndeed(jobData) {
         try {
             const titleElement = document.querySelector('[data-testid="jobsearch-JobInfoHeader-title"] span');
             if (titleElement) {
                 let title = titleElement.textContent.trim();
-                title = title.replace(/\s*[-\(]?\s*job post\s*[\)]?/i, '').trim(); 
+                title = title.replace(/\s*[-\(]?\s*job post\s*[\)]?/i, '').trim();
                 jobData.jobTitle = title;
             }
 
@@ -403,8 +390,8 @@ async function contentScriptFunction() {
                 let name = companyElement.textContent.trim();
                 const parentSpan = companyElement.closest('span');
                 if (parentSpan) {
-                     name = parentSpan.textContent.trim();
-                     name = name.replace(/View all jobs/i, '').trim(); 
+                    name = parentSpan.textContent.trim();
+                    name = name.replace(/View all jobs/i, '').trim();
                 }
                 jobData.companyName = name;
             } else {
@@ -414,7 +401,6 @@ async function contentScriptFunction() {
                 }
             }
 
-            // Extract Location
             const locationElement = document.querySelector('[data-testid="inlineHeader-companyLocation"]');
             if (locationElement) {
                 jobData.location = locationElement.textContent.trim();
@@ -425,17 +411,16 @@ async function contentScriptFunction() {
         return jobData;
     }
 
-    // Generic Fallback
     function scrapeGeneric(jobData) {
         jobData.jobTitle = document.title.split('|')[0].trim() || 'Unknown Job Title';
-        
+
         if (!jobData.companyName) {
-            const match = document.title.match(/ at (.*?) \|/); 
+            const match = document.title.match(/ at (.*?) \|/);
             jobData.companyName = match ? match[1].trim() : 'Unknown Company';
         }
         return jobData;
     }
-    
+
     const hostname = window.location.hostname;
     for (let i = 0; i < 4; i++) {
         let jobData = { jobTitle: null, companyName: null, jobURL: window.location.href, location: null };
@@ -449,14 +434,116 @@ async function contentScriptFunction() {
 
         await delay(250);
     }
+
     return scrapeGeneric({ jobTitle: null, companyName: null, jobURL: window.location.href, location: null });
 }
 
+async function scrapeActiveTabJob() {
+    const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (!activeTab?.id) {
+        throw new Error('No active tab found.');
+    }
+
+    const [{ result }] = await chrome.scripting.executeScript({
+        target: { tabId: activeTab.id },
+        func: scrapeJobFromPage,
+    });
+
+    return result;
+}
+
+function fillFormFromJobData(jobData) {
+    document.getElementById('company').value = jobData.companyName || '';
+    document.getElementById('role').value = jobData.jobTitle || '';
+    document.getElementById('link').value = jobData.jobURL || '';
+    document.getElementById('notes').value = jobData.location || '';
+    document.getElementById('jobFormContainer').classList.remove('hidden');
+}
+
+async function scrapeAndFillForm() {
+    const statusMessage = document.getElementById('statusMessage');
+    setStatusAlert(statusMessage, 'info', 'Searching for job details...');
+    document.getElementById('jobFormContainer').classList.add('hidden');
+
+    try {
+        const jobData = await scrapeActiveTabJob();
+
+        if (jobData && jobData.jobTitle && jobData.jobTitle !== 'Unknown Job Title') {
+            fillFormFromJobData(jobData);
+            setStatusAlert(statusMessage, 'info', 'Review the details, then save (Cmd/Ctrl+Shift+J).');
+        } else {
+            setStatusAlert(statusMessage, 'error', 'No job details found on this page. Please enter manually.');
+            document.getElementById('jobFormContainer').classList.remove('hidden');
+        }
+    } catch (error) {
+        setStatusAlert(statusMessage, 'error', error instanceof Error ? error.message : 'Unexpected error occurred.');
+        console.error(error);
+    }
+}
+
+function submitJobForm() {
+    const statusMessage = document.getElementById('statusMessage');
+    const jobFormContainer = document.getElementById('jobFormContainer');
+    const submitBtn = document.getElementById('submitBtn');
+
+    if (jobFormContainer.classList.contains('hidden')) {
+        setStatusAlert(statusMessage, 'error', 'Scrape a job first (Cmd/Ctrl+J).');
+        return;
+    }
+
+    if (submitBtn.disabled) {
+        return;
+    }
+
+    clearAllFormErrors('job');
+
+    const company = document.getElementById('company').value.trim();
+    const role = document.getElementById('role').value.trim();
+    const link = document.getElementById('link').value.trim();
+    const notes = document.getElementById('notes').value.trim();
+
+    let hasError = false;
+    if (!company) {
+        setInputError('companyError', 'Company name is required.');
+        hasError = true;
+    }
+    if (!role) {
+        setInputError('roleError', 'Role/Title is required.');
+        hasError = true;
+    }
+
+    if (hasError) {
+        setStatusAlert(statusMessage, 'error', 'Please correct the highlighted errors.');
+        return;
+    }
+
+    setStatusAlert(statusMessage, 'info', 'Saving data to JobLog...');
+
+    sendToBackend({
+        companyName: company,
+        jobTitle: role,
+        jobURL: link,
+        notes: notes,
+    });
+}
 
 // Main Event Listener
-document.addEventListener('DOMContentLoaded', () => {
-    checkAuthAndRender(); 
-    
+document.addEventListener('DOMContentLoaded', async () => {
+    await checkAuthAndRender();
+
+    const { jwtToken } = await chrome.storage.local.get('jwtToken');
+    if (jwtToken) {
+        await scrapeAndFillForm();
+    }
+
+    document.addEventListener('keydown', (event) => {
+        const isSaveShortcut = (event.metaKey || event.ctrlKey) && event.shiftKey && event.key.toLowerCase() === 'j';
+        if (isSaveShortcut) {
+            event.preventDefault();
+            submitJobForm();
+        }
+    });
+
     const themeToggleBtn = document.getElementById('theme-toggle-btn');
     if (themeToggleBtn) {
         themeToggleBtn.addEventListener('click', toggleTheme);
@@ -484,93 +571,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Initiate Scrape Button Listener
-    document.getElementById('initiateBtn').addEventListener('click', async () => {
-        const statusMessage = document.getElementById('statusMessage');
-        setStatusAlert(statusMessage, 'info', 'Searching for job details...');
-        document.getElementById('jobFormContainer').classList.add('hidden');
+    document.getElementById('initiateBtn').addEventListener('click', scrapeAndFillForm);
 
-        try {
-            const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
-
-            if (!activeTab) {
-                setStatusAlert(statusMessage, 'error', 'Error: No active tab found.');
-                return;
-            }
-
-            chrome.scripting.executeScript({
-                target: { tabId: activeTab.id },
-                function: contentScriptFunction
-            }, (results) => {
-                if (chrome.runtime.lastError) {
-                    setStatusAlert(statusMessage, 'error', `Error: ${chrome.runtime.lastError.message}`);
-                    return;
-                }
-                
-                const jobData = results[0].result;
-                
-                if (jobData && jobData.jobTitle && jobData.jobTitle !== "Unknown Job Title") {
-                    setStatusAlert(statusMessage, 'info', `Data extracted. Review and click 'Save'.`);
-                    
-                    document.getElementById('company').value = jobData.companyName || '';
-                    document.getElementById('role').value = jobData.jobTitle || '';
-                    document.getElementById('link').value = jobData.jobURL || '';
-                    
-                    // Pre-fill location into the notes field if it's found
-                    if (jobData.location) {
-                        document.getElementById('notes').value = `${jobData.location}`;
-                    } else {
-                        document.getElementById('notes').value = '';
-                    }
-                    
-                    document.getElementById('jobFormContainer').classList.remove('hidden');
-                } else {
-                    setStatusAlert(statusMessage, 'error', 'No job details found on this page. Please enter manually.');
-                    document.getElementById('jobFormContainer').classList.remove('hidden');
-                }
-            });
-        } catch (error) {
-            setStatusAlert(statusMessage, 'error', 'Unexpected error occurred.');
-            console.error(error);
-        }
-    });
-
-    // Job Form Submission Listener
     document.getElementById('jobForm').addEventListener('submit', (event) => {
-        event.preventDefault(); 
-        const statusMessage = document.getElementById('statusMessage');
-
-        clearAllFormErrors('job'); 
-
-        const company = document.getElementById('company').value.trim();
-        const role = document.getElementById('role').value.trim();
-        const link = document.getElementById('link').value.trim();
-        const notes = document.getElementById('notes').value.trim();
-
-        let hasError = false;
-        if (!company) {
-            setInputError('companyError', "Company name is required.");
-            hasError = true;
-        }
-        if (!role) {
-            setInputError('roleError', "Role/Title is required.");
-            hasError = true;
-        }
-
-        if (hasError) {
-            setStatusAlert(statusMessage, 'error', 'Please correct the highlighted errors.');
-            return;
-        }
-
-        setStatusAlert(statusMessage, 'info', 'Saving data to JobLog...');
-        
-        const finalJobData = {
-            companyName: company,
-            jobTitle: role,
-            jobURL: link,
-            notes: notes
-        };
-
-        sendToBackend(finalJobData);
+        event.preventDefault();
+        submitJobForm();
     });
 });

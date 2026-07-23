@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8">
     <title>JobLog Quick Add</title>
     <style>
         /* Base Variables */
@@ -311,6 +312,24 @@
         .input-with-icon-wrapper input[type="password"] {
             padding-right: 40px; 
         }
+
+        .shortcut-hint {
+            margin-top: 16px;
+            font-size: 0.85em;
+            line-height: 1.4;
+            color: var(--muted-foreground, #a0a0a0);
+            text-align: center;
+        }
+
+        .shortcut-hint kbd {
+            display: inline-block;
+            padding: 1px 5px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            background: var(--secondary);
+            font-family: inherit;
+            font-size: 0.95em;
+        }
     </style>
 </head>
  
@@ -377,6 +396,10 @@
             </form>
         </div>
     </div>
+
+    <p class="shortcut-hint">
+        Shortcuts: <kbd>Ctrl/Cmd+J</kbd> open &amp; scrape · <kbd>Ctrl/Cmd+Shift+J</kbd> save while popup is open
+    </p>
     
     <script src="popup.js"></script>
 </body>

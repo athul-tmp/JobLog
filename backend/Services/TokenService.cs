@@ -4,9 +4,10 @@ using System.Text;
 using backend.Models;
 using Microsoft.IdentityModel.Tokens;
 
+public record TokenResult(string Token, DateTime Expiry, bool IsDemoUser);
 public interface ITokenService
 {
-  string CreateToken(User user);
+  TokenResult CreateToken(User user);
 }
 
 public class TokenService : ITokenService
@@ -18,7 +19,7 @@ public class TokenService : ITokenService
     _config = config;
   }
 
-  public string CreateToken(User user)
+  public TokenResult CreateToken(User user)
   {
     // Secret key
     var secretKey = _config["Jwt:Key"] ?? throw new InvalidOperationException("JWT Secret Key not configured.");
@@ -51,6 +52,6 @@ public class TokenService : ITokenService
     var tokenHandler = new JwtSecurityTokenHandler();
     var token = tokenHandler.CreateToken(tokenDescriptor);
 
-    return tokenHandler.WriteToken(token);
+    return new TokenResult(tokenHandler.WriteToken(token), expiryTime, isDemoUser);
   }
 }

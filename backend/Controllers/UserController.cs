@@ -82,34 +82,25 @@ public class UserController : ControllerBase
       return Unauthorized(new { message = "Invalid email or password." });
     }
 
-    // Demo account reset
-    const string DEMO_EMAIL = "demo@joblog.com";
-    var isDemoUser = user.Email.Equals(DEMO_EMAIL, StringComparison.OrdinalIgnoreCase);
+    // JWT 
+    var tokenResult = _tokenService.CreateToken(user);
 
-    // Calculate Expiration Time
-    DateTime tokenExpiryTime = isDemoUser
-        ? DateTime.UtcNow.AddMinutes(30) // 30 minutes
-        : DateTime.UtcNow.AddDays(7);   // 7 days
-
-    if (isDemoUser)
+    if (tokenResult.IsDemoUser)
     {
       await _jobApplicationService.ResetDemoApplications(user.Id);
     }
 
-    // JWT 
-    var token = _tokenService.CreateToken(user);
-
     // Set the JWT as an HttpOnly cookie
-    SetAuthCookie(token, tokenExpiryTime);
+    SetAuthCookie(tokenResult.Token, tokenResult.Expiry);
 
     return Ok(new
     {
       message = "Login successful",
       email = user.Email,
       firstName = user.FirstName,
-      token = token,
+      token = tokenResult.Token,
       // Return ISO 8601 string for frontend countdown only if it's the demo user
-      tokenExpiration = isDemoUser ? tokenExpiryTime.ToString("o") : null
+      tokenExpiration = tokenResult.IsDemoUser ? tokenResult.Expiry.ToString("o") : null
     });
   }
 

@@ -107,4 +107,33 @@ public class TokenServiceTests
     Assert.True(difference < TimeSpan.FromSeconds(2));
   }
 
+  [Fact]
+  public void CreateToken_IsCaseSensitive_ForDemoEmail()
+  {
+    // Arrange
+    var tokenService = CreateTokenService();
+    var user = CreateUser("DEMO@JOBLOG.COM");
+
+    // Act
+    var result = tokenService.CreateToken(user);
+
+    // Assert
+    Assert.True(result.IsDemoUser);
+  }
+
+  [Fact]
+  public void CreateToken_ThrowsInvalidOperationException_WhenJwtKeyMissing()
+  {
+    // Arrange
+    var mockConfig = new Mock<IConfiguration>();
+    mockConfig.Setup(c => c["Jwt:Key"]).Returns((string?)null);
+    mockConfig.Setup(c => c["Jwt:Issuer"]).Returns("TestIssuer");
+    mockConfig.Setup(c => c["Jwt:Audience"]).Returns("TestAudience");
+
+    var tokenService = new TokenService(mockConfig.Object);
+    var user = CreateUser("test@example.com");
+
+    // Act + Assert
+    Assert.Throws<InvalidOperationException>(() => tokenService.CreateToken(user));
+  }
 }

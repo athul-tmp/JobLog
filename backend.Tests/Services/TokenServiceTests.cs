@@ -73,4 +73,38 @@ public class TokenServiceTests
     Assert.True(result.IsDemoUser);
   }
 
+  [Fact]
+  public void CreateToken_GivesSevenDayExpiry_ForNormalUser()
+  {
+    // Arrange
+    var tokenService = CreateTokenService();
+    var user = CreateUser("test@example.com");
+    var before = DateTime.UtcNow;
+
+    // Act
+    var result = tokenService.CreateToken(user);
+
+    // Assert
+    var expectedExpiry = before.AddDays(7);
+    var difference = (result.Expiry - expectedExpiry).Duration();
+    Assert.True(difference < TimeSpan.FromSeconds(2));
+  }
+
+  [Fact]
+  public void CreateToken_GivesThirtyMinuteExpiry_ForDemoUser()
+  {
+    // Arrange
+    var tokenService = CreateTokenService();
+    var user = CreateUser("demo@joblog.com");
+    var before = DateTime.UtcNow;
+
+    // Act
+    var result = tokenService.CreateToken(user);
+
+    // Assert
+    var expectedExpiry = before.AddMinutes(30);
+    var difference = (result.Expiry - expectedExpiry).Duration();
+    Assert.True(difference < TimeSpan.FromSeconds(2));
+  }
+
 }

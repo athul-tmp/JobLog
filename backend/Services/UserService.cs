@@ -34,10 +34,14 @@ public class UserService : IUserService
     _config = config;
   }
 
+  // Helper to normalise email
+  private static string NormaliseEmail(string email) => email.Trim().ToLowerInvariant();
+
   // Get user
   public Task<User?> GetUserByEmail(string email)
   {
-    return _dbContext.Users.SingleOrDefaultAsync(u => u.Email == email);
+    var normalisedEmail = NormaliseEmail(email);
+    return _dbContext.Users.SingleOrDefaultAsync(u => u.Email == normalisedEmail);
   }
 
   // Authentication
@@ -191,6 +195,8 @@ public class UserService : IUserService
   // Initiate Registration
   public async Task InitiateRegistration(string email)
   {
+
+    email = NormaliseEmail(email);
     if (await GetUserByEmail(email) != null)
     {
       throw new InvalidOperationException("Email address is already registered. Please log in.");
@@ -225,6 +231,7 @@ public class UserService : IUserService
   // Complete Registration
   public async Task<User> CompleteRegistration(string email, string token, string firstName, string password)
   {
+    email = NormaliseEmail(email);
     var record = await _dbContext.EmailVerifications
       .SingleOrDefaultAsync(v => v.Email == email && v.Purpose == "Registration");
 
@@ -261,7 +268,7 @@ public class UserService : IUserService
   public async Task InitiateEmailChange(int userId, string currentPassword, string newEmail)
   {
     var user = await UserValidationHelper.GetAndValidateUser(_dbContext, userId, currentPassword);
-
+    newEmail = NormaliseEmail(newEmail);
     // Check if the new email is already in use
     if (await _dbContext.Users.AnyAsync(u => u.Email == newEmail && u.Id != userId))
     {

@@ -17,4 +17,54 @@ public class JobApplicationServiceTests
 
       return new ApplicationDbContext(options);
     }
+
+  [Fact]
+  public async Task CreateApplication_SetsApplicationNoToOne_WhenUserHasNoExistingApplications()
+  {
+    // Arrange
+    var dbContext = CreateDbContext();
+    var service = new JobApplicationService(dbContext);
+    var request = new JobApplicationCreateRequest("Test Co", "Developer", null, null);
+
+    // Act
+    var result = await service.CreateApplication(1, request);
+
+    // Assert
+    Assert.Equal(1, result.ApplicationNo);
+  }
+
+  [Fact]
+  public async Task CreateApplication_IncrementsApplicationNo_WhenUserHasExistingApplications()
+  {
+    // Arrange
+    var dbContext = CreateDbContext();
+    dbContext.JobApplications.Add(new JobApplication
+    {
+      UserId = 1,
+      Company = "Test Co1",
+      Role = "Developer",
+      Status = "Applied",
+      DateApplied = DateTime.UtcNow,
+      ApplicationNo = 1
+    });
+    dbContext.JobApplications.Add(new JobApplication
+    {
+      UserId = 1,
+      Company = "Test Co2",
+      Role = "Developer",
+      Status = "Applied",
+      DateApplied = DateTime.UtcNow,
+      ApplicationNo = 2
+    });
+    dbContext.SaveChanges();
+
+    var service = new JobApplicationService(dbContext);
+    var request = new JobApplicationCreateRequest("Test Co", "Developer", null, null);
+
+    // Act
+    var result = await service.CreateApplication(1, request);
+
+    // Assert
+    Assert.Equal(3, result.ApplicationNo);
+  }
 }

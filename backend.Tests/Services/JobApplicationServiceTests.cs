@@ -168,4 +168,59 @@ public class JobApplicationServiceTests
     // Act + Assert
     await Assert.ThrowsAsync<InvalidOperationException>(() => service.UpdateApplication(1, request));
   }
+
+  [Fact]
+  public async Task UpdateApplication_SucceedsAndUpdatesStatus_ForValidForwardTransition()
+  {
+    // Arrange
+    var dbContext = CreateDbContext();
+    dbContext.JobApplications.Add(new JobApplication
+    {
+      UserId = 1,
+      Company = "Test Co1",
+      Role = "Developer",
+      Status = "Applied",
+      DateApplied = DateTime.UtcNow,
+      ApplicationNo = 1
+    });
+    dbContext.SaveChanges();
+
+    var service = new JobApplicationService(dbContext);
+    var request = new JobApplicationUpdateRequest(1, null, null, null, "Screening Interview", null);
+
+    // Act
+    var result = await service.UpdateApplication(1, request);
+
+    // Assert
+    Assert.Equal("Screening Interview", result.Status);
+  }
+
+  [Fact]
+  public async Task UpdateApplication_LogsStatusHistory_WhenStatusChanges()
+  {
+    // Arrange
+    var dbContext = CreateDbContext();
+    dbContext.JobApplications.Add(new JobApplication
+    {
+      UserId = 1,
+      Company = "Test Co1",
+      Role = "Developer",
+      Status = "Applied",
+      DateApplied = DateTime.UtcNow,
+      ApplicationNo = 1
+    });
+    dbContext.SaveChanges();
+
+    var service = new JobApplicationService(dbContext);
+    var request = new JobApplicationUpdateRequest(1, null, null, null, "Screening Interview", null);
+
+    // Act
+    var result = await service.UpdateApplication(1, request);
+
+    // Assert
+    var historyEntry = dbContext.JobStatusHistories
+      .SingleOrDefault(h => h.JobApplicationId == result.Id && h.Status == "Screening Interview");
+
+    Assert.NotNull(historyEntry);
+  }
 }

@@ -318,4 +318,87 @@ public class JobApplicationServiceTests
     // Assert
     Assert.Empty(dbContext.JobApplications.Where(a => a.UserId == 1));
   }
+
+  [Fact]
+  public async Task UndoLastStatusChange_ThrowsKeyNotFoundException_WhenApplicationNotFound()
+  {
+    // Arrange
+    var dbContext = CreateDbContext();
+    var service = new JobApplicationService(dbContext);
+
+    // Act + Assert
+    await Assert.ThrowsAsync<KeyNotFoundException>(() => service.UndoLastStatusChange(1, 1));
+  }
+
+  [Fact]
+  public async Task UndoLastStatusChange_ThrowsInvalidOperationException_WhenOnlyInitialStatusExists()
+  {
+    // Arrange
+    var dbContext = CreateDbContext();
+    var application = new JobApplication
+    {
+      UserId = 1,
+      Company = "Test Co1",
+      Role = "Developer",
+      Status = "Applied",
+      DateApplied = DateTime.UtcNow,
+      ApplicationNo = 1
+    };
+    dbContext.JobApplications.Add(application);
+    dbContext.SaveChanges();
+
+    dbContext.JobStatusHistories.Add(new JobStatusHistory
+    {
+      JobApplicationId = application.Id,
+      Status = "Applied",
+      ChangeDate = DateTime.UtcNow
+    });
+    dbContext.SaveChanges();
+
+    var service = new JobApplicationService(dbContext);
+
+    // Act + Assert
+    await Assert.ThrowsAsync<InvalidOperationException>(() => service.UndoLastStatusChange(1, 1));
+  }
+
+  [Fact]
+  public async Task UndoLastStatusChange_RevertsToPrecedingStatus_WhenMultipleHistoryEntriesExist()
+  {
+    // Arrange
+    var dbContext = CreateDbContext();
+    var application = new JobApplication
+    {
+      UserId = 1,
+      Company = "Test Co1",
+      Role = "Developer",
+      Status = "Screening Interview",
+      DateApplied = DateTime.UtcNow,
+      ApplicationNo = 1
+    };
+    dbContext.JobApplications.Add(application);
+    dbContext.SaveChanges();
+
+    dbContext.JobStatusHistories.Add(new JobStatusHistory
+    {
+      JobApplicationId = application.Id,
+      Status = "Applied",
+      ChangeDate = DateTime.UtcNow.AddDays(-1)
+    });
+    dbContext.JobStatusHistories.Add(new JobStatusHistory
+    {
+      JobApplicationId = application.Id,
+      Status = "Screening Interview",
+      ChangeDate = DateTime.UtcNow
+    });
+    dbContext.SaveChanges();
+
+    var service = new JobApplicationService(dbContext);
+
+    // Act
+    var result = await service.UndoLastStatusChange(application.Id, 1);
+
+    // Assert
+    Assert.Equal("Applied", result.Status);
+    Assert.Single(dbContext.JobStatusHistories.Where(h => h.JobApplicationId == application.Id));
+  }
 }

@@ -102,4 +102,70 @@ public class JobApplicationServiceTests
     // Act + Assert
     await Assert.ThrowsAsync<InvalidOperationException>(() => service.UpdateApplication(1, request));
   }
+
+  [Fact]
+  public async Task UpdateApplication_ThrowsInvalidOperationException_WhenCurrentStatusIsEndState()
+  {
+    // Arrange
+    var dbContext = CreateDbContext();
+    dbContext.JobApplications.Add(new JobApplication
+    {
+      UserId = 1,
+      Company = "Test Co1",
+      Role = "Developer",
+      Status = "Rejected",
+      DateApplied = DateTime.UtcNow,
+      ApplicationNo = 1
+    });
+    dbContext.SaveChanges();
+
+    var service = new JobApplicationService(dbContext);
+    var request = new JobApplicationUpdateRequest(1, null, null, null,"Applied", null);
+    // Act + Assert
+    await Assert.ThrowsAsync<InvalidOperationException>(() => service.UpdateApplication(1, request));
+  }
+
+  [Fact]
+  public async Task UpdateApplication_ThrowsInvalidOperationException_WhenMovingBackToApplied()
+  {
+    // Arrange
+    var dbContext = CreateDbContext();
+    dbContext.JobApplications.Add(new JobApplication
+    {
+      UserId = 1,
+      Company = "Test Co1",
+      Role = "Developer",
+      Status = "Screening Interview",
+      DateApplied = DateTime.UtcNow,
+      ApplicationNo = 1
+    });
+    dbContext.SaveChanges();
+
+    var service = new JobApplicationService(dbContext);
+    var request = new JobApplicationUpdateRequest(1, null, null, null,"Applied", null);
+    // Act + Assert
+    await Assert.ThrowsAsync<InvalidOperationException>(() => service.UpdateApplication(1, request));
+  }
+
+  [Fact]
+  public async Task UpdateApplication_ThrowsInvalidOperationException_WhenMovingBackwardInInterviewStages()
+  {
+    // Arrange
+    var dbContext = CreateDbContext();
+    dbContext.JobApplications.Add(new JobApplication
+    {
+      UserId = 1,
+      Company = "Test Co1",
+      Role = "Developer",
+      Status = "Final Interview",
+      DateApplied = DateTime.UtcNow,
+      ApplicationNo = 1
+    });
+    dbContext.SaveChanges();
+
+    var service = new JobApplicationService(dbContext);
+    var request = new JobApplicationUpdateRequest(1, null, null, null,"Screening Interview", null);
+    // Act + Assert
+    await Assert.ThrowsAsync<InvalidOperationException>(() => service.UpdateApplication(1, request));
+  }
 }

@@ -401,4 +401,88 @@ public class JobApplicationServiceTests
     Assert.Equal("Applied", result.Status);
     Assert.Single(dbContext.JobStatusHistories.Where(h => h.JobApplicationId == application.Id));
   }
+
+  [Fact]
+  public async Task ResetDemoApplications_DeletesApplicationsAboveThreshold_KeepsApplicationsAtOrBelowThreshold()
+  {
+    // Arrange
+    var dbContext = CreateDbContext();
+
+    dbContext.JobApplications.Add(new JobApplication
+    {
+      UserId = 1,
+      Company = "Below Threshold",
+      Role = "Developer",
+      Status = "Applied",
+      DateApplied = DateTime.UtcNow,
+      ApplicationNo = 74
+    });
+    dbContext.JobApplications.Add(new JobApplication
+    {
+      UserId = 1,
+      Company = "At Threshold",
+      Role = "Developer",
+      Status = "Applied",
+      DateApplied = DateTime.UtcNow,
+      ApplicationNo = 75
+    });
+    dbContext.JobApplications.Add(new JobApplication
+    {
+      UserId = 1,
+      Company = "Above Threshold",
+      Role = "Developer",
+      Status = "Applied",
+      DateApplied = DateTime.UtcNow,
+      ApplicationNo = 76
+    });
+    dbContext.SaveChanges();
+
+    var service = new JobApplicationService(dbContext);
+
+    // Act
+    await service.ResetDemoApplications(1);
+
+    // Assert
+    var remaining = dbContext.JobApplications.Where(a => a.UserId == 1).ToList();
+
+    Assert.Equal(2, remaining.Count);
+    Assert.Contains(remaining, a => a.ApplicationNo == 74);
+    Assert.Contains(remaining, a => a.ApplicationNo == 75);
+    Assert.DoesNotContain(remaining, a => a.ApplicationNo == 76);
+  }
+
+  [Fact]
+  public async Task ResetDemoApplications_DoesNothing_WhenNoApplicationsAboveThreshold()
+  {
+    // Arrange
+    var dbContext = CreateDbContext();
+    dbContext.JobApplications.Add(new JobApplication
+    {
+      UserId = 1,
+      Company = "Well Below Threshold",
+      Role = "Developer",
+      Status = "Applied",
+      DateApplied = DateTime.UtcNow,
+      ApplicationNo = 50
+    });
+    dbContext.JobApplications.Add(new JobApplication
+    {
+      UserId = 1,
+      Company = "At Threshold",
+      Role = "Developer",
+      Status = "Applied",
+      DateApplied = DateTime.UtcNow,
+      ApplicationNo = 75
+    });
+    dbContext.SaveChanges();
+
+    var service = new JobApplicationService(dbContext);
+
+    // Act
+    await service.ResetDemoApplications(1);
+
+    // Assert
+    var remaining = dbContext.JobApplications.Where(a => a.UserId == 1).ToList();
+    Assert.Equal(2, remaining.Count);
+  }
 }

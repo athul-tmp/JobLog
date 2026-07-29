@@ -295,4 +295,27 @@ public class JobApplicationServiceTests
     // Assert
     Assert.Empty(dbContext.JobApplications.Where(a => a.UserId == 1));
   }
+
+  [Fact]
+  public async Task DeleteAllUserApplications_DoesNothing_WhenUserHasNoApplications()
+  {
+    // Arrange
+    var dbContext = CreateDbContext();
+    dbContext.Users.Add(new User
+    {
+      Id = 1,
+      Email = "test@example.com",
+      PasswordHash = BCrypt.Net.BCrypt.HashPassword("correct-password"),
+      FirstName = "Test"
+    });
+    dbContext.SaveChanges();
+
+    var service = new JobApplicationService(dbContext);
+
+    // Act
+    await service.DeleteAllUserApplications(1, "correct-password");
+
+    // Assert
+    Assert.Empty(dbContext.JobApplications.Where(a => a.UserId == 1));
+  }
 }

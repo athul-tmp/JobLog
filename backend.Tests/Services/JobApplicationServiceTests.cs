@@ -67,4 +67,39 @@ public class JobApplicationServiceTests
     // Assert
     Assert.Equal(3, result.ApplicationNo);
   }
+
+  [Fact]
+  public async Task UpdateApplication_ThrowsKeyNotFoundException_WhenApplicationNotFound()
+  {
+    // Arrange
+    var dbContext = CreateDbContext();
+    var service = new JobApplicationService(dbContext);
+    var request = new JobApplicationUpdateRequest(1, "Test Company", null, null, null, null);
+
+    // Act + Assert
+    await Assert.ThrowsAsync<KeyNotFoundException>(() => service.UpdateApplication(1, request));
+  }
+
+  [Fact]
+  public async Task UpdateApplication_ThrowsInvalidOperationException_ForInvalidStatusValue()
+  {
+    // Arrange
+    var dbContext = CreateDbContext();
+    dbContext.JobApplications.Add(new JobApplication
+    {
+      UserId = 1,
+      Company = "Test Co1",
+      Role = "Developer",
+      Status = "Applied",
+      DateApplied = DateTime.UtcNow,
+      ApplicationNo = 1
+    });
+    dbContext.SaveChanges();
+
+    var service = new JobApplicationService(dbContext);
+    var request = new JobApplicationUpdateRequest(1, null, null, null,"NotRealStatus", null);
+
+    // Act + Assert
+    await Assert.ThrowsAsync<InvalidOperationException>(() => service.UpdateApplication(1, request));
+  }
 }

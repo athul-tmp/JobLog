@@ -70,4 +70,39 @@ public class UserServiceTests
     Assert.NotNull(result);
     Assert.Equal("test@example.com", result!.Email);
   }
+
+  [Fact]
+  public async Task DeleteUser_RemovesUserAndTheirApplications()
+  {
+    // Arrange
+    var dbContext = CreateDbContext();
+    var user = new User
+    {
+      Email = "test@example.com",
+      PasswordHash = BCrypt.Net.BCrypt.HashPassword("correct-password"),
+      FirstName = "Test"
+    };
+    dbContext.Users.Add(user);
+    dbContext.SaveChanges();
+
+    dbContext.JobApplications.Add(new JobApplication
+    {
+      UserId = user.Id,
+      Company = "Test Co",
+      Role = "Developer",
+      Status = "Applied",
+      DateApplied = DateTime.UtcNow,
+      ApplicationNo = 1
+    });
+    dbContext.SaveChanges();
+
+    var service = CreateUserService(dbContext);
+
+    // Act
+    await service.DeleteUser(user.Id, "correct-password");
+
+    // Assert
+    Assert.Null(await dbContext.Users.FindAsync(user.Id));
+    Assert.Empty(dbContext.JobApplications.Where(a => a.UserId == user.Id));
+  }
 }

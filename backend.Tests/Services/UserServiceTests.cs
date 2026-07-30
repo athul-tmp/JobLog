@@ -105,4 +105,26 @@ public class UserServiceTests
     Assert.Null(await dbContext.Users.FindAsync(user.Id));
     Assert.Empty(dbContext.JobApplications.Where(a => a.UserId == user.Id));
   }
+
+  [Fact]
+  public async Task ResetPassword_ThrowsInvalidOperationException_WhenTokenExpired()
+  {
+    // Arrange
+    var dbContext = CreateDbContext();
+    dbContext.Users.Add(new User
+    {
+      Email = "test@example.com",
+      PasswordHash = BCrypt.Net.BCrypt.HashPassword("old-password"),
+      FirstName = "Test",
+      PasswordResetToken = BCrypt.Net.BCrypt.HashPassword("reset-token"),
+      ResetTokenExpires = DateTime.UtcNow.AddHours(-1) // already expired
+    });
+    dbContext.SaveChanges();
+
+    var service = CreateUserService(dbContext);
+
+    // Act + Assert
+    await Assert.ThrowsAsync<InvalidOperationException>(
+      () => service.ResetPassword("test@example.com", "reset-token", "new-password"));
+  }
 }

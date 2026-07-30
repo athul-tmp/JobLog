@@ -162,4 +162,23 @@ public class UserServiceTests
     // Assert
     mockEmailService.Verify(e => e.SendPasswordResetEmail(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
   }
+
+  [Fact]
+  public async Task InitiateRegistration_ThrowsInvalidOperationException_WhenEmailAlreadyRegistered()
+  {
+    // Arrange
+    var dbContext = CreateDbContext();
+    dbContext.Users.Add(new User
+    {
+      Email = "test@example.com",
+      PasswordHash = BCrypt.Net.BCrypt.HashPassword("password"),
+      FirstName = "Test"
+    });
+    dbContext.SaveChanges();
+
+    var service = CreateUserService(dbContext);
+
+    // Act + Assert
+    await Assert.ThrowsAsync<InvalidOperationException>(() => service.InitiateRegistration("test@example.com"));
+  }
 }

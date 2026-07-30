@@ -124,7 +124,27 @@ public class UserServiceTests
     var service = CreateUserService(dbContext);
 
     // Act + Assert
-    await Assert.ThrowsAsync<InvalidOperationException>(
-      () => service.ResetPassword("test@example.com", "reset-token", "new-password"));
+    await Assert.ThrowsAsync<InvalidOperationException>(() => service.ResetPassword("test@example.com", "reset-token", "new-password"));
+  }
+
+  [Fact]
+  public async Task CompleteRegistration_ThrowsInvalidOperationException_WhenVerificationExpired()
+  {
+    // Arrange
+    var dbContext = CreateDbContext();
+    dbContext.EmailVerifications.Add(new EmailVerification
+    {
+      Email = "test@example.com",
+      Token = BCrypt.Net.BCrypt.HashPassword("verify-token"),
+      ExpiryDate = DateTime.UtcNow.AddHours(-1), // already expired
+      Purpose = "Registration",
+      UserId = null
+    });
+    dbContext.SaveChanges();
+
+    var service = CreateUserService(dbContext);
+
+    // Act + Assert
+    await Assert.ThrowsAsync<InvalidOperationException>(() => service.CompleteRegistration("test@example.com", "verify-token", "Test", "password123"));
   }
 }

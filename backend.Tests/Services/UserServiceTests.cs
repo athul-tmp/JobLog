@@ -207,4 +207,34 @@ public class UserServiceTests
     // Act + Assert
     await Assert.ThrowsAsync<InvalidOperationException>(() => service.InitiateEmailChange(user.Id, "correct-password", "taken@example.com"));
   }
+
+  [Fact]
+  public async Task CompleteEmailChange_ThrowsUnauthorizedAccessException_WhenTokenInvalid()
+  {
+    // Arrange
+    var dbContext = CreateDbContext();
+    var user = new User
+    {
+      Email = "test@example.com",
+      PasswordHash = BCrypt.Net.BCrypt.HashPassword("password"),
+      FirstName = "Test"
+    };
+    dbContext.Users.Add(user);
+    dbContext.SaveChanges();
+
+    dbContext.EmailVerifications.Add(new EmailVerification
+    {
+      UserId = user.Id,
+      Email = "newemail@example.com",
+      Token = BCrypt.Net.BCrypt.HashPassword("correct-token"),
+      ExpiryDate = DateTime.UtcNow.AddHours(1),
+      Purpose = "EmailChange"
+    });
+    dbContext.SaveChanges();
+
+    var service = CreateUserService(dbContext);
+
+    // Act + Assert
+    await Assert.ThrowsAsync<UnauthorizedAccessException>(() => service.CompleteEmailChange(user.Id, "wrong-token"));
+  }
 }

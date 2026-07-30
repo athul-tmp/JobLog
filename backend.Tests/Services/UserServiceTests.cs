@@ -18,9 +18,9 @@ public class UserServiceTests
     return new ApplicationDbContext(options);
   }
 
-  private UserService CreateUserService(ApplicationDbContext dbContext)
+  private UserService CreateUserService(ApplicationDbContext dbContext, Mock<IEmailService>? mockEmailService = null)
   {
-    var mockEmailService = new Mock<IEmailService>();
+    mockEmailService ??= new Mock<IEmailService>();
     var mockConfig = new Mock<IConfiguration>();
 
     return new UserService(dbContext, mockEmailService.Object, mockConfig.Object);
@@ -146,5 +146,20 @@ public class UserServiceTests
 
     // Act + Assert
     await Assert.ThrowsAsync<InvalidOperationException>(() => service.CompleteRegistration("test@example.com", "verify-token", "Test", "password123"));
+  }
+
+  [Fact]
+  public async Task ForgotPassword_DoesNotSendEmail_WhenUserDoesNotExist()
+  {
+    // Arrange
+    var dbContext = CreateDbContext();
+    var mockEmailService = new Mock<IEmailService>();
+    var service = CreateUserService(dbContext, mockEmailService);
+
+    // Act
+    await service.ForgotPassword("doesnotexist@example.com");
+
+    // Assert
+    mockEmailService.Verify(e => e.SendPasswordResetEmail(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()), Times.Never);
   }
 }

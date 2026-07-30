@@ -181,4 +181,30 @@ public class UserServiceTests
     // Act + Assert
     await Assert.ThrowsAsync<InvalidOperationException>(() => service.InitiateRegistration("test@example.com"));
   }
+
+  [Fact]
+  public async Task InitiateEmailChange_ThrowsInvalidOperationException_WhenNewEmailAlreadyInUse()
+  {
+    // Arrange
+    var dbContext = CreateDbContext();
+    var user = new User
+    {
+      Email = "test@example.com",
+      PasswordHash = BCrypt.Net.BCrypt.HashPassword("correct-password"),
+      FirstName = "Test"
+    };
+    var otherUser = new User
+    {
+      Email = "taken@example.com",
+      PasswordHash = BCrypt.Net.BCrypt.HashPassword("some-password"),
+      FirstName = "Other"
+    };
+    dbContext.Users.AddRange(user, otherUser);
+    dbContext.SaveChanges();
+
+    var service = CreateUserService(dbContext);
+
+    // Act + Assert
+    await Assert.ThrowsAsync<InvalidOperationException>(() => service.InitiateEmailChange(user.Id, "correct-password", "taken@example.com"));
+  }
 }

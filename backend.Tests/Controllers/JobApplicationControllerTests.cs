@@ -148,4 +148,49 @@ public class JobApplicationControllerTests : IClassFixture<CustomWebApplicationF
     Assert.Equal(2, applications!.Count);
     Assert.DoesNotContain(applications, a => a.Company == "Someone Else's Co");
   }
+
+  [Fact]
+  public async Task DeleteAllUserApplications_ReturnsOk_WhenPasswordCorrect()
+  {
+    // Arrange
+    using var scope = _factory.Services.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    var tokenService = scope.ServiceProvider.GetRequiredService<ITokenService>();
+
+    var user = new User
+    {
+      Email = $"test-{Guid.NewGuid()}@example.com",
+      PasswordHash = BCrypt.Net.BCrypt.HashPassword("correct-password"),
+      FirstName = "Test"
+    };
+    dbContext.Users.Add(user);
+    dbContext.SaveChanges();
+
+    dbContext.JobApplications.Add(new JobApplication
+    {
+      UserId = user.Id,
+      Company = "Test Co",
+      Role = "Developer",
+      Status = "Applied",
+      DateApplied = DateTime.UtcNow,
+      ApplicationNo = 1
+    });
+    dbContext.SaveChanges();
+
+    var tokenResult = tokenService.CreateToken(user);
+    var client = _factory.CreateClient();
+    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", tokenResult.Token);
+
+    var request = new DeleteDataRequest("correct-password");
+
+    // Act
+    var response = await client.SendAsync(new HttpRequestMessage(HttpMethod.Delete, "/api/JobApplication/all")
+    {
+      Content = JsonContent.Create(request)
+    });
+
+    // Assert
+    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    Assert.Empty(dbContext.JobApplications.Where(a => a.UserId == user.Id));
+  }
 }

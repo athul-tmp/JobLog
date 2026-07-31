@@ -46,4 +46,17 @@ public class AnalyticsControllerTests : IClassFixture<CustomWebApplicationFactor
     // Assert
     Assert.Equal(HttpStatusCode.OK, response.StatusCode);
   }
+
+  [Fact]
+  public async Task GetSummaryStats_ReturnsUnauthorized_ForMissingToken()
+  {
+    // Arrange
+    var client = _factory.CreateClient();
+
+    // Act
+    var response = await client.GetAsync("/api/Analytics/summary");
+
+    // Assert
+    Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+  }
 }

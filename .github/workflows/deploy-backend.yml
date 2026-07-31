@@ -2,8 +2,7 @@ name: Deploy JobLog Backend to Azure
 
 on:
   push:
-    branches: ["main"]
-    paths: ["backend/**"]
+    paths: ["backend/**", "backend.Tests/**"]
 
 env:
   REGISTRY: ghcr.io
@@ -12,7 +11,25 @@ env:
   RESOURCE_GROUP: joblog-resources
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Restore Dependencies
+        run: dotnet restore
+
+      - name: Run Tests
+        run: dotnet test --no-restore --verbosity normal
   build-and-deploy:
+    needs: test
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       contents: read

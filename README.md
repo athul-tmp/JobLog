@@ -1,6 +1,8 @@
 # JobLog: A Modern Job Application Tracker
 
-[![React](https://img.shields.io/badge/React-20232A?style=flat-square&logo=react&logoColor=61DAFB)](https://reactjs.org/) [![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=fff)](https://www.typescriptlang.org/) [![Next.js](https://img.shields.io/badge/Next.js-000000?style=flat-square&logo=next.js&logoColor=white)](https://nextjs.org/) [![shadcn/ui](https://img.shields.io/badge/shadcn%2Fui-000?logo=shadcnui&logoColor=fff)](https://ui.shadcn.com/) [![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-%2338B2AC.svg?logo=tailwind-css&logoColor=white)](https://tailwindcss.com/) [![.NET 8](https://img.shields.io/badge/.NET_8-512BD4?style=flat-square&logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/) [![C#](https://custom-icon-badges.demolab.com/badge/C%23-%23239120.svg?logo=cshrp&logoColor=white)](https://dotnet.microsoft.com/) [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-%23316192.svg?logo=postgresql&logoColor=white)](https://www.postgresql.org/) [![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=fff)](https://www.docker.com/) [![Azure](https://img.shields.io/badge/Azure_Container_Apps-0078D4?style=flat-square&logo=microsoftazure&logoColor=white)](https://azure.microsoft.com/en-us/products/container-apps)	[![Vercel](https://img.shields.io/badge/Vercel-%23000000.svg?logo=vercel&logoColor=white)](https://vercel.com/) [![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?logo=github-actions&logoColor=white)](https://docs.github.com/en/actions) [![Chrome Web Store](https://img.shields.io/badge/Chrome%20Web%20Store-4285F4?style=flat-square&logo=googlechrome&logoColor=white)]((https://chromewebstore.google.com/detail/mbbminokbdldbonjhceefnjncgadogcj?utm_source=item-share-cb))
+[![React](https://img.shields.io/badge/React-20232A?style=flat-square&logo=react&logoColor=61DAFB)](https://reactjs.org/) [![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=fff)](https://www.typescriptlang.org/) [![Next.js](https://img.shields.io/badge/Next.js-000000?style=flat-square&logo=next.js&logoColor=white)](https://nextjs.org/) [![shadcn/ui](https://img.shields.io/badge/shadcn%2Fui-000?logo=shadcnui&logoColor=fff)](https://ui.shadcn.com/) [![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-%2338B2AC.svg?logo=tailwind-css&logoColor=white)](https://tailwindcss.com/) [![.NET 8](https://img.shields.io/badge/.NET_8-512BD4?style=flat-square&logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/) [![C#](https://custom-icon-badges.demolab.com/badge/C%23-%23239120.svg?logo=cshrp&logoColor=white)](https://dotnet.microsoft.com/) [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-%23316192.svg?logo=postgresql&logoColor=white)](https://www.postgresql.org/) [![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=fff)](https://www.docker.com/) [![Azure](https://img.shields.io/badge/Azure_Container_Apps-0078D4?style=flat-square&logo=microsoftazure&logoColor=white)](https://azure.microsoft.com/en-us/products/container-apps)	[![Vercel](https://img.shields.io/badge/Vercel-%23000000.svg?logo=vercel&logoColor=white)](https://vercel.com/) [![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?logo=github-actions&logoColor=white)](https://docs.github.com/en/actions) [![Chrome Web Store](https://img.shields.io/badge/Chrome%20Web%20Store-4285F4?style=flat-square&logo=googlechrome&logoColor=white)]((https://chromewebstore.google.com/detail/mbbminokbdldbonjhceefnjncgadogcj?utm_source=item-share-cb)) [![xUnit](https://img.shields.io/badge/xUnit-512BD4?style=flat-square&logo=nuget&logoColor=white)](https://xunit.net/) 
+
+[![CI](https://github.com/athul-tmp/JobLog/actions/workflows/deploy-backend.yml/badge.svg)](https://github.com/athul-tmp/JobLog/actions/workflows/deploy-backend.yml)
 
 JobLog is a full-stack web application for tracking job applications and monitoring job-search progress through structured data and visual analytics.
 It is designed to provide clarity, organisation, and insights throughout the job application process.
@@ -14,6 +16,7 @@ It is designed to provide clarity, organisation, and insights throughout the job
 ## 📔 Table of Contents
 
 * [Features](#features)
+* [Testing](#testing)
 * [Screenshots](#screenshots)
 * [Tech Stack](#tech-stack)
 * [Infrastructure & Deployment](#infrastructure--deployment)
@@ -58,6 +61,21 @@ It is designed to provide clarity, organisation, and insights throughout the job
 ### UI / UX
 * **Modern Design:** Built with **Tailwind CSS** and **shadcn/ui**.
 * **Experience:** Fully responsive design, dark/light mode themes, and a landing-page screenshot carousel.
+
+---
+
+## 🧪 Testing <a id="testing"></a>
+
+The backend is covered by a suite of **60 automated tests** using **xUnit**, **Moq**, and the **EF Core In-Memory Provider**.
+
+* **Unit Tests (40):** Cover core business logic across services, including status transition rules, JWT token generation, analytics calculations, and authentication logic, using mocked dependencies for full isolation.
+* **Integration Tests (20):** Use `WebApplicationFactory` to exercise the full HTTP pipeline, including routing, JWT authentication, and controller behaviour, against a real (in-memory) database.
+* **CI Pipeline:** Tests run automatically on every push via **GitHub Actions**, and gate production deployment. A failing test blocks the release.
+
+Run the full suite locally:
+```bash
+dotnet test
+```
 
 ---
 
@@ -133,6 +151,7 @@ The extension popup, demonstrating successful data capture and theme responsiven
 | **Authentication** | `JWT` (HttpOnly Cookies), `BCrypt` | Stateless API with secure password hashing. |
 | **Email** | `Brevo SMTP` | For user verification and password reset flows. |
 | **Extension** | `HTML`, `CSS`, `Vanilla JavaScript` | Browser-specific APIs (chrome.scripting, chrome.storage). |
+| **Testing** | `xUnit, Moq, EF Core InMemory` | 60 tests (unit and integration), CI gated deployment. |
 
 ---
 

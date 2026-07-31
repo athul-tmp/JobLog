@@ -150,7 +150,7 @@ public class UserControllerTests : IClassFixture<CustomWebApplicationFactory>
     Assert.Equal(HttpStatusCode.OK, response.StatusCode);
   }
 
-  // --- Delete Account ---
+  // --- DeleteAccount ---
 
   [Fact]
   public async Task DeleteAccount_ReturnsOk_AndRemovesUser_ForCorrectPassword()
@@ -187,7 +187,7 @@ public class UserControllerTests : IClassFixture<CustomWebApplicationFactory>
     Assert.Null(await dbContext.Users.FindAsync(user.Id));
   }
 
-  // --- Verify Password ---
+  // --- VerifyPassword ---
 
   [Fact]
   public async Task VerifyPassword_ReturnsOk_ForAuthenticatedUserWithCorrectPassword()
@@ -214,6 +214,63 @@ public class UserControllerTests : IClassFixture<CustomWebApplicationFactory>
 
     // Act
     var response = await client.PostAsJsonAsync("/api/User/verifyPassword", request);
+
+    // Assert
+    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+  }
+
+  // --- ForgotPassword ---
+
+  [Fact]
+  public async Task ForgotPassword_ReturnsOk_ForKnownUser()
+  {
+    // Arrange
+    using var scope = _factory.Services.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+    dbContext.Users.Add(new User
+    {
+      Email = "forgotpassword-test@example.com",
+      PasswordHash = BCrypt.Net.BCrypt.HashPassword("some-password"),
+      FirstName = "Test"
+    });
+    dbContext.SaveChanges();
+
+    var client = _factory.CreateClient();
+    var request = new ForgotPasswordRequest("forgotpassword-test@example.com");
+
+    // Act
+    var response = await client.PostAsJsonAsync("/api/User/forgotPassword", request);
+
+    // Assert
+    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+  }
+
+  // --- ResetPassword ---
+
+  [Fact]
+  public async Task ResetPassword_ReturnsOk_ForValidToken()
+  {
+    // Arrange
+    using var scope = _factory.Services.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+    const string rawToken = "valid-reset-token";
+    dbContext.Users.Add(new User
+    {
+      Email = "resetpassword-test@example.com",
+      PasswordHash = BCrypt.Net.BCrypt.HashPassword("old-password"),
+      FirstName = "Test",
+      PasswordResetToken = BCrypt.Net.BCrypt.HashPassword(rawToken),
+      ResetTokenExpires = DateTime.UtcNow.AddHours(1)
+    });
+    dbContext.SaveChanges();
+
+    var client = _factory.CreateClient();
+    var request = new ResetPasswordRequest("resetpassword-test@example.com", rawToken, "NewPassw0rd!");
+
+    // Act
+    var response = await client.PostAsJsonAsync("/api/User/resetPassword", request);
 
     // Assert
     Assert.Equal(HttpStatusCode.OK, response.StatusCode);

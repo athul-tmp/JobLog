@@ -72,4 +72,150 @@ public class UserControllerTests : IClassFixture<CustomWebApplicationFactory>
     // Assert
     Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
   }
+
+  // --- Logout ---
+
+  [Fact]
+  public async Task Logout_ReturnsOk_WithNoAuthRequired()
+  {
+    // Arrange
+    var client = _factory.CreateClient();
+
+    // Act
+    var response = await client.PostAsync("/api/User/logout", null);
+
+    // Assert
+    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+  }
+
+  // --- UpdateName + UpdatePassword ---
+
+  [Fact]
+  public async Task UpdateName_ReturnsOk_ForAuthenticatedUserWithCorrectPassword()
+  {
+    // Arrange
+    using var scope = _factory.Services.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    var tokenService = scope.ServiceProvider.GetRequiredService<ITokenService>();
+
+    var user = new User
+    {
+      Email = "updatename-test@example.com",
+      PasswordHash = BCrypt.Net.BCrypt.HashPassword("correct-password"),
+      FirstName = "OldName"
+    };
+    dbContext.Users.Add(user);
+    dbContext.SaveChanges();
+
+    var tokenResult = tokenService.CreateToken(user);
+    var client = _factory.CreateClient();
+    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", tokenResult.Token);
+
+    var request = new UpdateNameRequest("correct-password", "NewName");
+
+    // Act
+    var response = await client.PutAsJsonAsync("/api/User/updateName", request);
+
+    // Assert
+    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+  }
+
+  [Fact]
+  public async Task UpdatePassword_ReturnsOk_ForAuthenticatedUserWithCorrectPassword()
+  {
+    // Arrange
+    using var scope = _factory.Services.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    var tokenService = scope.ServiceProvider.GetRequiredService<ITokenService>();
+
+    var user = new User
+    {
+      Email = "updatepassword-test@example.com",
+      PasswordHash = BCrypt.Net.BCrypt.HashPassword("correct-password"),
+      FirstName = "Test"
+    };
+    dbContext.Users.Add(user);
+    dbContext.SaveChanges();
+
+    var tokenResult = tokenService.CreateToken(user);
+    var client = _factory.CreateClient();
+    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", tokenResult.Token);
+
+    var request = new UpdatePasswordRequest("correct-password", "NewPassw0rd!");
+
+    // Act
+    var response = await client.PutAsJsonAsync("/api/User/updatePassword", request);
+
+    // Assert
+    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+  }
+
+  // --- Delete Account ---
+
+  [Fact]
+  public async Task DeleteAccount_ReturnsOk_AndRemovesUser_ForCorrectPassword()
+  {
+    // Arrange
+    using var scope = _factory.Services.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    var tokenService = scope.ServiceProvider.GetRequiredService<ITokenService>();
+
+    var user = new User
+    {
+      Email = "delete-test@example.com",
+      PasswordHash = BCrypt.Net.BCrypt.HashPassword("correct-password"),
+      FirstName = "Test"
+    };
+    dbContext.Users.Add(user);
+    dbContext.SaveChanges();
+
+    var tokenResult = tokenService.CreateToken(user);
+    var client = _factory.CreateClient();
+    client.DefaultRequestHeaders.Authorization =
+        new AuthenticationHeaderValue("Bearer", tokenResult.Token);
+
+    var request = new DeleteAccountRequest("correct-password");
+
+    // Act
+    var response = await client.SendAsync(new HttpRequestMessage(HttpMethod.Delete, "/api/User/delete")
+    {
+      Content = JsonContent.Create(request)
+    });
+
+    // Assert
+    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    Assert.Null(await dbContext.Users.FindAsync(user.Id));
+  }
+
+  // --- Verify Password ---
+
+  [Fact]
+  public async Task VerifyPassword_ReturnsOk_ForAuthenticatedUserWithCorrectPassword()
+  {
+    // Arrange
+    using var scope = _factory.Services.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    var tokenService = scope.ServiceProvider.GetRequiredService<ITokenService>();
+
+    var user = new User
+    {
+      Email = "verifypassword-test@example.com",
+      PasswordHash = BCrypt.Net.BCrypt.HashPassword("correct-password"),
+      FirstName = "Test"
+    };
+    dbContext.Users.Add(user);
+    dbContext.SaveChanges();
+
+    var tokenResult = tokenService.CreateToken(user);
+    var client = _factory.CreateClient();
+    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", tokenResult.Token);
+
+    var request = new VerifyPasswordRequest("correct-password");
+
+    // Act
+    var response = await client.PostAsJsonAsync("/api/User/verifyPassword", request);
+
+    // Assert
+    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+  }
 }

@@ -346,4 +346,50 @@ public class UserControllerTests : IClassFixture<CustomWebApplicationFactory>
     // Assert
     Assert.Equal(HttpStatusCode.OK, response.StatusCode);
   }
+
+
+  // --- InitiateRegistration + CompleteRegistration ---
+
+  [Fact]
+  public async Task InitiateRegistration_ReturnsOk_ForNewEmail()
+  {
+    // Arrange
+    var client = _factory.CreateClient();
+    var request = new InitiateRegistrationRequest($"newuser-{Guid.NewGuid()}@example.com");
+
+    // Act
+    var response = await client.PostAsJsonAsync("/api/User/initiate-registration", request);
+
+    // Assert
+    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+  }
+
+  [Fact]
+  public async Task CompleteRegistration_ReturnsCreated_ForValidToken()
+  {
+    // Arrange
+    using var scope = _factory.Services.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+    const string rawToken = "valid-registration-token";
+    dbContext.EmailVerifications.Add(new EmailVerification
+    {
+      Email = "completereg-test@example.com",
+      Token = BCrypt.Net.BCrypt.HashPassword(rawToken),
+      ExpiryDate = DateTime.UtcNow.AddHours(1),
+      Purpose = "Registration",
+      UserId = null
+    });
+    dbContext.SaveChanges();
+
+    var client = _factory.CreateClient();
+    var request = new CompleteRegistrationRequest(
+        "completereg-test@example.com", rawToken, "NewUser", "StrongPassw0rd!");
+
+    // Act
+    var response = await client.PostAsJsonAsync("/api/User/complete-registration", request);
+
+    // Assert
+    Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+  }
 }

@@ -86,4 +86,66 @@ public class JobApplicationControllerTests : IClassFixture<CustomWebApplicationF
     // Assert
     Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
   }
+
+  [Fact]
+  public async Task GetAllUserApplications_ReturnsOnlyRequestingUsersApplications()
+  {
+    // Arrange
+    using var scope = _factory.Services.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    var tokenService = scope.ServiceProvider.GetRequiredService<ITokenService>();
+
+    var (client, user) = CreateAuthenticatedClient(dbContext, tokenService);
+
+    dbContext.JobApplications.Add(new JobApplication
+    {
+      UserId = user.Id,
+      Company = "My Co1",
+      Role = "Developer",
+      Status = "Applied",
+      DateApplied = DateTime.UtcNow,
+      ApplicationNo = 1
+    });
+    dbContext.JobApplications.Add(new JobApplication
+    {
+      UserId = user.Id,
+      Company = "My Co2",
+      Role = "Developer",
+      Status = "Applied",
+      DateApplied = DateTime.UtcNow,
+      ApplicationNo = 2
+    });
+
+    // Another user's application which should NOT show up in the response
+    var otherUser = new User
+    {
+      Email = $"other-{Guid.NewGuid()}@example.com",
+      PasswordHash = "irrelevant-for-this-test",
+      FirstName = "Other"
+    };
+    dbContext.Users.Add(otherUser);
+    dbContext.SaveChanges();
+
+    dbContext.JobApplications.Add(new JobApplication
+    {
+      UserId = otherUser.Id,
+      Company = "Someone Else's Co",
+      Role = "Developer",
+      Status = "Applied",
+      DateApplied = DateTime.UtcNow,
+      ApplicationNo = 1
+    });
+    dbContext.SaveChanges();
+
+    // Act
+    var response = await client.GetAsync("/api/JobApplication/all");
+
+    // Assert
+    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+    var applications = await response.Content.ReadFromJsonAsync<List<JobApplicationDto>>();
+    Assert.NotNull(applications);
+    Assert.Equal(2, applications!.Count);
+    Assert.DoesNotContain(applications, a => a.Company == "Someone Else's Co");
+  }
 }

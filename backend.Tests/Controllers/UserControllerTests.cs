@@ -275,4 +275,74 @@ public class UserControllerTests : IClassFixture<CustomWebApplicationFactory>
     // Assert
     Assert.Equal(HttpStatusCode.OK, response.StatusCode);
   }
+
+  // --- InitiateEmailChange + CompleteEmailChange ---
+
+  [Fact]
+  public async Task InitiateEmailChange_ReturnsOk_ForAuthenticatedUserWithUnusedEmail()
+  {
+    // Arrange
+    using var scope = _factory.Services.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    var tokenService = scope.ServiceProvider.GetRequiredService<ITokenService>();
+
+    var user = new User
+    {
+      Email = "initiateemailchange-test@example.com",
+      PasswordHash = BCrypt.Net.BCrypt.HashPassword("correct-password"),
+      FirstName = "Test"
+    };
+    dbContext.Users.Add(user);
+    dbContext.SaveChanges();
+
+    var tokenResult = tokenService.CreateToken(user);
+    var client = _factory.CreateClient();
+    client.DefaultRequestHeaders.Authorization =
+        new AuthenticationHeaderValue("Bearer", tokenResult.Token);
+
+    var request = new InitiateEmailChangeRequest("correct-password", "brandnew@example.com");
+
+    // Act
+    var response = await client.PostAsJsonAsync("/api/User/initiate-email-change", request);
+
+    // Assert
+    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+  }
+
+  [Fact]
+  public async Task CompleteEmailChange_ReturnsOk_ForValidToken()
+  {
+    // Arrange
+    using var scope = _factory.Services.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+    var user = new User
+    {
+      Email = "completeemailchange-test@example.com",
+      PasswordHash = BCrypt.Net.BCrypt.HashPassword("some-password"),
+      FirstName = "Test"
+    };
+    dbContext.Users.Add(user);
+    dbContext.SaveChanges();
+
+    const string rawToken = "valid-email-change-token";
+    dbContext.EmailVerifications.Add(new EmailVerification
+    {
+      UserId = user.Id,
+      Email = "newemail-completed@example.com",
+      Token = BCrypt.Net.BCrypt.HashPassword(rawToken),
+      ExpiryDate = DateTime.UtcNow.AddHours(1),
+      Purpose = "EmailChange"
+    });
+    dbContext.SaveChanges();
+
+    var client = _factory.CreateClient();
+    var request = new CompleteEmailChangeRequest(user.Id, rawToken);
+
+    // Act
+    var response = await client.PostAsJsonAsync("/api/User/complete-email-change", request);
+
+    // Assert
+    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+  }
 }

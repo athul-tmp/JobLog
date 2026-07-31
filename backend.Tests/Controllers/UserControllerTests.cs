@@ -150,8 +150,6 @@ public class UserControllerTests : IClassFixture<CustomWebApplicationFactory>
     Assert.Equal(HttpStatusCode.OK, response.StatusCode);
   }
 
-  // --- DeleteAccount ---
-
   [Fact]
   public async Task DeleteAccount_ReturnsOk_AndRemovesUser_ForCorrectPassword()
   {
@@ -184,7 +182,10 @@ public class UserControllerTests : IClassFixture<CustomWebApplicationFactory>
 
     // Assert
     Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-    Assert.Null(await dbContext.Users.FindAsync(user.Id));
+
+    using var verificationScope = _factory.Services.CreateScope();
+    var verificationDbContext = verificationScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    Assert.Null(await verificationDbContext.Users.FindAsync(user.Id));
   }
 
   // --- VerifyPassword ---

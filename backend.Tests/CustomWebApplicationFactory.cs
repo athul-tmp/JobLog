@@ -12,16 +12,9 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 {
   protected override void ConfigureWebHost(IWebHostBuilder builder)
   {
-    builder.ConfigureAppConfiguration((context, config) =>
-    {
-      var testConfig = new Dictionary<string, string?>
-      {
-        { "Jwt:Key", "this-is-a-fake-test-secret-key-with-enough-length-123456" },
-        { "Jwt:Issuer", "TestIssuer" },
-        { "Jwt:Audience", "TestAudience" }
-      };
-      config.AddInMemoryCollection(testConfig);
-    });
+    builder.UseSetting("Jwt:Key", "this-is-a-fake-test-secret-key-with-enough-length-123456");
+    builder.UseSetting("Jwt:Issuer", "TestIssuer");
+    builder.UseSetting("Jwt:Audience", "TestAudience");
 
     builder.ConfigureServices(services =>
     {

@@ -193,4 +193,51 @@ public class JobApplicationControllerTests : IClassFixture<CustomWebApplicationF
     Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     Assert.Empty(dbContext.JobApplications.Where(a => a.UserId == user.Id));
   }
+
+  [Fact]
+  public async Task UndoLastStatusChange_ReturnsOk_AndRevertsStatus()
+  {
+    // Arrange
+    using var scope = _factory.Services.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    var tokenService = scope.ServiceProvider.GetRequiredService<ITokenService>();
+
+    var (client, user) = CreateAuthenticatedClient(dbContext, tokenService);
+
+    var application = new JobApplication
+    {
+      UserId = user.Id,
+      Company = "Test Co",
+      Role = "Developer",
+      Status = "Screening Interview",
+      DateApplied = DateTime.UtcNow,
+      ApplicationNo = 1
+    };
+    dbContext.JobApplications.Add(application);
+    dbContext.SaveChanges();
+
+    dbContext.JobStatusHistories.Add(new JobStatusHistory
+    {
+      JobApplicationId = application.Id,
+      Status = "Applied",
+      ChangeDate = DateTime.UtcNow.AddDays(-1)
+    });
+    dbContext.JobStatusHistories.Add(new JobStatusHistory
+    {
+      JobApplicationId = application.Id,
+      Status = "Screening Interview",
+      ChangeDate = DateTime.UtcNow
+    });
+    dbContext.SaveChanges();
+
+    // Act
+    var response = await client.PostAsync($"/api/JobApplication/undo/{application.Id}", null);
+
+    // Assert
+    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+    var updatedApplication = await response.Content.ReadFromJsonAsync<JobApplicationDto>();
+    Assert.NotNull(updatedApplication);
+    Assert.Equal("Applied", updatedApplication!.Status);
+  }
 }

@@ -378,32 +378,41 @@ async function scrapeJobFromPage() {
 
     function scrapeIndeed(jobData) {
         try {
-            const titleElement = document.querySelector('[data-testid="jobsearch-JobInfoHeader-title"] span');
-            if (titleElement) {
-                let title = titleElement.textContent.trim();
-                title = title.replace(/\s*[-\(]?\s*job post\s*[\)]?/i, '').trim();
-                jobData.jobTitle = title;
-            }
+            const clean = (text) => text?.replace(/\s+/g, ' ').trim() || null;
+            const header = document.querySelector('[data-testid="desktop-job-header"]');
 
-            const companyElement = document.querySelector('[data-testid="inlineHeader-companyName"] a');
-            if (companyElement) {
-                let name = companyElement.textContent.trim();
-                const parentSpan = companyElement.closest('span');
-                if (parentSpan) {
-                    name = parentSpan.textContent.trim();
-                    name = name.replace(/View all jobs/i, '').trim();
+            if (header) {
+                // Current layout (both split-pane and standalone job pages)
+                jobData.jobTitle = clean(header.querySelector('[data-testid="vj-job-title"]')?.textContent);
+
+                const metadata = header.querySelector('[data-testid="company-info-metadata"]');
+                const companyLink = metadata?.querySelector('a[href*="/cmp/"]') || metadata?.querySelector('a');
+                if (companyLink) {
+                    jobData.companyName = clean(companyLink.textContent)
+                        || clean(companyLink.getAttribute('aria-label')?.replace(/\s*\(opens in a new tab\)\s*$/i, ''));
                 }
-                jobData.companyName = name;
+
+                // Location is the first visible text in the metadata that isn't the company, a separator or the rating
+                for (const el of metadata?.querySelectorAll('div[dir="ltr"]') || []) {
+                    const text = clean(el.textContent);
+                    if (!text || el.closest('a') || el.closest('[aria-hidden="true"]')) continue;
+                    if (/stars/i.test(el.getAttribute('aria-label') || '') || /^[·•\-\d.\s]+$/.test(text)) continue;
+                    jobData.location = text;
+                    break;
+                }
             } else {
-                const companySpan = document.querySelector('[data-testid="inlineHeader-companyName"] span');
-                if (companySpan) {
-                    jobData.companyName = companySpan.textContent.trim();
+                // Legacy layout
+                const titleElement = document.querySelector('[data-testid="jobsearch-JobInfoHeader-title"] span, [data-testid="jobsearch-JobInfoHeader-title"]');
+                if (titleElement) {
+                    jobData.jobTitle = clean(titleElement.textContent.replace(/\s*[-\(]?\s*job post\s*[\)]?/i, ''));
                 }
-            }
 
-            const locationElement = document.querySelector('[data-testid="inlineHeader-companyLocation"]');
-            if (locationElement) {
-                jobData.location = locationElement.textContent.trim();
+                const companyElement = document.querySelector('[data-testid="inlineHeader-companyName"] a, [data-testid="inlineHeader-companyName"] span');
+                if (companyElement) {
+                    jobData.companyName = clean(companyElement.textContent.replace(/View all jobs/i, ''));
+                }
+
+                jobData.location = clean(document.querySelector('[data-testid="inlineHeader-companyLocation"]')?.textContent);
             }
         } catch (e) {
             console.error("Indeed scraping failed:", e);

@@ -2,13 +2,14 @@ import React, { useState } from "react";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"; 
-import { AlertCircle, AlertTriangle, CheckCircle, Database } from "lucide-react";
+import { AlertCircle, AlertTriangle, CheckCircle, Database, Download } from "lucide-react";
 import { Alert, AlertDescription } from "../ui/alert";
 import { Label } from "../ui/label";
 import { PasswordInput } from "../ui/PasswordInput";
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
 import { AuthService, JobApplicationService } from "@/services/api";
+import { buildApplicationsCsv, downloadCsv } from "@/lib/csvExport";
 
 // Renders the status (success/error)
 const StatusAlert = ({ status, message }: { status: 'success' | 'error' | null, message: string | null }) => {
@@ -35,6 +36,34 @@ export const DataManagementTab = ({ isDemoUser }: DataManagementTabProps) => {
     const [clearStatus, setClearStatus] = useState<'success' | 'error' | null>(null);
     const [clearMessage, setClearMessage] = useState<string | null>(null);
     const [isClearModalOpen, setIsClearModalOpen] = useState(false);
+    const [exportLoading, setExportLoading] = useState(false);
+
+    // CSV Export
+    const handleExportCsv = async () => {
+        setExportLoading(true);
+
+        try {
+            const applications = await JobApplicationService.getAllJobApplications();
+
+            if (applications.length === 0) {
+                toast.info("No applications to export.");
+                return;
+            }
+
+            const date = new Date().toISOString().substring(0, 10);
+            downloadCsv(buildApplicationsCsv(applications), `joblog-applications-${date}.csv`);
+
+            toast.success("Export complete.", {
+                description: `${applications.length} application${applications.length === 1 ? '' : 's'} exported to CSV.`,
+            });
+        } catch (error) {
+            toast.error("Export failed.", {
+                description: error instanceof Error ? error.message : 'An unexpected error occurred.',
+            });
+        } finally {
+            setExportLoading(false);
+        }
+    };
 
     const clearStatusMessages = () => {
         setClearStatus(null);
@@ -99,6 +128,21 @@ export const DataManagementTab = ({ isDemoUser }: DataManagementTabProps) => {
     return (
         <div className="space-y-6">
             <h2 className="text-xl font-bold tracking-tight">Data Management</h2>
+            <Card>
+                <CardHeader>
+                    <CardTitle>Export Application Data</CardTitle>
+                    <CardDescription>
+                        Download all of your job applications, including status history, as a CSV file. Useful for <strong>keeping a backup before clearing data</strong> or analysing it in a spreadsheet.
+                    </CardDescription>
+                </CardHeader>
+                <CardFooter>
+                    <Button onClick={handleExportCsv} disabled={exportLoading}>
+                        <Download className="h-4 w-4 mr-2" />
+                        {exportLoading ? 'Exporting...' : 'Export as CSV'}
+                    </Button>
+                </CardFooter>
+            </Card>
+
             <Card className="border-red-500/50 bg-red-200 dark:bg-red-950/40">
                 <CardHeader>
                     <CardTitle className="text-red-600 dark:text-red-400">Clear All Application Data</CardTitle>

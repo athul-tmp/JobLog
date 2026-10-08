@@ -68,6 +68,22 @@ public class DemoTests : IClassFixture<CustomWebApplicationFactory>
   }
 
   [Fact]
+  public async Task StartDemo_SeedsDailyTrend_WithMultipleApplicationsOnSomeDays()
+  {
+    // Arrange
+    var (client, _) = await StartDemo();
+
+    // Act
+    var applications = (await client.GetFromJsonAsync<List<JobApplicationDto>>("/api/JobApplication/all"))!;
+    var perDay = applications.GroupBy(a => a.DateApplied.Date).Select(g => g.Count()).ToList();
+
+    // Assert
+    Assert.Contains(perDay, count => count > 1);
+    Assert.Contains(applications, a => a.DateApplied.Date == DateTime.UtcNow.Date); // today always has data
+    Assert.All(applications, a => Assert.True(a.DateApplied <= DateTime.UtcNow));
+  }
+
+  [Fact]
   public async Task DemoSessions_AreIsolatedFromEachOther()
   {
     // Arrange

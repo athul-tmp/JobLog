@@ -67,6 +67,12 @@ public class JobApplicationController : ControllerBase
       return BadRequest(new { message = "Company and Role are required fields." });
     }
 
+    var validationError = ValidationHelper.ValidateJobApplicationFields(request.Company, request.Role, request.JobPostingURL, request.Notes);
+    if (validationError != null)
+    {
+      return BadRequest(new { message = validationError });
+    }
+
     try
     {
       var userId = GetUserId();
@@ -94,6 +100,12 @@ public class JobApplicationController : ControllerBase
   [HttpPut]
   public async Task<IActionResult> UpdateApplication([FromBody] JobApplicationUpdateRequest request)
   {
+    var validationError = ValidationHelper.ValidateJobApplicationFields(request.Company, request.Role, request.JobPostingURL, request.Notes);
+    if (validationError != null)
+    {
+      return BadRequest(new { message = validationError });
+    }
+
     try
     {
       var userId = GetUserId();

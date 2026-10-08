@@ -41,7 +41,7 @@ const formSchema = z.object({
   }).max(50, {
     message: "Role must be less than 50 characters."
   }),
-  jobPostingURL: z.string().url({ message: "Must be a valid URL." }).optional().or(z.literal("")),
+  jobPostingURL: z.string().url({ message: "Must be a valid URL." }).refine((url) => /^https?:\/\//i.test(url), { message: "URL must start with http:// or https://." }).optional().or(z.literal("")),
   notes: z.string().max(500, {
     message: "Notes must be less than 500 characters."
   }).optional(),

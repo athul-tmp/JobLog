@@ -127,6 +127,10 @@ public class UserController : ControllerBase
     {
       return BadRequest(new { message = "New First Name and Current Password are required." });
     }
+    if (request.NewFirstName.Trim().Length > MaxFirstNameLength)
+    {
+      return BadRequest(new { message = $"First name must be {MaxFirstNameLength} characters or fewer." });
+    }
 
     try
     {
@@ -437,6 +441,11 @@ public class UserController : ControllerBase
         string.IsNullOrWhiteSpace(request.FirstName) || string.IsNullOrWhiteSpace(request.Password))
     {
       return BadRequest(new { message = "All fields are required." });
+    }
+
+    if (request.FirstName.Trim().Length > MaxFirstNameLength)
+    {
+      return BadRequest(new { message = $"First name must be {MaxFirstNameLength} characters or fewer." });
     }
 
     if (!IsStrongPassword(request.Password))

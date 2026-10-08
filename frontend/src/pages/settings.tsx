@@ -96,7 +96,7 @@ export default function SettingsPage() {
                     <Alert variant="destructive" className="mb-6 bg-red-100 border-red-500 text-red-700 dark:bg-red-950/40 dark:text-red-300 dark:border-red-600">
                         <AlertTriangle className="h-4 w-4" />
                         <AlertDescription className="text-red-700 dark:text-red-300 font-bold">
-                            You are on the Demo Account. Settings changes are disabled to preserve the demo experience for others.
+                            You are in a demo session. Account settings are disabled because demo accounts are temporary.
                         </AlertDescription>
                     </Alert>
                     </>

@@ -29,7 +29,7 @@ export default function LandingPageContent() {
     const errorMessage = await startDemo();
 
     if (errorMessage) {
-        toast.error("Demo Login Failed", {
+        toast.error("Couldn't Start Demo", {
             description: errorMessage,
         });
         return; 
@@ -79,7 +79,7 @@ export default function LandingPageContent() {
                               onClick={handleDemoLogin}
                               disabled={authLoading}
                           >
-                              {authLoading ? "Logging In..." : "Try Demo"}
+                              {authLoading ? "Starting Demo..." : "Try Demo"}
                               <ArrowUpRight className="ml-2 h-5 w-5" />
                           </Button>
                       </div>

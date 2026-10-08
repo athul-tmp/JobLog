@@ -10,6 +10,10 @@ namespace backend.Tests;
 
 public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 {
+  // One database per factory (i.e. per test class). xUnit runs test classes in parallel, and a shared
+  // in-memory database let classes race on the same rows (the in-memory provider ignores unique indexes).
+  private readonly string _databaseName = $"IntegrationTestDb-{Guid.NewGuid()}";
+
   protected override void ConfigureWebHost(IWebHostBuilder builder)
   {
     builder.UseSetting("Jwt:Key", "this-is-a-fake-test-secret-key-with-enough-length-123456");
@@ -34,7 +38,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
       // Replace it with the in-memory provider
       services.AddDbContext<ApplicationDbContext>(options =>
       {
-        options.UseInMemoryDatabase("IntegrationTestDb");
+        options.UseInMemoryDatabase(_databaseName);
       });
     });
   }

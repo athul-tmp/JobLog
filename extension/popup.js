@@ -87,6 +87,28 @@ function clearAllFormErrors(formType) {
 // Helper regex for email check
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+// Saves a renewed token if the backend extended the session
+async function storeRefreshedToken(response) {
+    const refreshedToken = response.headers.get('X-Refreshed-Token');
+    if (refreshedToken) {
+        await chrome.storage.local.set({ jwtToken: refreshedToken });
+    }
+}
+
+// Fire-and-forget ping so the backend starts waking up while the user reviews the form.
+// Sends the stored token too, so simply opening the popup keeps the session alive.
+async function warmUpBackend() {
+    try {
+        const { jwtToken } = await chrome.storage.local.get('jwtToken');
+        const response = await fetch(HEALTH_API_ENDPOINT, {
+            headers: jwtToken ? { 'Authorization': `Bearer ${jwtToken}` } : {}
+        });
+        await storeRefreshedToken(response);
+    } catch (error) {
+        // Ignore: this request only exists to wake the server
+    }
+}
+
 function scheduleWakingUpMessage(element) {
     return setTimeout(() => setStatusAlert(element, 'info', 'Waking up the server...'), 3500);
 }
@@ -225,6 +247,8 @@ async function sendToBackend(jobData) {
             },
             body: JSON.stringify(payload)
         });
+
+        await storeRefreshedToken(response);
 
         if (response.ok) {
             setStatusAlert(statusMessage, 'success', `SUCCESS: Job '${jobData.jobTitle}' added!`);
@@ -539,8 +563,7 @@ function submitJobForm() {
 
 // Main Event Listener
 document.addEventListener('DOMContentLoaded', async () => {
-    // Fire-and-forget ping so the backend starts waking up while the user reviews the form
-    fetch(HEALTH_API_ENDPOINT).catch(() => {});
+    warmUpBackend();
 
     await checkAuthAndRender();
 

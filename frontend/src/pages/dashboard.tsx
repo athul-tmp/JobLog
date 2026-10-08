@@ -13,7 +13,6 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ArrowUp, ArrowDown, Minus } from "lucide-react";
 
-// import StageBreakdownChart from "@/components/charts/StageBreakdownChart";
 import HistoricalInterviewsChart from "@/components/charts/HistoricalInterviewsChart";
 import InterviewOutcomesChart from "@/components/charts/InterviewOutcomesChart";
 import InterviewTypesChart from "@/components/charts/InterviewTypesChart";

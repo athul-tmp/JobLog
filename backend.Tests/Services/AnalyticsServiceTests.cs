@@ -342,4 +342,34 @@ public class AnalyticsServiceTests
     Assert.Equal(3, result.InterviewedApplications); // applications that interviewed
     Assert.Equal(1, result.OffersAfterInterview);
   }
+
+  [Fact]
+  public async Task GetDashboardAnalytics_ComparesAgainstSameDaysOfPreviousMonth()
+  {
+    // Arrange
+    var dbContext = CreateDbContext();
+    var today = DateTime.UtcNow.Date;
+    var previousMonthStart = new DateTime(today.Year, today.Month, 1, 0, 0, 0, DateTimeKind.Utc).AddMonths(-1);
+
+    // Inside the comparison window (1st of last month) and just outside it (the day after today's day number)
+    dbContext.JobApplications.Add(new JobApplication
+    {
+      UserId = 1, Company = "Early Co", Role = "Dev", Status = "Applied",
+      DateApplied = previousMonthStart.AddHours(10), ApplicationNo = 1
+    });
+    dbContext.JobApplications.Add(new JobApplication
+    {
+      UserId = 1, Company = "Later Co", Role = "Dev", Status = "Applied",
+      DateApplied = previousMonthStart.AddDays(today.Day).AddHours(10), ApplicationNo = 2
+    });
+    dbContext.SaveChanges();
+
+    var service = new AnalyticsService(dbContext);
+
+    // Act
+    var result = await service.GetDashboardAnalytics(1);
+
+    // Assert
+    Assert.Equal(1, result.PreviousMonthToDateCount);
+  }
 }

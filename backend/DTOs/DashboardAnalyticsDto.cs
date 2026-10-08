@@ -39,6 +39,8 @@ namespace backend.DTOs
         int InterviewedApplications,
         int OffersAfterInterview,
 
+        // Applications in the same days of last month (1st to today's day), for a fair month-to-date comparison
+        int PreviousMonthToDateCount,
 
         // Chart Data
         List<InterviewBreakdown> HistoricalInterviewBreakdown,

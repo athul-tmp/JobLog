@@ -28,7 +28,7 @@ public class AnalyticsService : IAnalyticsService
 
         if (!applications.Any())
         {
-            return new DashboardAnalyticsDto(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, new List<InterviewBreakdown>(), new List<MonthlyApplications>(), new List<InterviewBreakdown>(), new List<ApplicationsPerDay>());
+            return new DashboardAnalyticsDto(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, new List<InterviewBreakdown>(), new List<MonthlyApplications>(), new List<InterviewBreakdown>(), new List<ApplicationsPerDay>());
         }
 
         // Analytics to show
@@ -103,6 +103,11 @@ public class AnalyticsService : IAnalyticsService
             .OrderBy(m => DateTime.ParseExact(m.MonthYear, "MMM yyyy", null)) // Sort by date
             .ToList();
 
+        // Same days of last month as have passed this month (capped at last month's length)
+        int daysToCompare = Math.Min(today.Day, DateTime.DaysInMonth(previousMonthStart.Year, previousMonthStart.Month));
+        var previousMonthToDateCount = applications
+            .Count(a => a.DateApplied >= previousMonthStart && a.DateApplied < previousMonthStart.AddDays(daysToCompare));
+
         // Filter for current month's applications
         var currentMonthApplications = applications
             .Where(a => a.DateApplied >= currentMonthStart)
@@ -144,6 +149,7 @@ public class AnalyticsService : IAnalyticsService
             InterviewedAndGhosted: interviewedAndGhosted,
             InterviewedApplications: interviewedApplications,
             OffersAfterInterview: offersAfterInterview,
+            PreviousMonthToDateCount: previousMonthToDateCount,
             HistoricalInterviewBreakdown: historicalInterviewBreakdown,
             MonthlyTrend: monthlyTrend,
             InterviewTypeBreakdown: interviewTypeBreakdown,

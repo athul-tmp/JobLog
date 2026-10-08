@@ -89,6 +89,7 @@ export interface DashboardAnalytics {
 
   interviewedApplications: number;
   offersAfterInterview: number;
+  previousMonthToDateCount: number;
 
   historicalInterviewBreakdown: InterviewBreakdown[];
   interviewTypeBreakdown: InterviewBreakdown[];

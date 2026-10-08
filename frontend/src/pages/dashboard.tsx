@@ -11,7 +11,7 @@ import { DashboardNavigation } from "@/components/DashboardNavigation";
 import { LoadingScreen } from "@/components/LoadingScreen";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ArrowUp, ArrowDown } from "lucide-react";
+import { ArrowUp, ArrowDown, Minus } from "lucide-react";
 
 // import StageBreakdownChart from "@/components/charts/StageBreakdownChart";
 import HistoricalInterviewsChart from "@/components/charts/HistoricalInterviewsChart";
@@ -97,13 +97,21 @@ export default function DashboardPage() {
     const previousMonthCount = previousMonthData?.count ?? 0;
     const previousMonthName = previousMonthData?.monthYear ?? 'Previous Month';
 
+    // Compare this month so far against the same days of last month (dates are UTC, like the backend)
+    const now = new Date();
+    const previousMonthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, 1));
+    const daysInPreviousMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 0)).getUTCDate();
+    const comparedDays = Math.min(now.getUTCDate(), daysInPreviousMonth);
+    const comparisonLabel = `${previousMonthStart.toLocaleDateString('en-US', { month: 'short', timeZone: 'UTC' })} 1–${comparedDays}`;
+    const previousMonthToDateCount = stats?.previousMonthToDateCount ?? 0;
+
     // Monthly Increase Calculation 
-    const MonthlyIncrease = previousMonthCount > 0
-        ? ((currentMonthCount - previousMonthCount) / previousMonthCount) * 100
+    const MonthlyIncrease = previousMonthToDateCount > 0
+        ? ((currentMonthCount - previousMonthToDateCount) / previousMonthToDateCount) * 100
         : currentMonthCount > 0 ? 100 : 0;
 
-    const MonthlyTrendIcon = MonthlyIncrease > 0 ? ArrowUp : ArrowDown;
-    const monthlyColor = MonthlyIncrease > 0 ? "text-green-600" : "text-red-600";
+    const MonthlyTrendIcon = MonthlyIncrease > 0 ? ArrowUp : MonthlyIncrease < 0 ? ArrowDown : Minus;
+    const monthlyColor = MonthlyIncrease > 0 ? "text-green-600" : MonthlyIncrease < 0 ? "text-red-600" : "text-muted-foreground";
     
     return (
         <>
@@ -251,10 +259,10 @@ export default function DashboardPage() {
                                                     <span className="font-bold text-foreground ml-1">{currentMonthCount}</span> applications
                                                 </p>
                                                 {/* Display the Monthly Increase/Decrease if theres enough data */}
-                                                {(currentMonthCount > 0 || previousMonthCount > 0) && (
+                                                {(currentMonthCount > 0 || previousMonthToDateCount > 0) && (
                                                 <p className={`font-semibold flex items-center ${monthlyColor}`}>
                                                     <MonthlyTrendIcon className="w-4 h-4 mr-1" />
-                                                    {MonthlyIncrease.toFixed(0)}% vs. {previousMonthName}
+                                                    {MonthlyIncrease.toFixed(0)}% vs. {comparisonLabel}
                                                 </p>
                                                 )}
                                             </div>

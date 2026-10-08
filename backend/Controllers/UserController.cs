@@ -14,14 +14,12 @@ public class UserController : ControllerBase
 {
   private readonly IUserService _userService;
   private readonly ITokenService _tokenService;
-  private readonly IJobApplicationService _jobApplicationService;
   private readonly IHostEnvironment _env;
 
-  public UserController(IUserService userService, ITokenService tokenService, IJobApplicationService jobApplicationService, IHostEnvironment env)
+  public UserController(IUserService userService, ITokenService tokenService, IHostEnvironment env)
   {
     _userService = userService;
     _tokenService = tokenService;
-    _jobApplicationService = jobApplicationService;
     _env = env;
   }
 
@@ -76,11 +74,6 @@ public class UserController : ControllerBase
 
     // JWT 
     var tokenResult = _tokenService.CreateToken(user);
-
-    if (tokenResult.IsDemoUser)
-    {
-      await _jobApplicationService.ResetDemoApplications(user.Id);
-    }
 
     // Set the JWT as an HttpOnly cookie
     SetAuthCookie(tokenResult.Token, tokenResult.Expiry);

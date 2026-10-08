@@ -16,6 +16,14 @@ namespace backend.Data
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+      modelBuilder.Entity<User>()
+          .HasIndex(u => u.Email)
+          .IsUnique();
+
+      modelBuilder.Entity<JobApplication>()
+          .HasIndex(j => new { j.UserId, j.ApplicationNo })
+          .IsUnique();
+
       modelBuilder.Entity<JobApplication>()
           .HasOne(j => j.User)
           .WithMany(u => u.JobApplications)

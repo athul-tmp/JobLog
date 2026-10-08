@@ -55,35 +55,49 @@ public class JobApplicationService : IJobApplicationService
   // Create job application
   public async Task<JobApplication> CreateApplication(int userId, JobApplicationCreateRequest request)
   {
-    // Calculate next application number
-    var currentApplicationCount = await _dbContext.JobApplications.CountAsync(a => a.UserId == userId);
+    const int MaxAttempts = 3;
 
-    var application = new JobApplication
+    for (var attempt = 1; ; attempt++)
     {
-      UserId = userId,
-      Company = request.Company,
-      Role = request.Role,
-      Status = "Applied",
-      JobPostingURL = request.JobPostingURL,
-      Notes = request.Notes,
-      DateApplied = DateTime.UtcNow,
-      ApplicationNo = currentApplicationCount + 1
-    };
+      // Calculate next application number
+      var lastApplicationNo = await _dbContext.JobApplications
+          .Where(a => a.UserId == userId)
+          .MaxAsync(a => (int?)a.ApplicationNo) ?? 0;
 
-    _dbContext.JobApplications.Add(application);
-    await _dbContext.SaveChangesAsync();
+      var dateApplied = DateTime.UtcNow;
+      var application = new JobApplication
+      {
+        UserId = userId,
+        Company = request.Company,
+        Role = request.Role,
+        Status = "Applied",
+        JobPostingURL = request.JobPostingURL,
+        Notes = request.Notes,
+        DateApplied = dateApplied,
+        ApplicationNo = lastApplicationNo + 1
+      };
 
-    // Log job status
-    var initialHistory = new JobStatusHistory
-    {
-      JobApplicationId = application.Id,
-      Status = application.Status,
-      ChangeDate = application.DateApplied
-    };
-    _dbContext.JobStatusHistories.Add(initialHistory);
-    await _dbContext.SaveChangesAsync();
+      // Log job status (saved together with the application)
+      application.StatusHistory.Add(new JobStatusHistory
+      {
+        JobApplicationId = application.Id,
+        Status = application.Status,
+        ChangeDate = dateApplied
+      });
 
-    return (await GetApplicationById(application.Id, userId))!;
+      _dbContext.JobApplications.Add(application);
+
+      try
+      {
+        await _dbContext.SaveChangesAsync();
+        return (await GetApplicationById(application.Id, userId))!;
+      }
+      catch (DbUpdateException) when (attempt < MaxAttempts)
+      {
+        // Another request took this ApplicationNo concurrently (unique index), so retry with the next number
+        _dbContext.ChangeTracker.Clear();
+      }
+    }
   }
 
   // Get all user's job applications

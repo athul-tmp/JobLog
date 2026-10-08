@@ -274,4 +274,34 @@ public class AnalyticsServiceTests
     var totalInMonthlyTrend = result.MonthlyTrend.Sum(m => m.Count);
     Assert.Equal(1, totalInMonthlyTrend);
   }
+
+  [Fact]
+  public async Task GetDashboardAnalytics_IncludesEveryDayOfCurrentMonth_WithZeroForDaysWithoutApplications()
+  {
+    // Arrange
+    var dbContext = CreateDbContext();
+    var now = DateTime.UtcNow;
+    dbContext.JobApplications.Add(new JobApplication
+    {
+      UserId = 1, Company = "Today Co1", Role = "Dev", Status = "Applied",
+      DateApplied = now, ApplicationNo = 1
+    });
+    dbContext.JobApplications.Add(new JobApplication
+    {
+      UserId = 1, Company = "Today Co2", Role = "Dev", Status = "Applied",
+      DateApplied = now, ApplicationNo = 2
+    });
+    dbContext.SaveChanges();
+
+    var service = new AnalyticsService(dbContext);
+
+    // Act
+    var result = await service.GetDashboardAnalytics(1);
+
+    // Assert: one entry per day from the 1st to today, zero except today
+    Assert.Equal(now.Day, result.ApplicationsPerDay.Count);
+    Assert.Equal(now.ToString("MMM dd"), result.ApplicationsPerDay.Last().Date);
+    Assert.Equal(2, result.ApplicationsPerDay.Last().Count);
+    Assert.All(result.ApplicationsPerDay.SkipLast(1), day => Assert.Equal(0, day.Count));
+  }
 }

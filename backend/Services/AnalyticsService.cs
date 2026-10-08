@@ -77,7 +77,7 @@ public class AnalyticsService : IAnalyticsService
 
 
         // Monthly Trend 
-        DateTime today = DateTime.Today;
+        DateTime today = DateTime.UtcNow.Date; // DateApplied is stored in UTC
         DateTime currentMonthStart = new DateTime(today.Year, today.Month, 1);
         DateTime previousMonthStart = currentMonthStart.AddMonths(-1);
 
@@ -100,14 +100,17 @@ public class AnalyticsService : IAnalyticsService
             .Where(a => a.DateApplied >= currentMonthStart)
             .ToList();
 
-        // Group by Day
-        var applicationsPerDay = currentMonthApplications
+        // Group by Day, including days with no applications (count 0) up to today
+        var countsByDay = currentMonthApplications
             .GroupBy(a => a.DateApplied.Date)
-            .Select(g => new ApplicationsPerDay(
-                Date: g.Key.ToString("MMM dd"),
-                Count: g.Count()
+            .ToDictionary(g => g.Key, g => g.Count());
+
+        var applicationsPerDay = Enumerable.Range(0, (today - currentMonthStart).Days + 1)
+            .Select(offset => currentMonthStart.AddDays(offset))
+            .Select(day => new ApplicationsPerDay(
+                Date: day.ToString("MMM dd"),
+                Count: countsByDay.GetValueOrDefault(day)
             ))
-            .OrderBy(d => DateTime.ParseExact(d.Date, "MMM dd", null))
             .ToList();
 
         // Every interview ever

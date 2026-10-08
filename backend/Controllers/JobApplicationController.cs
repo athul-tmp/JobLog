@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using System.Security.Claims;
 using backend.DTOs;
+using backend.Helpers;
 using backend.Hubs;
 using backend.Models;
 
@@ -121,6 +122,7 @@ public class JobApplicationController : ControllerBase
 
   // Delete all job applications | Route: DELETE /api/JobApplication/all
   [HttpDelete("all")]
+  [BlockDemoUser]
   public async Task<IActionResult> DeleteAllUserApplications([FromBody] DeleteDataRequest request)
   {
     if (string.IsNullOrWhiteSpace(request.CurrentPassword))

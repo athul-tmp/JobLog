@@ -117,6 +117,7 @@ public class UserController : ControllerBase
   // Update User Name | Route: PUT /api/User/updateName
   [Authorize]
   [HttpPut("updateName")]
+  [BlockDemoUser]
   public async Task<IActionResult> UpdateName([FromBody] UpdateNameRequest request)
   {
     if (string.IsNullOrWhiteSpace(request.NewFirstName) || string.IsNullOrWhiteSpace(request.CurrentPassword))
@@ -148,6 +149,7 @@ public class UserController : ControllerBase
   // Initiate email change | ROUTE: POST /api/User/inititate-email-change
   [Authorize]
   [HttpPost("initiate-email-change")]
+  [BlockDemoUser]
   public async Task<IActionResult> InitiateEmailChange([FromBody] InitiateEmailChangeRequest request)
   {
     if (!IsValidEmailFormat(request.NewEmail))
@@ -218,6 +220,7 @@ public class UserController : ControllerBase
   // Update User Password | Route: PUT /api/User/updatePassword
   [Authorize]
   [HttpPut("updatePassword")]
+  [BlockDemoUser]
   public async Task<IActionResult> UpdatePassword([FromBody] UpdatePasswordRequest request)
   {
     if (string.IsNullOrWhiteSpace(request.NewPassword) || string.IsNullOrWhiteSpace(request.CurrentPassword))
@@ -252,6 +255,7 @@ public class UserController : ControllerBase
   // Delete Account | Route: DELETE /api/User/delete
   [Authorize]
   [HttpDelete("delete")]
+  [BlockDemoUser]
   public async Task<IActionResult> DeleteAccount([FromBody] DeleteAccountRequest request)
   {
     if (string.IsNullOrWhiteSpace(request.CurrentPassword))

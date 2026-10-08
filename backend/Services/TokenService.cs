@@ -1,6 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using backend.Helpers;
 using backend.Models;
 using Microsoft.IdentityModel.Tokens;
 
@@ -33,8 +34,7 @@ public class TokenService : ITokenService
         };
 
     // Demo-specific expiration
-    const string DEMO_EMAIL = "demo@joblog.com";
-    var isDemoUser = user.Email.Equals(DEMO_EMAIL, StringComparison.OrdinalIgnoreCase);
+    var isDemoUser = DemoUserHelper.IsDemoEmail(user.Email);
 
     var expiryTime = isDemoUser
         ? DateTime.UtcNow.AddMinutes(30) // Short expiry for demo (30 min)

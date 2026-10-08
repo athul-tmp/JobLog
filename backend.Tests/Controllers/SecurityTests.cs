@@ -43,13 +43,24 @@ public class SecurityTests : IClassFixture<CustomWebApplicationFactory>
     return client;
   }
 
+  private async Task<HttpClient> CreateDemoClient()
+  {
+    var client = _factory.CreateClient();
+    var response = await client.PostAsync("/api/Demo/start", null);
+    var body = await response.Content.ReadFromJsonAsync<System.Text.Json.JsonElement>();
+
+    var demoClient = _factory.CreateClient();
+    demoClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", body.GetProperty("token").GetString());
+    return demoClient;
+  }
+
   // --- Demo account guard ---
 
   [Fact]
   public async Task DemoUser_CannotChangePassword()
   {
     // Arrange
-    var client = CreateClientFor(DemoUserHelper.DemoEmail);
+    var client = await CreateDemoClient();
     var request = new UpdatePasswordRequest("Correct-password1!", "New-password1!");
 
     // Act
@@ -63,7 +74,7 @@ public class SecurityTests : IClassFixture<CustomWebApplicationFactory>
   public async Task DemoUser_CannotDeleteAccountOrClearData()
   {
     // Arrange
-    var client = CreateClientFor(DemoUserHelper.DemoEmail);
+    var client = await CreateDemoClient();
     var body = JsonContent.Create(new { currentPassword = "Correct-password1!" });
 
     // Act

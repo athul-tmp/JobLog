@@ -171,7 +171,8 @@ public class SessionTests : IClassFixture<CustomWebApplicationFactory>
   {
     // Arrange
     var refreshingFactory = _factory.WithWebHostBuilder(builder => builder.UseSetting("Jwt:RefreshAfterHours", "0"));
-    var (_, token) = CreateUserWithToken(refreshingFactory, DemoUserHelper.DemoEmail);
+    var start = await refreshingFactory.CreateClient().PostAsync("/api/Demo/start", null);
+    var token = (await start.Content.ReadFromJsonAsync<System.Text.Json.JsonElement>()).GetProperty("token").GetString()!;
 
     // Act
     var response = await CreateClient(refreshingFactory, token).GetAsync("/api/JobApplication/all");

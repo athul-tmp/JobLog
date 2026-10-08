@@ -43,7 +43,8 @@ builder.Services.AddCors(options =>
             .WithOrigins(allowedCorsOrigins)
             .AllowAnyHeader()
             .AllowAnyMethod()
-            .AllowCredentials();
+            .AllowCredentials()
+            .WithExposedHeaders(AuthSessionHelper.RefreshedTokenHeader);
     });
 });
 
@@ -69,7 +70,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         {
             OnMessageReceived = context =>
             {
-                if (context.Request.Cookies.TryGetValue("joblog_jwt_token", out var token))
+                if (context.Request.Cookies.TryGetValue(AuthSessionHelper.AuthCookieName, out var token))
                 {
                     context.Token = token;
                     return Task.CompletedTask;
@@ -82,7 +83,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 }
 
                 return Task.CompletedTask;
-            }
+            },
+
+            OnTokenValidated = AuthSessionHelper.OnTokenValidated
         };
     });
 

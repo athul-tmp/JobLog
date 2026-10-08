@@ -264,7 +264,8 @@ public class JobApplicationService : IJobApplicationService
   public async Task ResetDemoApplications(int userId)
   {
 
-    const int DEMO_DATA_THRESHOLD = 75;
+    // The demo account is seeded with 10 applications; anything numbered above that was added by a visitor
+    const int DEMO_DATA_THRESHOLD = 10;
 
     // Applications to delete
     var applicationsToDelete = await _dbContext.JobApplications

@@ -80,8 +80,9 @@ public class UserService : IUserService
   {
     var user = await UserValidationHelper.GetAndValidateUser(_dbContext, userId, currentPassword);
 
-    // Re-hash the new password
+    // Re-hash the new password and sign out every existing session
     user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
+    user.TokenVersion++;
 
     _dbContext.Users.Update(user);
     await _dbContext.SaveChangesAsync();
@@ -181,8 +182,9 @@ public class UserService : IUserService
       throw new UnauthorizedAccessException("Invalid password reset token.");
     }
 
-    // Reset password
+    // Reset password and sign out every existing session
     user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
+    user.TokenVersion++;
 
     // Clear the reset token to prevent reuse
     user.PasswordResetToken = null;
@@ -358,6 +360,7 @@ public class UserService : IUserService
     var newEmail = verification.Email;
 
     user.Email = newEmail;
+    user.TokenVersion++; // Sign out every existing session
 
     // Clean up and save changes
     _dbContext.Users.Update(user);

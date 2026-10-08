@@ -415,7 +415,7 @@ public class JobApplicationServiceTests
       Role = "Developer",
       Status = "Applied",
       DateApplied = DateTime.UtcNow,
-      ApplicationNo = 74
+      ApplicationNo = 9
     });
     dbContext.JobApplications.Add(new JobApplication
     {
@@ -424,7 +424,7 @@ public class JobApplicationServiceTests
       Role = "Developer",
       Status = "Applied",
       DateApplied = DateTime.UtcNow,
-      ApplicationNo = 75
+      ApplicationNo = 10
     });
     dbContext.JobApplications.Add(new JobApplication
     {
@@ -433,7 +433,7 @@ public class JobApplicationServiceTests
       Role = "Developer",
       Status = "Applied",
       DateApplied = DateTime.UtcNow,
-      ApplicationNo = 76
+      ApplicationNo = 11
     });
     dbContext.SaveChanges();
 
@@ -446,9 +446,9 @@ public class JobApplicationServiceTests
     var remaining = dbContext.JobApplications.Where(a => a.UserId == 1).ToList();
 
     Assert.Equal(2, remaining.Count);
-    Assert.Contains(remaining, a => a.ApplicationNo == 74);
-    Assert.Contains(remaining, a => a.ApplicationNo == 75);
-    Assert.DoesNotContain(remaining, a => a.ApplicationNo == 76);
+    Assert.Contains(remaining, a => a.ApplicationNo == 9);
+    Assert.Contains(remaining, a => a.ApplicationNo == 10);
+    Assert.DoesNotContain(remaining, a => a.ApplicationNo == 11);
   }
 
   [Fact]
@@ -463,7 +463,7 @@ public class JobApplicationServiceTests
       Role = "Developer",
       Status = "Applied",
       DateApplied = DateTime.UtcNow,
-      ApplicationNo = 50
+      ApplicationNo = 5
     });
     dbContext.JobApplications.Add(new JobApplication
     {
@@ -472,7 +472,7 @@ public class JobApplicationServiceTests
       Role = "Developer",
       Status = "Applied",
       DateApplied = DateTime.UtcNow,
-      ApplicationNo = 75
+      ApplicationNo = 10
     });
     dbContext.SaveChanges();
 

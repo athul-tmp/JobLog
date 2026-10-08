@@ -74,7 +74,7 @@ public class TokenServiceTests
   }
 
   [Fact]
-  public void CreateToken_GivesSevenDayExpiry_ForNormalUser()
+  public void CreateToken_GivesThirtyDayExpiry_ForNormalUser()
   {
     // Arrange
     var tokenService = CreateTokenService();
@@ -85,7 +85,7 @@ public class TokenServiceTests
     var result = tokenService.CreateToken(user);
 
     // Assert
-    var expectedExpiry = before.AddDays(7);
+    var expectedExpiry = before.AddDays(30);
     var difference = (result.Expiry - expectedExpiry).Duration();
     Assert.True(difference < TimeSpan.FromSeconds(2));
   }
@@ -119,6 +119,22 @@ public class TokenServiceTests
 
     // Assert
     Assert.True(result.IsDemoUser);
+  }
+
+  [Fact]
+  public void CreateToken_IncludesUsersTokenVersionClaim()
+  {
+    // Arrange
+    var tokenService = CreateTokenService();
+    var user = CreateUser("test@example.com");
+    user.TokenVersion = 3;
+
+    // Act
+    var result = tokenService.CreateToken(user);
+
+    // Assert
+    var jwt = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler().ReadJwtToken(result.Token);
+    Assert.Equal("3", jwt.Claims.Single(c => c.Type == TokenService.TokenVersionClaim).Value);
   }
 
   [Fact]

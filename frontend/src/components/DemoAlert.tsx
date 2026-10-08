@@ -74,7 +74,7 @@ export const DemoAlert = () => {
       <div className="flex items-start">
           <AlertTriangle className="h-5 w-5 mt-0.5 mr-3 flex-shrink-0 text-blue-700 dark:text-blue-300" />
           <AlertDescription className="text-blue-700 dark:text-blue-300 font-medium text-sm sm:text-base leading-relaxed">
-              You are on the Demo Account. Feel free to explore all features. Please note that data is shared; you may see applications added or changed by other users demoing at the same time. All changes will be automatically reset when a new session starts. <strong>Your session expires in {timeLeftText}</strong>
+              You are in a private demo session with sample data. Feel free to explore and change anything; only you can see your changes, and everything is deleted when the session ends. <strong>Your session expires in {timeLeftText}</strong>
           </AlertDescription>
       </div>
       <div className="flex sm:flex-shrink-0 justify-end sm:justify-center">

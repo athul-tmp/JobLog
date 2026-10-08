@@ -83,9 +83,7 @@ public class UserController : ControllerBase
       message = "Login successful",
       email = user.Email,
       firstName = user.FirstName,
-      token = tokenResult.Token,
-      // Return ISO 8601 string for frontend countdown only if it's the demo user
-      tokenExpiration = tokenResult.IsDemoUser ? tokenResult.Expiry.ToString("o") : null
+      token = tokenResult.Token
     });
   }
 
@@ -465,7 +463,6 @@ public class UserController : ControllerBase
 
 public record UserLoginRequest(string Email, string Password);
 public record UpdateNameRequest(string CurrentPassword, string NewFirstName);
-public record UpdateEmailRequest(string CurrentPassword, string NewEmail);
 public record UpdatePasswordRequest(string CurrentPassword, string NewPassword);
 public record DeleteAccountRequest(string CurrentPassword);
 public record VerifyPasswordRequest(string CurrentPassword);

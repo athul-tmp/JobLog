@@ -5,7 +5,7 @@ using backend.Helpers;
 using backend.Models;
 using Microsoft.IdentityModel.Tokens;
 
-public record TokenResult(string Token, DateTime Expiry, bool IsDemoUser);
+public record TokenResult(string Token, DateTime Expiry);
 public interface ITokenService
 {
   TokenResult CreateToken(User user);
@@ -40,13 +40,12 @@ public class TokenService : ITokenService
         };
 
     // Demo accounts: token lives exactly as long as the account itself
-    var isDemoUser = user.IsDemo;
-    if (isDemoUser)
+    if (user.IsDemo)
     {
       claims.Add(new Claim(DemoUserHelper.IsDemoClaim, "true"));
     }
 
-    var expiryTime = isDemoUser && user.DemoExpiresAt.HasValue
+    var expiryTime = user.IsDemo && user.DemoExpiresAt.HasValue
         ? user.DemoExpiresAt.Value
         : DateTime.UtcNow.Add(SessionLifetime); // Registered users (30 days, extended while active)
 
@@ -62,6 +61,6 @@ public class TokenService : ITokenService
     var tokenHandler = new JwtSecurityTokenHandler();
     var token = tokenHandler.CreateToken(tokenDescriptor);
 
-    return new TokenResult(tokenHandler.WriteToken(token), expiryTime, isDemoUser);
+    return new TokenResult(tokenHandler.WriteToken(token), expiryTime);
   }
 }

@@ -48,34 +48,6 @@ public class TokenServiceTests
   }
 
   [Fact]
-  public void CreateToken_SetsIsDemoUserFalse_ForNormalUser()
-  {
-    // Arrange
-    var tokenService = CreateTokenService();
-    var user = CreateUser("test@example.com");
-
-    // Act
-    var result = tokenService.CreateToken(user);
-
-    // Assert
-    Assert.False(result.IsDemoUser);
-  }
-
-  [Fact]
-  public void CreateToken_SetsIsDemoUserTrue_ForDemoUser()
-  {
-    // Arrange
-    var tokenService = CreateTokenService();
-    var user = CreateUser("demo-123@demo.joblog.invalid", isDemo: true);
-
-    // Act
-    var result = tokenService.CreateToken(user);
-
-    // Assert
-    Assert.True(result.IsDemoUser);
-  }
-
-  [Fact]
   public void CreateToken_GivesThirtyDayExpiry_ForNormalUser()
   {
     // Arrange

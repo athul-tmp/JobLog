@@ -1,7 +1,7 @@
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
 import { AuthProvider } from "@/context/AuthContext";
-import { Toaster } from "sonner";
+import { Toaster } from "@/components/ui/sonner";
 import Head from "next/head";
 import { ThemeProvider, useTheme } from 'next-themes'
 import { useEffect, useState } from "react";
@@ -39,8 +39,8 @@ export default function App({ Component, pageProps }: AppProps) {
       <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
       <FaviconUpdater />
       <Component {...pageProps} />
-      </ThemeProvider>
       <Toaster richColors position="top-center" />
+      </ThemeProvider>
     </AuthProvider>
   );
 }

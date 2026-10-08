@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Configuration;
 using System.Threading.Tasks;
+using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
@@ -70,13 +71,13 @@ public class EmailService : IEmailService
                   Password Reset Request for <span style='color: #7e22ce;'>JobLog</span>
               </h1>
               
-              <p style='margin-bottom: 20px;'>Hi {userName},</p>
+              <p style='margin-bottom: 20px;'>Hi {WebUtility.HtmlEncode(userName)},</p>
               <p style='margin-bottom: 20px;'>You recently requested to reset the password for your JobLog account.</p>
               
               <table role='presentation' border='0' cellpadding='0' cellspacing='0' class='body' style='width: 100%;'>
                   <tr>
                       <td align='center' style='padding: 20px 0;'>
-                          <a href='{resetLink}' class='button' style='background-color: #7e22ce; color: #ffffff !important; padding: 12px 25px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;'>
+                          <a href='{WebUtility.HtmlEncode(resetLink)}' class='button' style='background-color: #7e22ce; color: #ffffff !important; padding: 12px 25px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;'>
                               Reset Password
                           </a>
                       </td>
@@ -153,7 +154,7 @@ public class EmailService : IEmailService
               <table role='presentation' border='0' cellpadding='0' cellspacing='0' class='body' style='width: 100%;'>
                   <tr>
                       <td align='center' style='padding: 20px 0;'>
-                          <a href='{verificationLink}' class='button' style='background-color: #7e22ce; color: #ffffff !important; padding: 12px 25px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;'>
+                          <a href='{WebUtility.HtmlEncode(verificationLink)}' class='button' style='background-color: #7e22ce; color: #ffffff !important; padding: 12px 25px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;'>
                               Verify Email & Continue
                           </a>
                       </td>
@@ -223,13 +224,13 @@ public class EmailService : IEmailService
                   </h1>
                   
                   <p style='margin-bottom: 20px;'>Hello,</p>
-                  <p style='margin-bottom: 20px;'>You recently requested to change your account email address to <strong>{toEmail}</strong>.</p>
+                  <p style='margin-bottom: 20px;'>You recently requested to change your account email address to <strong>{WebUtility.HtmlEncode(toEmail)}</strong>.</p>
                   <p style='margin-bottom: 20px;'>Please click the button below within <strong>1 hour</strong> to confirm and apply the new email address to your account. This will log you out immediately.</p>
                   
                   <table role='presentation' border='0' cellpadding='0' cellspacing='0' class='body' style='width: 100%;'>
                       <tr>
                           <td align='center' style='padding: 20px 0;'>
-                              <a href='{verificationLink}' class='button' style='background-color: #7e22ce; color: #ffffff !important; padding: 12px 25px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;'>
+                              <a href='{WebUtility.HtmlEncode(verificationLink)}' class='button' style='background-color: #7e22ce; color: #ffffff !important; padding: 12px 25px; text-decoration: none; border-radius: 5px; display: inline-block; font-weight: bold;'>
                                   Confirm New Email
                               </a>
                           </td>
@@ -297,7 +298,7 @@ public class EmailService : IEmailService
                   </h1>
                   
                   <p style='margin-bottom: 20px;'>Hello,</p>
-                  <p style='margin-bottom: 20px;'>This email confirms that the email address for your JobLog account has been successfully changed from <strong>{oldEmail}</strong> to <strong>{newEmail}</strong>.</p>
+                  <p style='margin-bottom: 20px;'>This email confirms that the email address for your JobLog account has been successfully changed from <strong>{WebUtility.HtmlEncode(oldEmail)}</strong> to <strong>{WebUtility.HtmlEncode(newEmail)}</strong>.</p>
                   
                   <p style='margin-bottom: 20px; color: #dc3545; font-weight: bold;'>
                       If you did NOT authorise this change, please contact support immediately to secure your account.

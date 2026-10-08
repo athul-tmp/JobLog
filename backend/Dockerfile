@@ -24,5 +24,8 @@ EXPOSE 8080
 # Copy published output from the build stage
 COPY --from=build /app/publish .
 
+# Run as the image's built-in non-root user
+USER $APP_UID
+
 # Entry point to run the application
 ENTRYPOINT ["dotnet", "backend.dll"]

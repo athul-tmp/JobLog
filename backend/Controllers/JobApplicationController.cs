@@ -187,9 +187,9 @@ public class JobApplicationController : ControllerBase
     {
       return BadRequest(new { message = ex.Message });
     }
-    catch (Exception ex)
+    catch (Exception)
     {
-      return StatusCode(500, new { message = "An error occurred while attempting to undo the last status change.", error = ex.Message });
+      return StatusCode(500, new { message = "An error occurred while attempting to undo the last status change." });
     }
   }
 }

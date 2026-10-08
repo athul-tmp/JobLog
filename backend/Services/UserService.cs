@@ -345,8 +345,6 @@ public class UserService : IUserService
 
     if (!BCrypt.Net.BCrypt.Verify(token, verification.Token))
     {
-      _dbContext.EmailVerifications.Remove(verification);
-      await _dbContext.SaveChangesAsync();
       throw new UnauthorizedAccessException("Invalid email change verification token.");
     }
 

@@ -28,7 +28,7 @@ public class AnalyticsService : IAnalyticsService
 
         if (!applications.Any())
         {
-            return new DashboardAnalyticsDto(0, 0, 0, 0, 0, 0, 0, 0, 0, new List<InterviewBreakdown>(), new List<MonthlyApplications>(), new List<InterviewBreakdown>(), new List<ApplicationsPerDay>());
+            return new DashboardAnalyticsDto(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, new List<InterviewBreakdown>(), new List<MonthlyApplications>(), new List<InterviewBreakdown>(), new List<ApplicationsPerDay>());
         }
 
         // Analytics to show
@@ -58,6 +58,14 @@ public class AnalyticsService : IAnalyticsService
 
         var interviewedAndGhosted = applications
             .Count(a => a.Status == "Ghosted" && a.StatusHistory
+                .Any(h => h.Status.Contains("Interview")));
+
+        // Applications that reached at least one interview stage, and offers that came through one
+        var interviewedApplications = applications
+            .Count(a => a.StatusHistory.Any(h => h.Status.Contains("Interview")));
+
+        var offersAfterInterview = applications
+            .Count(a => a.Status == "Offer" && a.StatusHistory
                 .Any(h => h.Status.Contains("Interview")));
 
         // Filter applications that are currently in any interview stage
@@ -134,6 +142,8 @@ public class AnalyticsService : IAnalyticsService
             TotalPastInterviews: totalPastInterviews,
             InterviewedAndRejected: interviewedAndRejected,
             InterviewedAndGhosted: interviewedAndGhosted,
+            InterviewedApplications: interviewedApplications,
+            OffersAfterInterview: offersAfterInterview,
             HistoricalInterviewBreakdown: historicalInterviewBreakdown,
             MonthlyTrend: monthlyTrend,
             InterviewTypeBreakdown: interviewTypeBreakdown,

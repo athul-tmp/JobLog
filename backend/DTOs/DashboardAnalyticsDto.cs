@@ -35,6 +35,11 @@ namespace backend.DTOs
         int InterviewedAndRejected,
         int InterviewedAndGhosted,
 
+        // Applications (not stages) that reached an interview, for the flow chart
+        int InterviewedApplications,
+        int OffersAfterInterview,
+
+
         // Chart Data
         List<InterviewBreakdown> HistoricalInterviewBreakdown,
         List<MonthlyApplications> MonthlyTrend,

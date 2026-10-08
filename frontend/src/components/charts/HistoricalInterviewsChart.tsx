@@ -54,7 +54,7 @@ export default function HistoricalInterviewsChart({ data }: HistoricalInterviews
         labels: stages.map(s => s.label),
         datasets: [
             {
-                label: 'Total Interviews Conducted',
+                label: 'Interview Rounds',
                 data: stages.map(s => historyMap.get(s.key) || 0),
                 backgroundColor: HISTORICAL_COLORS,
                 borderColor: themeKey === 'dark' ? '#1e293b' : '#ffffff',
@@ -92,7 +92,7 @@ export default function HistoricalInterviewsChart({ data }: HistoricalInterviews
             
             <div className="mt-5 py-2 border-t border-border/50">
                 <p className="text-center text-sm text-foreground">
-                    Total Interviews: <span className="font-bold">{totalHistory}</span>
+                    Total Interview Rounds: <span className="font-bold">{totalHistory}</span>
                 </p>
             </div>
         </div>

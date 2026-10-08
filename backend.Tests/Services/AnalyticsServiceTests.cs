@@ -274,4 +274,102 @@ public class AnalyticsServiceTests
     var totalInMonthlyTrend = result.MonthlyTrend.Sum(m => m.Count);
     Assert.Equal(1, totalInMonthlyTrend);
   }
+
+  [Fact]
+  public async Task GetDashboardAnalytics_IncludesEveryDayOfCurrentMonth_WithZeroForDaysWithoutApplications()
+  {
+    // Arrange
+    var dbContext = CreateDbContext();
+    var now = DateTime.UtcNow;
+    dbContext.JobApplications.Add(new JobApplication
+    {
+      UserId = 1, Company = "Today Co1", Role = "Dev", Status = "Applied",
+      DateApplied = now, ApplicationNo = 1
+    });
+    dbContext.JobApplications.Add(new JobApplication
+    {
+      UserId = 1, Company = "Today Co2", Role = "Dev", Status = "Applied",
+      DateApplied = now, ApplicationNo = 2
+    });
+    dbContext.SaveChanges();
+
+    var service = new AnalyticsService(dbContext);
+
+    // Act
+    var result = await service.GetDashboardAnalytics(1);
+
+    // Assert: one entry per day from the 1st to today, zero except today
+    Assert.Equal(now.Day, result.ApplicationsPerDay.Count);
+    Assert.Equal(now.ToString("MMM dd"), result.ApplicationsPerDay.Last().Date);
+    Assert.Equal(2, result.ApplicationsPerDay.Last().Count);
+    Assert.All(result.ApplicationsPerDay.SkipLast(1), day => Assert.Equal(0, day.Count));
+  }
+
+  [Fact]
+  public async Task GetDashboardAnalytics_CountsInterviewedApplications_NotInterviewStages()
+  {
+    // Arrange
+    var dbContext = CreateDbContext();
+    var appNo = 1;
+    void AddApplication(string status, params string[] history)
+    {
+      var application = new JobApplication
+      {
+        UserId = 1, Company = $"Co{appNo}", Role = "Dev", Status = status,
+        DateApplied = DateTime.UtcNow, ApplicationNo = appNo++
+      };
+      foreach (var stage in history)
+      {
+        application.StatusHistory.Add(new JobStatusHistory { JobApplicationId = 0, Status = stage });
+      }
+      dbContext.JobApplications.Add(application);
+    }
+
+    AddApplication("Applied", "Applied");
+    AddApplication("Final Interview", "Applied", "Screening Interview", "Mid-stage Interview", "Final Interview");
+    AddApplication("Offer", "Applied", "Screening Interview", "Offer");
+    AddApplication("Offer", "Applied", "Offer");
+    AddApplication("Rejected", "Applied", "Screening Interview", "Rejected");
+    dbContext.SaveChanges();
+
+    var service = new AnalyticsService(dbContext);
+
+    // Act
+    var result = await service.GetDashboardAnalytics(1);
+
+    // Assert
+    Assert.Equal(5, result.TotalPastInterviews);    // every interview stage
+    Assert.Equal(3, result.InterviewedApplications); // applications that interviewed
+    Assert.Equal(1, result.OffersAfterInterview);
+  }
+
+  [Fact]
+  public async Task GetDashboardAnalytics_ComparesAgainstSameDaysOfPreviousMonth()
+  {
+    // Arrange
+    var dbContext = CreateDbContext();
+    var today = DateTime.UtcNow.Date;
+    var previousMonthStart = new DateTime(today.Year, today.Month, 1, 0, 0, 0, DateTimeKind.Utc).AddMonths(-1);
+
+    // Inside the comparison window (1st of last month) and just outside it (the day after today's day number)
+    dbContext.JobApplications.Add(new JobApplication
+    {
+      UserId = 1, Company = "Early Co", Role = "Dev", Status = "Applied",
+      DateApplied = previousMonthStart.AddHours(10), ApplicationNo = 1
+    });
+    dbContext.JobApplications.Add(new JobApplication
+    {
+      UserId = 1, Company = "Later Co", Role = "Dev", Status = "Applied",
+      DateApplied = previousMonthStart.AddDays(today.Day).AddHours(10), ApplicationNo = 2
+    });
+    dbContext.SaveChanges();
+
+    var service = new AnalyticsService(dbContext);
+
+    // Act
+    var result = await service.GetDashboardAnalytics(1);
+
+    // Assert
+    Assert.Equal(1, result.PreviousMonthToDateCount);
+  }
 }

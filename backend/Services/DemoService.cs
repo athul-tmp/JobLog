@@ -34,6 +34,16 @@ public class DemoService : IDemoService
     new("Apple", "iOS Developer", 12, new SeedStage("Screening Interview", 5)),
     new("Uber", "Data Scientist", 6),
     new("Google", "Software Engineer", 2),
+
+    // Recent applications, several per day, so the daily trend chart has some shape
+    new("Slack", "Platform Engineer", 8),
+    new("Dropbox", "Backend Engineer", 5),
+    new("Atlassian", "Software Engineer", 3),
+    new("Canva", "Frontend Engineer", 3),
+    new("Spotify", "Data Engineer", 3),
+    new("Shopify", "Fullstack Developer", 1),
+    new("Adobe", "UX Engineer", 0),
+    new("Salesforce", "Cloud Engineer", 0),
   };
 
   public static int SeedApplicationCount => SeedApplications.Length;
@@ -64,8 +74,8 @@ public class DemoService : IDemoService
     var applicationNo = 1;
     foreach (var seed in SeedApplications)
     {
-      // Spread times of day so same-day entries don't collide
-      var appliedAt = now.Date.AddDays(-seed.AppliedDaysAgo).AddHours(9 + applicationNo % 8);
+      // Spread times of day so same-day entries don't collide, but never later than now
+      var appliedAt = Earliest(now.Date.AddDays(-seed.AppliedDaysAgo).AddHours(9 + applicationNo % 8), now.AddMinutes(-applicationNo));
 
       var application = new JobApplication
       {
@@ -85,7 +95,7 @@ public class DemoService : IDemoService
         {
           JobApplicationId = 0,
           Status = stage.Status,
-          ChangeDate = appliedAt.AddDays(stage.DaysAfterApplied).AddHours(2)
+          ChangeDate = Earliest(appliedAt.AddDays(stage.DaysAfterApplied).AddHours(2), now)
         });
       }
 
@@ -97,6 +107,8 @@ public class DemoService : IDemoService
 
     return user;
   }
+
+  private static DateTime Earliest(DateTime a, DateTime b) => a < b ? a : b;
 
   // Deletes demo accounts (and their applications/history) whose session has ended
   public async Task<int> DeleteExpiredDemoUsers()

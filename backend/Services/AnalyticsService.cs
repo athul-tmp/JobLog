@@ -28,7 +28,7 @@ public class AnalyticsService : IAnalyticsService
 
         if (!applications.Any())
         {
-            return new DashboardAnalyticsDto(0, 0, 0, 0, 0, 0, 0, 0, 0, new List<InterviewBreakdown>(), new List<MonthlyApplications>(), new List<InterviewBreakdown>(), new List<ApplicationsPerDay>());
+            return new DashboardAnalyticsDto(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, new List<InterviewBreakdown>(), new List<MonthlyApplications>(), new List<InterviewBreakdown>(), new List<ApplicationsPerDay>());
         }
 
         // Analytics to show
@@ -60,6 +60,14 @@ public class AnalyticsService : IAnalyticsService
             .Count(a => a.Status == "Ghosted" && a.StatusHistory
                 .Any(h => h.Status.Contains("Interview")));
 
+        // Applications that reached at least one interview stage, and offers that came through one
+        var interviewedApplications = applications
+            .Count(a => a.StatusHistory.Any(h => h.Status.Contains("Interview")));
+
+        var offersAfterInterview = applications
+            .Count(a => a.Status == "Offer" && a.StatusHistory
+                .Any(h => h.Status.Contains("Interview")));
+
         // Filter applications that are currently in any interview stage
         var interviewApplications = applications.Where(a =>
             a.Status == "Screening Interview" ||
@@ -77,7 +85,7 @@ public class AnalyticsService : IAnalyticsService
 
 
         // Monthly Trend 
-        DateTime today = DateTime.Today;
+        DateTime today = DateTime.UtcNow.Date; // DateApplied is stored in UTC
         DateTime currentMonthStart = new DateTime(today.Year, today.Month, 1);
         DateTime previousMonthStart = currentMonthStart.AddMonths(-1);
 
@@ -95,19 +103,27 @@ public class AnalyticsService : IAnalyticsService
             .OrderBy(m => DateTime.ParseExact(m.MonthYear, "MMM yyyy", null)) // Sort by date
             .ToList();
 
+        // Same days of last month as have passed this month (capped at last month's length)
+        int daysToCompare = Math.Min(today.Day, DateTime.DaysInMonth(previousMonthStart.Year, previousMonthStart.Month));
+        var previousMonthToDateCount = applications
+            .Count(a => a.DateApplied >= previousMonthStart && a.DateApplied < previousMonthStart.AddDays(daysToCompare));
+
         // Filter for current month's applications
         var currentMonthApplications = applications
             .Where(a => a.DateApplied >= currentMonthStart)
             .ToList();
 
-        // Group by Day
-        var applicationsPerDay = currentMonthApplications
+        // Group by Day, including days with no applications (count 0) up to today
+        var countsByDay = currentMonthApplications
             .GroupBy(a => a.DateApplied.Date)
-            .Select(g => new ApplicationsPerDay(
-                Date: g.Key.ToString("MMM dd"),
-                Count: g.Count()
+            .ToDictionary(g => g.Key, g => g.Count());
+
+        var applicationsPerDay = Enumerable.Range(0, (today - currentMonthStart).Days + 1)
+            .Select(offset => currentMonthStart.AddDays(offset))
+            .Select(day => new ApplicationsPerDay(
+                Date: day.ToString("MMM dd"),
+                Count: countsByDay.GetValueOrDefault(day)
             ))
-            .OrderBy(d => DateTime.ParseExact(d.Date, "MMM dd", null))
             .ToList();
 
         // Every interview ever
@@ -131,6 +147,9 @@ public class AnalyticsService : IAnalyticsService
             TotalPastInterviews: totalPastInterviews,
             InterviewedAndRejected: interviewedAndRejected,
             InterviewedAndGhosted: interviewedAndGhosted,
+            InterviewedApplications: interviewedApplications,
+            OffersAfterInterview: offersAfterInterview,
+            PreviousMonthToDateCount: previousMonthToDateCount,
             HistoricalInterviewBreakdown: historicalInterviewBreakdown,
             MonthlyTrend: monthlyTrend,
             InterviewTypeBreakdown: interviewTypeBreakdown,

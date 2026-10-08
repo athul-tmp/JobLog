@@ -9,6 +9,8 @@ namespace backend.Models
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public string? PasswordResetToken { get; set; }
     public DateTime? ResetTokenExpires { get; set; }
+    // Incremented to invalidate every issued JWT (password change/reset, email change)
+    public int TokenVersion { get; set; }
     public ICollection<JobApplication> JobApplications { get; set; } = new List<JobApplication>();
   }
 }

@@ -122,6 +122,22 @@ public class TokenServiceTests
   }
 
   [Fact]
+  public void CreateToken_IncludesUsersTokenVersionClaim()
+  {
+    // Arrange
+    var tokenService = CreateTokenService();
+    var user = CreateUser("test@example.com");
+    user.TokenVersion = 3;
+
+    // Act
+    var result = tokenService.CreateToken(user);
+
+    // Assert
+    var jwt = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler().ReadJwtToken(result.Token);
+    Assert.Equal("3", jwt.Claims.Single(c => c.Type == TokenService.TokenVersionClaim).Value);
+  }
+
+  [Fact]
   public void CreateToken_ThrowsInvalidOperationException_WhenJwtKeyMissing()
   {
     // Arrange

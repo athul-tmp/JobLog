@@ -13,6 +13,9 @@ public interface ITokenService
 
 public class TokenService : ITokenService
 {
+  // Claim holding the user's TokenVersion at the time the token was issued
+  public const string TokenVersionClaim = "token_version";
+
   private readonly IConfiguration _config;
 
   public TokenService(IConfiguration config)
@@ -26,11 +29,12 @@ public class TokenService : ITokenService
     var secretKey = _config["Jwt:Key"] ?? throw new InvalidOperationException("JWT Secret Key not configured.");
     var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
 
-    // Payload containing user ID and email
+    // Payload containing user ID, email and token version
     var claims = new List<Claim>
         {
             new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new Claim(JwtRegisteredClaimNames.Email, user.Email),
+            new Claim(TokenVersionClaim, user.TokenVersion.ToString()),
         };
 
     // Demo-specific expiration

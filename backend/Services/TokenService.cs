@@ -16,6 +16,9 @@ public class TokenService : ITokenService
   // Claim holding the user's TokenVersion at the time the token was issued
   public const string TokenVersionClaim = "token_version";
 
+  public static readonly TimeSpan SessionLifetime = TimeSpan.FromDays(30);
+  public static readonly TimeSpan DemoSessionLifetime = TimeSpan.FromMinutes(30);
+
   private readonly IConfiguration _config;
 
   public TokenService(IConfiguration config)
@@ -40,9 +43,9 @@ public class TokenService : ITokenService
     // Demo-specific expiration
     var isDemoUser = DemoUserHelper.IsDemoEmail(user.Email);
 
-    var expiryTime = isDemoUser
-        ? DateTime.UtcNow.AddMinutes(30) // Short expiry for demo (30 min)
-        : DateTime.UtcNow.AddDays(7);   // Normal expiry for registered users (7 days)
+    var expiryTime = DateTime.UtcNow.Add(isDemoUser
+        ? DemoSessionLifetime // Short fixed expiry for demo (30 min)
+        : SessionLifetime);   // Registered users (30 days, extended while active)
 
     var tokenDescriptor = new SecurityTokenDescriptor
     {

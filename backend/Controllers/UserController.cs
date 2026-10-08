@@ -26,25 +26,15 @@ public class UserController : ControllerBase
   }
 
   // Helper to set the JWT in an HttpOnly cookie
-  private void SetAuthCookie(string token, DateTime? expiryTime = null)
+  private void SetAuthCookie(string token, DateTime expiryTime)
   {
-    bool isDevelopment = _env.IsDevelopment();
-    var cookieOptions = new CookieOptions
-    {
-      HttpOnly = true,
-      Secure = !isDevelopment,
-      SameSite = SameSiteMode.Strict,
-      Expires = expiryTime ?? DateTimeOffset.UtcNow.AddDays(7),
-      Path = "/"
-    };
-
-    Response.Cookies.Append("joblog_jwt_token", token, cookieOptions);
+    AuthSessionHelper.SetAuthCookie(Response, token, expiryTime, _env.IsDevelopment());
   }
 
   // Helper to clear the auth cookie
   private void ClearAuthCookie()
   {
-    Response.Cookies.Delete("joblog_jwt_token");
+    AuthSessionHelper.ClearAuthCookie(Response);
   }
 
   // Helper to get User ID

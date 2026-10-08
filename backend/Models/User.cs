@@ -11,6 +11,9 @@ namespace backend.Models
     public DateTime? ResetTokenExpires { get; set; }
     // Incremented to invalidate every issued JWT (password change/reset, email change)
     public int TokenVersion { get; set; }
+    // Temporary per-visitor demo accounts, deleted by DemoCleanupService once expired
+    public bool IsDemo { get; set; }
+    public DateTime? DemoExpiresAt { get; set; }
     public ICollection<JobApplication> JobApplications { get; set; } = new List<JobApplication>();
   }
 }

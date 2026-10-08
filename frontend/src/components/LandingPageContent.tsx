@@ -14,7 +14,7 @@ import { WakingUpMessage } from "@/components/LoadingScreen";
 const CHROME_EXTENSION_URL = "https://chromewebstore.google.com/detail/mbbminokbdldbonjhceefnjncgadogcj?utm_source=item-share-cb";
 
 export default function LandingPageContent() {
-  const { isAuthenticated, authLoading, login, demoEmail, demoPassword } = useAuth();
+  const { isAuthenticated, authLoading, startDemo } = useAuth();
   const router = useRouter();
 
   // Redirect Logic
@@ -24,9 +24,9 @@ export default function LandingPageContent() {
     }
   }, [isAuthenticated, authLoading, router]);
 
-  // Auto-login handler for the demo
+  // Starts a private demo session for this visitor
   const handleDemoLogin = async () => {
-    const errorMessage = await login(demoEmail, demoPassword);
+    const errorMessage = await startDemo();
 
     if (errorMessage) {
         toast.error("Demo Login Failed", {

@@ -4,6 +4,7 @@ export interface LoginResponse {
   email: string;
   firstName: string;
   tokenExpiration?: string;
+  isDemo?: boolean;
 }
 
 export interface AuthUser {

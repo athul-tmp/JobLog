@@ -2,19 +2,14 @@ import React, { createContext, useCallback, useContext, useEffect, useState } fr
 import { AuthUser, LoginResponse } from "@/types/types"; 
 import { AuthService, setLogoutHandler } from "@/services/api";
 
-// Demo account credentials
-const DEMO_EMAIL = "demo@joblog.com";
-const DEMO_PASSWORD = "DemoPassword123!";
-
 interface AuthContextType {
   user: AuthUser | null;
   login: (email: string, password: string) => Promise<string | null>;
+  startDemo: () => Promise<string | null>;
   logout: () => void;
   isAuthenticated: boolean;
   authLoading: boolean;
   refreshUser: (updates: Partial<AuthUser>) => void;
-  demoEmail: string;
-  demoPassword: string;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -35,12 +30,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (storedUser) {
       try {
         const parsedUser: AuthUser = JSON.parse(storedUser);
-            
-        const isDemoUser = parsedUser.email === DEMO_EMAIL;
-        parsedUser.isDemo = isDemoUser;
         
         // Check if the demo session has expired locally
-        if (isDemoUser && parsedUser.expiresAt && parsedUser.expiresAt <= Date.now()) {
+        if (parsedUser.isDemo && parsedUser.expiresAt && parsedUser.expiresAt <= Date.now()) {
             localStorage.removeItem(USER_KEY);
         } else {
             loadedUser = parsedUser;
@@ -75,13 +67,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
   }, []);
 
-  // Login method to set session data
-  const login = async (email: string, password: string): Promise<string | null> => {
+  // Starts a session from a login or demo response
+  const startSession = async (request: () => Promise<LoginResponse>): Promise<string | null> => {
     setAuthLoading(true);
     try {
-      const response: LoginResponse = await AuthService.login(email, password);
+      const response: LoginResponse = await request();
 
-      const isDemoUser = email === DEMO_EMAIL;
+      const isDemoUser = response.isDemo === true;
       let expiresAt: number | undefined = undefined;
 
       if (isDemoUser && response.tokenExpiration) {
@@ -115,6 +107,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // Login method to set session data
+  const login = (email: string, password: string) => startSession(() => AuthService.login(email, password));
+
+  // Starts a private demo session with its own sample data
+  const startDemo = () => startSession(() => AuthService.startDemo());
+
   // Logout method to clear session data and call the backend to clear the HttpOnly cookie
   const logout = useCallback(() => {
     setAuthLoading(true);
@@ -143,12 +141,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const contextValue: AuthContextType = {
     user,
     login,
+    startDemo,
     logout,
     isAuthenticated,
     authLoading,
     refreshUser,
-    demoEmail: DEMO_EMAIL,
-    demoPassword: DEMO_PASSWORD,
   };
 
   return (

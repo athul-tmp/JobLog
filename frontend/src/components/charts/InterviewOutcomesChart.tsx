@@ -31,7 +31,7 @@ export default function InterviewOutcomesChart({ data }: InterviewOutcomesChartP
     const themeColors = THEME_COLORS[themeKey];
 
     // Shows if no interviews
-    const totalOutcomes = data.totalOffers + data.interviewedAndRejected + data.interviewedAndGhosted;
+    const totalOutcomes = data.offersAfterInterview + data.interviewedAndRejected + data.interviewedAndGhosted;
     if (totalOutcomes === 0) {
         return (
             <div className="flex items-center justify-center w-full h-full">
@@ -52,7 +52,7 @@ export default function InterviewOutcomesChart({ data }: InterviewOutcomesChartP
             {
                 label: 'Interview Outcomes',
                 data: [
-                  data.totalOffers, 
+                  data.offersAfterInterview, 
                   data.interviewedAndRejected,
                   data.interviewedAndGhosted,
                 ],

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.SignalR;
 using System.Security.Claims;
 using backend.DTOs;
@@ -123,6 +124,7 @@ public class JobApplicationController : ControllerBase
   // Delete all job applications | Route: DELETE /api/JobApplication/all
   [HttpDelete("all")]
   [BlockDemoUser]
+  [EnableRateLimiting(RateLimitPolicies.Auth)]
   public async Task<IActionResult> DeleteAllUserApplications([FromBody] DeleteDataRequest request)
   {
     if (string.IsNullOrWhiteSpace(request.CurrentPassword))

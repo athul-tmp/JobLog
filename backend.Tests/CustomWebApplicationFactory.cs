@@ -16,6 +16,11 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
     builder.UseSetting("Jwt:Issuer", "TestIssuer");
     builder.UseSetting("Jwt:Audience", "TestAudience");
 
+    // All test requests share one client IP, so lift limits out of the way (rate limiting has its own tests)
+    builder.UseSetting("RateLimiting:AuthPermitLimit", "10000");
+    builder.UseSetting("RateLimiting:EmailPermitLimit", "10000");
+    builder.UseSetting("RateLimiting:GlobalPermitLimit", "10000");
+
     builder.ConfigureServices(services =>
     {
       // Remove the real Postgres DbContext registration

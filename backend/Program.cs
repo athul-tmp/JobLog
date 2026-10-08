@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.HttpOverrides;
+using System.Threading.RateLimiting;
+using backend.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -84,6 +86,49 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+// Rate limiting (per client IP)
+var rateLimitSettings = builder.Configuration.GetSection("RateLimiting");
+var authPermitLimit = rateLimitSettings.GetValue("AuthPermitLimit", 10);     // per minute
+var emailPermitLimit = rateLimitSettings.GetValue("EmailPermitLimit", 5);    // per 15 minutes
+var globalPermitLimit = rateLimitSettings.GetValue("GlobalPermitLimit", 300); // per minute
+
+static string GetClientIp(HttpContext context) => context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.OnRejected = async (context, cancellationToken) =>
+    {
+        await context.HttpContext.Response.WriteAsJsonAsync(
+            new { message = "Too many requests. Please wait a moment and try again." },
+            cancellationToken);
+    };
+
+    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
+        RateLimitPartition.GetFixedWindowLimiter(GetClientIp(context), _ => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = globalPermitLimit,
+            Window = TimeSpan.FromMinutes(1)
+        }));
+
+    options.AddPolicy(RateLimitPolicies.Auth, context =>
+        RateLimitPartition.GetFixedWindowLimiter(GetClientIp(context), _ => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = authPermitLimit,
+            Window = TimeSpan.FromMinutes(1)
+        }));
+
+    options.AddPolicy(RateLimitPolicies.Email, context =>
+        RateLimitPartition.GetFixedWindowLimiter(GetClientIp(context), _ => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = emailPermitLimit,
+            Window = TimeSpan.FromMinutes(15)
+        }));
+});
+
+// Cap request bodies (largest legitimate payload is a job application with notes)
+builder.WebHost.ConfigureKestrel(options => options.Limits.MaxRequestBodySize = 1_000_000);
+
 builder.Services.AddSignalR();
 builder.Services.AddControllers();
 
@@ -138,11 +183,20 @@ if (app.Environment.IsDevelopment())
 }
 app.UseCookiePolicy();
 app.UseCors("AllowNextjsApp");
+app.UseRateLimiter();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Health check | Route: GET /api/health
+// Also used as a warm-up ping by the frontend and extension to wake the container and database early
+app.MapGet("/api/health", async (ApplicationDbContext dbContext) =>
+{
+    var databaseOk = await dbContext.Database.CanConnectAsync();
+    return Results.Ok(new { status = "ok", database = databaseOk ? "ok" : "unavailable" });
+}).AllowAnonymous();
 app.MapHub<JobApplicationHub>("/hubs/jobapplications");
 
 app.Run();

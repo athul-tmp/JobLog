@@ -14,6 +14,7 @@ import Footer from "@/components/Footer";
 import { CheckCircle } from "lucide-react";
 import { WakingUpMessage } from "@/components/LoadingScreen";
 import { PasswordInput } from "@/components/ui/PasswordInput";
+import { warmUpBackend } from "@/services/api";
 
 // Email validation helper function
 export const isEmailValidFormat = (email: string) => {
@@ -30,6 +31,11 @@ export default function LoginPage() {
     const [error, setError] = useState<string | null>(null);
     
     const registrationSuccess = router.query.success === 'registered';
+
+    // Start waking the backend while the user types their credentials
+    useEffect(() => {
+        warmUpBackend();
+    }, []);
     
     useEffect(() => {
         if (isAuthenticated) {

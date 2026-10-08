@@ -130,7 +130,7 @@ public class UserService : IUserService
   {
     var user = await GetUserByEmail(email);
 
-    if (user == null)
+    if (user == null || DemoUserHelper.IsDemoEmail(user.Email))
     {
       return;
     }
@@ -233,7 +233,9 @@ public class UserService : IUserService
   {
     email = NormaliseEmail(email);
     var record = await _dbContext.EmailVerifications
-      .SingleOrDefaultAsync(v => v.Email == email && v.Purpose == "Registration");
+      .Where(v => v.Email == email && v.Purpose == "Registration")
+      .OrderByDescending(v => v.CreatedAt)
+      .FirstOrDefaultAsync();
 
     // Validation checks
     if (record == null || record.ExpiryDate < DateTime.UtcNow)
@@ -247,6 +249,11 @@ public class UserService : IUserService
       throw new UnauthorizedAccessException("Invalid verification token.");
     }
 
+    if (await GetUserByEmail(email) != null)
+    {
+      throw new InvalidOperationException("Email address is already registered. Please log in.");
+    }
+
     // Everything is valid then create the user
     var passwordHash = BCrypt.Net.BCrypt.HashPassword(password);
     var newUser = new User
@@ -258,9 +265,18 @@ public class UserService : IUserService
     };
 
     _dbContext.Users.Add(newUser);
-    _dbContext.EmailVerifications.Remove(record);
+    _dbContext.EmailVerifications.RemoveRange(
+      _dbContext.EmailVerifications.Where(v => v.Email == email && v.Purpose == "Registration"));
 
-    await _dbContext.SaveChangesAsync();
+    try
+    {
+      await _dbContext.SaveChangesAsync();
+    }
+    catch (DbUpdateException)
+    {
+      // Unique email index hit by a concurrent registration
+      throw new InvalidOperationException("Email address is already registered. Please log in.");
+    }
     return newUser;
   }
 
@@ -329,8 +345,6 @@ public class UserService : IUserService
 
     if (!BCrypt.Net.BCrypt.Verify(token, verification.Token))
     {
-      _dbContext.EmailVerifications.Remove(verification);
-      await _dbContext.SaveChangesAsync();
       throw new UnauthorizedAccessException("Invalid email change verification token.");
     }
 
@@ -348,7 +362,16 @@ public class UserService : IUserService
     // Clean up and save changes
     _dbContext.Users.Update(user);
     _dbContext.EmailVerifications.Remove(verification);
-    await _dbContext.SaveChangesAsync();
+
+    try
+    {
+      await _dbContext.SaveChangesAsync();
+    }
+    catch (DbUpdateException)
+    {
+      // Unique email index hit because another account took this email in the meantime
+      throw new InvalidOperationException("This email is already in use by another account.");
+    }
 
     // Send notification to the old email address
     await _emailService.SendEmailChangeNotification(oldEmail, newEmail);

@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.SignalR;
 using System.Security.Claims;
 using backend.DTOs;
+using backend.Helpers;
 using backend.Hubs;
 using backend.Models;
 
@@ -65,6 +67,12 @@ public class JobApplicationController : ControllerBase
       return BadRequest(new { message = "Company and Role are required fields." });
     }
 
+    var validationError = ValidationHelper.ValidateJobApplicationFields(request.Company, request.Role, request.JobPostingURL, request.Notes);
+    if (validationError != null)
+    {
+      return BadRequest(new { message = validationError });
+    }
+
     try
     {
       var userId = GetUserId();
@@ -92,6 +100,12 @@ public class JobApplicationController : ControllerBase
   [HttpPut]
   public async Task<IActionResult> UpdateApplication([FromBody] JobApplicationUpdateRequest request)
   {
+    var validationError = ValidationHelper.ValidateJobApplicationFields(request.Company, request.Role, request.JobPostingURL, request.Notes);
+    if (validationError != null)
+    {
+      return BadRequest(new { message = validationError });
+    }
+
     try
     {
       var userId = GetUserId();
@@ -121,6 +135,8 @@ public class JobApplicationController : ControllerBase
 
   // Delete all job applications | Route: DELETE /api/JobApplication/all
   [HttpDelete("all")]
+  [BlockDemoUser]
+  [EnableRateLimiting(RateLimitPolicies.Auth)]
   public async Task<IActionResult> DeleteAllUserApplications([FromBody] DeleteDataRequest request)
   {
     if (string.IsNullOrWhiteSpace(request.CurrentPassword))
@@ -171,9 +187,9 @@ public class JobApplicationController : ControllerBase
     {
       return BadRequest(new { message = ex.Message });
     }
-    catch (Exception ex)
+    catch (Exception)
     {
-      return StatusCode(500, new { message = "An error occurred while attempting to undo the last status change.", error = ex.Message });
+      return StatusCode(500, new { message = "An error occurred while attempting to undo the last status change." });
     }
   }
 }

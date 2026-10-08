@@ -1,5 +1,6 @@
 const USER_API_ENDPOINT = 'https://api.joblog.athulthampan.com/api/User/login'; 
 const JOB_API_ENDPOINT = 'https://api.joblog.athulthampan.com/api/JobApplication';
+const HEALTH_API_ENDPOINT = 'https://api.joblog.athulthampan.com/api/health';
 
 // Theme Toggle Logic
 
@@ -538,6 +539,9 @@ function submitJobForm() {
 
 // Main Event Listener
 document.addEventListener('DOMContentLoaded', async () => {
+    // Fire-and-forget ping so the backend starts waking up while the user reviews the form
+    fetch(HEALTH_API_ENDPOINT).catch(() => {});
+
     await checkAuthAndRender();
 
     const { jwtToken } = await chrome.storage.local.get('jwtToken');

@@ -1,6 +1,7 @@
 using backend.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.RateLimiting;
 
 using static ValidationHelper;
 using System.Security.Claims;
@@ -60,6 +61,7 @@ public class UserController : ControllerBase
 
   // Login Endpoint | Route: POST /api/User/login
   [HttpPost("login")]
+  [EnableRateLimiting(RateLimitPolicies.Auth)]
   public async Task<IActionResult> LoginUser([FromBody] UserLoginRequest request)
   {
     // Input validation
@@ -117,11 +119,17 @@ public class UserController : ControllerBase
   // Update User Name | Route: PUT /api/User/updateName
   [Authorize]
   [HttpPut("updateName")]
+  [BlockDemoUser]
+  [EnableRateLimiting(RateLimitPolicies.Auth)]
   public async Task<IActionResult> UpdateName([FromBody] UpdateNameRequest request)
   {
     if (string.IsNullOrWhiteSpace(request.NewFirstName) || string.IsNullOrWhiteSpace(request.CurrentPassword))
     {
       return BadRequest(new { message = "New First Name and Current Password are required." });
+    }
+    if (request.NewFirstName.Trim().Length > MaxFirstNameLength)
+    {
+      return BadRequest(new { message = $"First name must be {MaxFirstNameLength} characters or fewer." });
     }
 
     try
@@ -148,6 +156,8 @@ public class UserController : ControllerBase
   // Initiate email change | ROUTE: POST /api/User/inititate-email-change
   [Authorize]
   [HttpPost("initiate-email-change")]
+  [BlockDemoUser]
+  [EnableRateLimiting(RateLimitPolicies.Email)]
   public async Task<IActionResult> InitiateEmailChange([FromBody] InitiateEmailChangeRequest request)
   {
     if (!IsValidEmailFormat(request.NewEmail))
@@ -181,6 +191,7 @@ public class UserController : ControllerBase
 
   // Complete email change | ROUTE: POST /api/User/complete-email-change
   [HttpPost("complete-email-change")]
+  [EnableRateLimiting(RateLimitPolicies.Auth)]
   [AllowAnonymous]
   public async Task<IActionResult> CompleteEmailChange([FromBody] CompleteEmailChangeRequest request)
   {
@@ -218,6 +229,8 @@ public class UserController : ControllerBase
   // Update User Password | Route: PUT /api/User/updatePassword
   [Authorize]
   [HttpPut("updatePassword")]
+  [BlockDemoUser]
+  [EnableRateLimiting(RateLimitPolicies.Auth)]
   public async Task<IActionResult> UpdatePassword([FromBody] UpdatePasswordRequest request)
   {
     if (string.IsNullOrWhiteSpace(request.NewPassword) || string.IsNullOrWhiteSpace(request.CurrentPassword))
@@ -252,6 +265,8 @@ public class UserController : ControllerBase
   // Delete Account | Route: DELETE /api/User/delete
   [Authorize]
   [HttpDelete("delete")]
+  [BlockDemoUser]
+  [EnableRateLimiting(RateLimitPolicies.Auth)]
   public async Task<IActionResult> DeleteAccount([FromBody] DeleteAccountRequest request)
   {
     if (string.IsNullOrWhiteSpace(request.CurrentPassword))
@@ -282,6 +297,7 @@ public class UserController : ControllerBase
   // Verify current password | Route: POST /api/User/verifyPassword
   [Authorize]
   [HttpPost("verifyPassword")]
+  [EnableRateLimiting(RateLimitPolicies.Auth)]
   public async Task<IActionResult> VerifyPassword([FromBody] VerifyPasswordRequest request)
   {
     if (string.IsNullOrWhiteSpace(request.CurrentPassword))
@@ -312,6 +328,7 @@ public class UserController : ControllerBase
 
   // Forgot Password Endpoint | Route: POST /api/User/forgotPassword
   [HttpPost("forgotPassword")]
+  [EnableRateLimiting(RateLimitPolicies.Email)]
   [AllowAnonymous]
   public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
   {
@@ -345,6 +362,7 @@ public class UserController : ControllerBase
 
   // Reset Password Endpoint | Route: POST /api/User/resetPassword
   [HttpPost("resetPassword")]
+  [EnableRateLimiting(RateLimitPolicies.Auth)]
   [AllowAnonymous]
   public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
   {
@@ -385,6 +403,7 @@ public class UserController : ControllerBase
 
   // Initiate registration Endpoint | Route: POST /api/User/initiate-registration
   [HttpPost("initiate-registration")]
+  [EnableRateLimiting(RateLimitPolicies.Email)]
   [AllowAnonymous]
   public async Task<IActionResult> InitiateRegistration([FromBody] InitiateRegistrationRequest request)
   {
@@ -414,6 +433,7 @@ public class UserController : ControllerBase
 
   // Complete registration Endpoint | Route: POST /api/User/complete-registration
   [HttpPost("complete-registration")]
+  [EnableRateLimiting(RateLimitPolicies.Auth)]
   [AllowAnonymous]
   public async Task<IActionResult> CompleteRegistration([FromBody] CompleteRegistrationRequest request)
   {
@@ -421,6 +441,11 @@ public class UserController : ControllerBase
         string.IsNullOrWhiteSpace(request.FirstName) || string.IsNullOrWhiteSpace(request.Password))
     {
       return BadRequest(new { message = "All fields are required." });
+    }
+
+    if (request.FirstName.Trim().Length > MaxFirstNameLength)
+    {
+      return BadRequest(new { message = $"First name must be {MaxFirstNameLength} characters or fewer." });
     }
 
     if (!IsStrongPassword(request.Password))

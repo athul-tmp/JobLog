@@ -128,7 +128,7 @@ export default function DashboardPage() {
                         <div className="space-y-8">
                             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
                                 
-                                {/* Total Applied Card */}
+                                {/* Total Applications Card */}
                                 <Card className="ring-1 ring-primary/40">
                                     <CardHeader className="flex flex-row items-center justify-between space-y-0">
                                         <CardTitle className="text-sm sm:text-base">Total Applications</CardTitle>
@@ -139,14 +139,14 @@ export default function DashboardPage() {
                                     </CardContent>
                                 </Card>
 
-                                {/* Total Pending Card */}
+                                {/* Awaiting Reply Card */}
                                 <Card className="ring-1 ring-primary/40">
                                     <CardHeader className="flex flex-row items-center justify-between space-y-0">
-                                        <CardTitle className="text-sm sm:text-base">Total Applied</CardTitle>
+                                        <CardTitle className="text-sm sm:text-base">Awaiting Reply</CardTitle>
                                     </CardHeader>
                                     <CardContent>
                                         <div className="text-xl sm:text-2xl font-bold text-yellow-600">{stats.totalPending}</div>
-                                        <p className="text-xs text-foreground mt-1">Applied but pending reply</p>
+                                        <p className="text-xs text-foreground mt-1">Applied, no response yet</p>
                                     </CardContent>
                                 </Card>
 
@@ -157,7 +157,7 @@ export default function DashboardPage() {
                                     </CardHeader>
                                     <CardContent>
                                         <div className="text-xl sm:text-2xl font-bold text-blue-600">{stats.totalInterviews}</div>
-                                        <p className="text-xs text-foreground mt-1">Interviews completed but pending reply</p>
+                                        <p className="text-xs text-foreground mt-1">Currently in the interview process</p>
                                     </CardContent>
                                 </Card>
                                 
@@ -211,7 +211,7 @@ export default function DashboardPage() {
                                 {/* All Interview Types */}
                                 <Card className="ring-1 ring-primary/40">
                                     <CardHeader>
-                                        <CardTitle className="text-sm sm:text-base text-center sm:text-left">All Interview Stages Breakdown</CardTitle>
+                                        <CardTitle className="text-sm sm:text-base text-center sm:text-left">All Interview Rounds</CardTitle>
                                     </CardHeader>
                                     <CardContent className="h-[250px] sm:h-[300px] flex items-center justify-center">
                                         <HistoricalInterviewsChart data={stats.historicalInterviewBreakdown || [] } />

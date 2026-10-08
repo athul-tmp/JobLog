@@ -189,6 +189,14 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Health check | Route: GET /api/health
+// Also used as a warm-up ping by the frontend and extension to wake the container and database early
+app.MapGet("/api/health", async (ApplicationDbContext dbContext) =>
+{
+    var databaseOk = await dbContext.Database.CanConnectAsync();
+    return Results.Ok(new { status = "ok", database = databaseOk ? "ok" : "unavailable" });
+}).AllowAnonymous();
 app.MapHub<JobApplicationHub>("/hubs/jobapplications");
 
 app.Run();

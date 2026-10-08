@@ -88,6 +88,17 @@ const getLoginErrorMessage = (error: unknown): string => {
     return data?.message || "Login failed. Please check your details.";
 };
 
+// Fire-and-forget ping so the backend container (and database) start waking up
+// while the user is still on the landing/login page. Only sent once per page session.
+let hasWarmedUp = false;
+export const warmUpBackend = (): void => {
+    if (hasWarmedUp || typeof window === "undefined") {
+        return;
+    }
+    hasWarmedUp = true;
+    apiClient.get("/health", { timeout: LOGIN_TIMEOUT_MS }).catch(() => {});
+};
+
 export const AuthService = {
   // Login method
   login: async (email: string, password: string): Promise<LoginResponse> => {

@@ -1,5 +1,7 @@
 import Head from "next/head";
 import dynamic from 'next/dynamic';
+import { useEffect } from "react";
+import { warmUpBackend } from "@/services/api";
 
 const DynamicLandingPageContent = dynamic(
   () => import("@/components/LandingPageContent"),
@@ -13,7 +15,11 @@ export function getStaticProps() {
 }
 
 export default function LandingPage() {
-  
+  // Start waking the backend before the user reaches the login form
+  useEffect(() => {
+    warmUpBackend();
+  }, []);
+
   return (
     <>
       <Head>

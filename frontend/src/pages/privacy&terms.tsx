@@ -24,7 +24,7 @@ export default function PrivacyAndTermsPage() {
                         Back
                     </Button>
                     <h1 className="text-3xl font-extrabold tracking-tight">Privacy & Terms</h1>
-                    <p className="text-l mb-6 mt-2 text-foreground">Last updated: December 2025</p>
+                    <p className="text-l mb-6 mt-2 text-foreground">Last updated: October 2026</p>
                     
                     <h2 className="text-3xl font-extrabold tracking-tight mb-6">1. Privacy Policy</h2>
                     <div className="space-y-6 text-muted-foreground">
@@ -35,16 +35,22 @@ export default function PrivacyAndTermsPage() {
                             JobLog collects only the information you choose to provide, such as your name, email address, and job-related details (e.g., company, role, status, notes). Your email may be used for account authentication, including registration confirmation, login, and password reset.
                         </p>
                         <p>
-                            The JobLog: Quick Add Chrome Extension collects job-related details (Role, Company, and URL) by scraping the content of supported third-party job board websites (e.g., LinkedIn, Seek, Indeed) at the user&apos;s request. This scraped data is immediately transmitted via secure HTTPS to the JobLog API for storage in the user&apos;s private account.
+                            The JobLog: Quick Add Chrome Extension collects job-related details (role, company, location, and URL) by scraping the content of supported third-party job board websites (e.g., LinkedIn, Seek, Indeed) at the user&apos;s request. This scraped data is immediately transmitted via secure HTTPS to the JobLog API for storage in the user&apos;s private account.
                         </p>
                         <p>
-                            Authentication tokens are stored securely in cookies. For the Extension, this token is stored securely in the browser&apos;s dedicated extension storage (chrome.storage.local) to maintain user authentication. Your name and email may be stored locally in your browser for display purposes. All passwords are encrypted using strong hashing techniques (BCrypt).
+                            Authentication tokens are stored securely in cookies and are valid for up to 30 days. For the Extension, this token is stored securely in the browser&apos;s dedicated extension storage (chrome.storage.local) to maintain user authentication. Your name and email may be stored locally in your browser for display purposes. Passwords are never stored in plain text; they are hashed using BCrypt.
                         </p>
                         <p>
-                            JobLog does not use advertising or tracking services, and no personal information is shared with third parties.
+                            JobLog does not use advertising or tracking services and does not sell your data. Your information is processed only by the services that run JobLog: Vercel and Azure (hosting), Neon (database), and Brevo (email delivery).
                         </p>
                         <p>
-                            If you delete your account, all associated data will be permanently removed from the database.
+                            Your IP address is used temporarily to prevent abuse (rate limiting) and is not stored by JobLog.
+                        </p>
+                        <p>
+                            You can export your applications as CSV, clear all application data, or delete your account at any time from Settings. If you delete your account, all associated data will be permanently removed from the database. Deleted data may remain in database backups for a limited period before it is permanently erased.
+                        </p>
+                        <p>
+                            Demo sessions are temporary. Any data entered in a demo is automatically deleted when the session ends.
                         </p>
                         
                     </div>

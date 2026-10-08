@@ -24,6 +24,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
     builder.UseSetting("RateLimiting:AuthPermitLimit", "10000");
     builder.UseSetting("RateLimiting:EmailPermitLimit", "10000");
     builder.UseSetting("RateLimiting:GlobalPermitLimit", "10000");
+    builder.UseSetting("RateLimiting:DemoPermitLimit", "10000");
 
     builder.ConfigureServices(services =>
     {

@@ -7,5 +7,8 @@ namespace backend.Helpers
 
     // Endpoints that send an email
     public const string Email = "email";
+
+    // Creating a demo account (each one writes seed data)
+    public const string Demo = "demo";
   }
 }

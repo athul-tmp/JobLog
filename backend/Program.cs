@@ -18,6 +18,8 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IJobApplicationService, JobApplicationService>();
 builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IDemoService, DemoService>();
+builder.Services.AddHostedService<DemoCleanupService>();
 builder.Services.AddHttpClient();
 
 // CORS config
@@ -94,6 +96,7 @@ var rateLimitSettings = builder.Configuration.GetSection("RateLimiting");
 var authPermitLimit = rateLimitSettings.GetValue("AuthPermitLimit", 10);     // per minute
 var emailPermitLimit = rateLimitSettings.GetValue("EmailPermitLimit", 5);    // per 15 minutes
 var globalPermitLimit = rateLimitSettings.GetValue("GlobalPermitLimit", 300); // per minute
+var demoPermitLimit = rateLimitSettings.GetValue("DemoPermitLimit", 10);     // per hour
 
 static string GetClientIp(HttpContext context) => context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
 
@@ -126,6 +129,13 @@ builder.Services.AddRateLimiter(options =>
         {
             PermitLimit = emailPermitLimit,
             Window = TimeSpan.FromMinutes(15)
+        }));
+
+    options.AddPolicy(RateLimitPolicies.Demo, context =>
+        RateLimitPartition.GetFixedWindowLimiter(GetClientIp(context), _ => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = demoPermitLimit,
+            Window = TimeSpan.FromHours(1)
         }));
 });
 
@@ -160,22 +170,6 @@ builder.Services.Configure<CookiePolicyOptions>(options =>
 });
 
 var app = builder.Build();
-
-// For local dev
-// using (var scope = app.Services.CreateScope())
-// {
-//     var services = scope.ServiceProvider;
-//     try
-//     {
-//         var dbContext = services.GetRequiredService<ApplicationDbContext>();
-//         dbContext.Database.Migrate();
-//         Console.WriteLine("INFO: Successfully applied Entity Framework Core migrations.");
-//     }
-//     catch (Exception ex)
-//     {
-//         Console.WriteLine($"ERROR: Failed to apply migrations. {ex.Message}");
-//     }
-// }
 
 app.UseForwardedHeaders();
 

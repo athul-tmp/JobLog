@@ -14,14 +14,12 @@ public class UserController : ControllerBase
 {
   private readonly IUserService _userService;
   private readonly ITokenService _tokenService;
-  private readonly IJobApplicationService _jobApplicationService;
   private readonly IHostEnvironment _env;
 
-  public UserController(IUserService userService, ITokenService tokenService, IJobApplicationService jobApplicationService, IHostEnvironment env)
+  public UserController(IUserService userService, ITokenService tokenService, IHostEnvironment env)
   {
     _userService = userService;
     _tokenService = tokenService;
-    _jobApplicationService = jobApplicationService;
     _env = env;
   }
 
@@ -77,11 +75,6 @@ public class UserController : ControllerBase
     // JWT 
     var tokenResult = _tokenService.CreateToken(user);
 
-    if (tokenResult.IsDemoUser)
-    {
-      await _jobApplicationService.ResetDemoApplications(user.Id);
-    }
-
     // Set the JWT as an HttpOnly cookie
     SetAuthCookie(tokenResult.Token, tokenResult.Expiry);
 
@@ -90,9 +83,7 @@ public class UserController : ControllerBase
       message = "Login successful",
       email = user.Email,
       firstName = user.FirstName,
-      token = tokenResult.Token,
-      // Return ISO 8601 string for frontend countdown only if it's the demo user
-      tokenExpiration = tokenResult.IsDemoUser ? tokenResult.Expiry.ToString("o") : null
+      token = tokenResult.Token
     });
   }
 
@@ -472,7 +463,6 @@ public class UserController : ControllerBase
 
 public record UserLoginRequest(string Email, string Password);
 public record UpdateNameRequest(string CurrentPassword, string NewFirstName);
-public record UpdateEmailRequest(string CurrentPassword, string NewEmail);
 public record UpdatePasswordRequest(string CurrentPassword, string NewPassword);
 public record DeleteAccountRequest(string CurrentPassword);
 public record VerifyPasswordRequest(string CurrentPassword);

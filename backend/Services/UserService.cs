@@ -131,7 +131,7 @@ public class UserService : IUserService
   {
     var user = await GetUserByEmail(email);
 
-    if (user == null || DemoUserHelper.IsDemoEmail(user.Email))
+    if (user == null || user.IsDemo)
     {
       return;
     }

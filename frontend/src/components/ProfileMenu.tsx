@@ -35,7 +35,7 @@ export const ProfileMenu = () => {
             <DropdownMenuContent align="end" className="w-64">
                 <DropdownMenuLabel className="flex flex-col">
                     <span className="font-bold text-lg">Hi, {user.firstName}!</span>
-                    <span className="text-sm text-muted-foreground font-normal">{user.email}</span>
+                    <span className="text-sm text-muted-foreground font-normal">{user.isDemo ? "Private demo session" : user.email}</span>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 

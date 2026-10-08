@@ -54,7 +54,7 @@ export const ManageAccountTab = ({ isDemoUser }: ManageAccountTabProps) => {
     const [nameLoading, setNameLoading] = useState(false);
 
     // States for email update 
-    const [newEmail, setNewEmail] = useState(user?.email || '');
+    const [newEmail, setNewEmail] = useState(isDemoUser ? '' : user?.email || '');
     const [emailPassword, setEmailPassword] = useState('');
     const [emailStatus, setEmailStatus] = useState<'success' | 'error' | null>(null);
     const [emailMessage, setEmailMessage] = useState<string | null>(null);
@@ -335,7 +335,9 @@ export const ManageAccountTab = ({ isDemoUser }: ManageAccountTabProps) => {
                 <CardHeader>
                     <CardTitle>Change Email Address</CardTitle>
                     <CardDescription>
-                        Your current email is: <strong>{user?.email}</strong>. Changing your email requires your current password.
+                        {isDemoUser
+                            ? <>Demo sessions don&apos;t have an email address.</>
+                            : <>Your current email is: <strong>{user?.email}</strong>. Changing your email requires your current password.</>}
                     </CardDescription>
                 </CardHeader>
                 <form onSubmit={handleUpdateEmail}>

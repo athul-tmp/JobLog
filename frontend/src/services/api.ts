@@ -99,32 +99,38 @@ export const warmUpBackend = (): void => {
     apiClient.get("/health", { timeout: LOGIN_TIMEOUT_MS }).catch(() => {});
 };
 
+// POST that retries while the backend is cold-starting (used by login and demo start)
+const postWithColdStartRetry = async <T>(url: string, body?: unknown): Promise<T> => {
+  let lastError: unknown;
+
+  for (let attempt = 0; attempt < LOGIN_MAX_RETRIES; attempt++) {
+    try {
+      const response = await apiClient.post<T>(url, body, { timeout: LOGIN_TIMEOUT_MS });
+      return response.data;
+    } catch (error) {
+      lastError = error;
+
+      if (attempt < LOGIN_MAX_RETRIES - 1 && isRetriableConnectionError(error)) {
+        await delay(LOGIN_RETRY_DELAY_MS * (attempt + 1));
+        continue;
+      }
+
+      return Promise.reject(getLoginErrorMessage(error));
+    }
+  }
+
+  return Promise.reject(getLoginErrorMessage(lastError));
+};
+
 export const AuthService = {
   // Login method
   login: async (email: string, password: string): Promise<LoginResponse> => {
-    let lastError: unknown;
+    return postWithColdStartRetry<LoginResponse>("/User/login", { email, password });
+  },
 
-    for (let attempt = 0; attempt < LOGIN_MAX_RETRIES; attempt++) {
-      try {
-        const response = await apiClient.post<LoginResponse>(
-          "/User/login",
-          { email, password },
-          { timeout: LOGIN_TIMEOUT_MS }
-        );
-        return response.data;
-      } catch (error) {
-        lastError = error;
-
-        if (attempt < LOGIN_MAX_RETRIES - 1 && isRetriableConnectionError(error)) {
-          await delay(LOGIN_RETRY_DELAY_MS * (attempt + 1));
-          continue;
-        }
-
-        return Promise.reject(getLoginErrorMessage(error));
-      }
-    }
-
-    return Promise.reject(getLoginErrorMessage(lastError));
+  // Start a private, temporary demo session
+  startDemo: async (): Promise<LoginResponse> => {
+    return postWithColdStartRetry<LoginResponse>("/Demo/start");
   },
 
   // Logout method to call backend to clear the HttpOnly cookie

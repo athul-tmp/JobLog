@@ -48,14 +48,15 @@ namespace backend.Helpers
       // Tokens issued before token versioning existed carry no claim and count as version 0
       var tokenVersion = int.TryParse(principal.FindFirst(TokenService.TokenVersionClaim)?.Value, out var version) ? version : 0;
 
-      if (user == null || user.TokenVersion != tokenVersion)
+      if (user == null || user.TokenVersion != tokenVersion
+          || (user.IsDemo && user.DemoExpiresAt <= DateTime.UtcNow))
       {
         context.Fail("Session is no longer valid.");
         return;
       }
 
       // Sliding session: demo sessions stay fixed, SignalR connections are skipped
-      if (DemoUserHelper.IsDemoEmail(user.Email) || !context.HttpContext.Request.Path.StartsWithSegments("/api"))
+      if (user.IsDemo || !context.HttpContext.Request.Path.StartsWithSegments("/api"))
       {
         return;
       }

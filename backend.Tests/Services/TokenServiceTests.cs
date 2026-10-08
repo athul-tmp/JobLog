@@ -20,14 +20,16 @@ public class TokenServiceTests
   }
 
   // Helper to set up User
-  private User CreateUser(string email)
+  private User CreateUser(string email, bool isDemo = false)
   {
     return new User
     {
       Id = 1,
       Email = email,
       PasswordHash = "irrelevant-for-this-test",
-      FirstName = "irrelevant-for-this-test"
+      FirstName = "irrelevant-for-this-test",
+      IsDemo = isDemo,
+      DemoExpiresAt = isDemo ? DateTime.UtcNow.AddMinutes(30) : null
     };
   }
 
@@ -43,34 +45,6 @@ public class TokenServiceTests
 
     // Assert
     Assert.False(string.IsNullOrEmpty(result.Token));
-  }
-
-  [Fact]
-  public void CreateToken_SetsIsDemoUserFalse_ForNormalUser()
-  {
-    // Arrange
-    var tokenService = CreateTokenService();
-    var user = CreateUser("test@example.com");
-
-    // Act
-    var result = tokenService.CreateToken(user);
-
-    // Assert
-    Assert.False(result.IsDemoUser);
-  }
-
-  [Fact]
-  public void CreateToken_SetsIsDemoUserTrue_ForDemoUser()
-  {
-    // Arrange
-    var tokenService = CreateTokenService();
-    var user = CreateUser("demo@joblog.com");
-
-    // Act
-    var result = tokenService.CreateToken(user);
-
-    // Assert
-    Assert.True(result.IsDemoUser);
   }
 
   [Fact]
@@ -91,34 +65,33 @@ public class TokenServiceTests
   }
 
   [Fact]
-  public void CreateToken_GivesThirtyMinuteExpiry_ForDemoUser()
+  public void CreateToken_ExpiresWithDemoAccount_ForDemoUser()
   {
     // Arrange
     var tokenService = CreateTokenService();
-    var user = CreateUser("demo@joblog.com");
-    var before = DateTime.UtcNow;
+    var user = CreateUser("demo-123@demo.joblog.invalid", isDemo: true);
 
     // Act
     var result = tokenService.CreateToken(user);
 
     // Assert
-    var expectedExpiry = before.AddMinutes(30);
-    var difference = (result.Expiry - expectedExpiry).Duration();
-    Assert.True(difference < TimeSpan.FromSeconds(2));
+    Assert.Equal(user.DemoExpiresAt, result.Expiry);
   }
 
   [Fact]
-  public void CreateToken_IsCaseSensitive_ForDemoEmail()
+  public void CreateToken_IncludesDemoClaim_OnlyForDemoUser()
   {
     // Arrange
     var tokenService = CreateTokenService();
-    var user = CreateUser("DEMO@JOBLOG.COM");
+    var handler = new System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler();
 
     // Act
-    var result = tokenService.CreateToken(user);
+    var demoToken = handler.ReadJwtToken(tokenService.CreateToken(CreateUser("demo-123@demo.joblog.invalid", isDemo: true)).Token);
+    var regularToken = handler.ReadJwtToken(tokenService.CreateToken(CreateUser("test@example.com")).Token);
 
     // Assert
-    Assert.True(result.IsDemoUser);
+    Assert.Contains(demoToken.Claims, c => c.Type == backend.Helpers.DemoUserHelper.IsDemoClaim && c.Value == "true");
+    Assert.DoesNotContain(regularToken.Claims, c => c.Type == backend.Helpers.DemoUserHelper.IsDemoClaim);
   }
 
   [Fact]

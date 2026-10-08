@@ -47,7 +47,7 @@ It is designed to provide clarity, organisation, and insights throughout the job
 * **Session Revocation:** Changing or resetting your password, or changing your email, signs out every existing session.
 * **User Flows:** Robust password reset and email-change verification flows.
 * **Security Standard:** Password hashing using **BCrypt**, per-IP **rate limiting** on login and email endpoints, and server-side input validation.
-* **Demo Mode:** Public, session based demo account with automatic data reset; account-changing and destructive actions are blocked server-side.
+* **Demo Mode:** One click creates a private, temporary demo account seeded with sample applications (dated relative to today). Each visitor gets their own sandbox, account-changing actions are blocked server-side, and expired demo accounts are cleaned up automatically.
 
 ### Account Management
 * **Settings:** Comprehensive settings for changing name, email, and password (all requiring current password/email verification).
@@ -68,10 +68,10 @@ It is designed to provide clarity, organisation, and insights throughout the job
 
 ## 🧪 Testing <a id="testing"></a>
 
-The backend is covered by a suite of **79 automated tests** using **xUnit**, **Moq**, and the **EF Core In-Memory Provider**.
+The backend is covered by a suite of **81 automated tests** using **xUnit**, **Moq**, and the **EF Core In-Memory Provider**.
 
-* **Unit Tests (41):** Cover core business logic across services, including status transition rules, JWT token generation, analytics calculations, and authentication logic, using mocked dependencies for full isolation.
-* **Integration Tests (38):** Use `WebApplicationFactory` to exercise the full HTTP pipeline, including routing, JWT authentication, and controller behaviour, against a real (in-memory) database. Includes security tests for the demo account guard, input validation, rate limiting, session renewal and session revocation.
+* **Unit Tests (37):** Cover core business logic across services, including status transition rules, JWT token generation, analytics calculations, and authentication logic, using mocked dependencies for full isolation.
+* **Integration Tests (44):** Use `WebApplicationFactory` to exercise the full HTTP pipeline, including routing, JWT authentication, and controller behaviour, against a real (in-memory) database. Includes security tests for the demo account guard, input validation, rate limiting, session renewal and session revocation, plus per-visitor demo isolation and cleanup.
 * **CI Pipeline:** Tests run automatically on every push via **GitHub Actions**, and gate production deployment. A failing test blocks the release.
 
 Run the full suite locally:
@@ -153,7 +153,7 @@ The extension popup, demonstrating successful data capture and theme responsiven
 | **Authentication** | `JWT` (HttpOnly Cookies), `BCrypt` | Sliding 30-day sessions with token-version revocation and secure password hashing. |
 | **Email** | `Brevo` | Transactional email API for user verification and password reset flows. |
 | **Extension** | `HTML`, `CSS`, `Vanilla JavaScript` | Browser-specific APIs (chrome.scripting, chrome.storage). |
-| **Testing** | `xUnit, Moq, EF Core InMemory` | 79 tests (unit and integration), CI gated deployment. |
+| **Testing** | `xUnit, Moq, EF Core InMemory` | 81 tests (unit and integration), CI gated deployment. |
 
 ---
 

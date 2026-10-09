@@ -12,6 +12,7 @@ public interface IJobApplicationService
   Task<JobApplication> UpdateApplication(int userId, JobApplicationUpdateRequest request);
   Task DeleteAllUserApplications(int userId, string currentPassword);
   Task<JobApplication> UndoLastStatusChange(int applicationId, int userId);
+  Task<int> MarkUnansweredAsGhosted(int userId);
 }
 
 public class JobApplicationService : IJobApplicationService
@@ -30,6 +31,32 @@ public class JobApplicationService : IJobApplicationService
   public JobApplicationService(ApplicationDbContext dbContext)
   {
     _dbContext = dbContext;
+  }
+
+  // Marks every application still at "Applied" with no reply for AnalyticsService.NoReplyDays+ days as Ghosted
+  // (the same rule as the dashboard's "Needs attention" list). Returns how many were updated.
+  public async Task<int> MarkUnansweredAsGhosted(int userId)
+  {
+    var now = DateTime.UtcNow;
+    var cutoff = now.AddDays(-AnalyticsService.NoReplyDays);
+
+    var unanswered = await _dbContext.JobApplications
+        .Where(a => a.UserId == userId && a.Status == "Applied" && a.DateApplied <= cutoff)
+        .ToListAsync();
+
+    foreach (var application in unanswered)
+    {
+      application.Status = "Ghosted";
+      _dbContext.JobStatusHistories.Add(new JobStatusHistory
+      {
+        JobApplicationId = application.Id,
+        Status = "Ghosted",
+        ChangeDate = now
+      });
+    }
+
+    await _dbContext.SaveChangesAsync();
+    return unanswered.Count;
   }
 
   // Helper to map Entity to DTO 

@@ -161,6 +161,27 @@ public class JobApplicationController : ControllerBase
     }
   }
 
+  // Mark long-unanswered applications as Ghosted | Route: POST /api/JobApplication/mark-unanswered-ghosted
+  [HttpPost("mark-unanswered-ghosted")]
+  public async Task<IActionResult> MarkUnansweredAsGhosted()
+  {
+    try
+    {
+      var userId = GetUserId();
+      var updated = await _jobApplicationService.MarkUnansweredAsGhosted(userId);
+
+      return Ok(new { updated });
+    }
+    catch (UnauthorizedAccessException ex)
+    {
+      return Unauthorized(new { message = ex.Message });
+    }
+    catch (Exception)
+    {
+      return StatusCode(500, new { message = "An error occurred while updating applications." });
+    }
+  }
+
   // Undo previous status change | Route: POST /api/JobApplication/undo/{id}
   [HttpPost("undo/{id:int}")]
   public async Task<IActionResult> UndoLastStatusChange(int id)

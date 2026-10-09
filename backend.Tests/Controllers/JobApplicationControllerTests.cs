@@ -240,4 +240,29 @@ public class JobApplicationControllerTests : IClassFixture<CustomWebApplicationF
     Assert.NotNull(updatedApplication);
     Assert.Equal("Applied", updatedApplication!.Status);
   }
+
+  [Fact]
+  public async Task MarkUnansweredAsGhosted_ReturnsUpdatedCount()
+  {
+    // Arrange
+    using var scope = _factory.Services.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    var tokenService = scope.ServiceProvider.GetRequiredService<ITokenService>();
+    var (client, user) = CreateAuthenticatedClient(dbContext, tokenService);
+
+    dbContext.JobApplications.Add(new JobApplication
+    {
+      UserId = user.Id, Company = "Silent Co", Role = "Dev", Status = "Applied",
+      DateApplied = DateTime.UtcNow.AddDays(-(AnalyticsService.NoReplyDays + 1)), ApplicationNo = 1
+    });
+    dbContext.SaveChanges();
+
+    // Act
+    var response = await client.PostAsync("/api/JobApplication/mark-unanswered-ghosted", null);
+    var body = await response.Content.ReadFromJsonAsync<System.Text.Json.JsonElement>();
+
+    // Assert
+    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    Assert.Equal(1, body.GetProperty("updated").GetInt32());
+  }
 }

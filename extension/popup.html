@@ -263,6 +263,17 @@
             color: var(--success);
         }
 
+        .notice {
+            margin-top: 14px;
+            padding: 8px 10px;
+            border: 1px solid var(--warning-border);
+            border-radius: 8px;
+            background-color: var(--warning-bg);
+            color: var(--warning);
+            font-size: 13px;
+            line-height: 1.45;
+        }
+
         .validation-error {
             display: block;
             margin-top: 4px;
@@ -380,6 +391,8 @@
 
                 <label for="notes">Notes <span class="optional">(optional)</span></label>
                 <input type="text" id="notes" name="notes" placeholder="Location, salary or other details">
+
+                <p id="duplicateNotice" class="notice hidden"></p>
 
                 <button type="submit" id="submitBtn" class="primary-btn">Save Application</button>
             </form>

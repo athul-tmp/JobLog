@@ -1,6 +1,7 @@
 const USER_API_ENDPOINT = 'https://api.joblog.athulthampan.com/api/User/login'; 
 const JOB_API_ENDPOINT = 'https://api.joblog.athulthampan.com/api/JobApplication';
 const HEALTH_API_ENDPOINT = 'https://api.joblog.athulthampan.com/api/health';
+const ALL_JOBS_API_ENDPOINT = 'https://api.joblog.athulthampan.com/api/JobApplication/all';
 
 // Theme Toggle Logic
 
@@ -481,6 +482,7 @@ async function scrapeAndFillForm() {
     const statusMessage = document.getElementById('statusMessage');
     setStatusAlert(statusMessage, 'info', 'Reading the job page...');
     document.getElementById('jobFormContainer').classList.add('hidden');
+    document.getElementById('duplicateNotice').classList.add('hidden');
 
     try {
         const jobData = await scrapeActiveTabJob();
@@ -488,6 +490,7 @@ async function scrapeAndFillForm() {
         if (jobData && jobData.jobTitle) {
             fillFormFromJobData(jobData);
             setStatusAlert(statusMessage, 'info', 'Check the details, then save.');
+            checkForDuplicate(jobData);
         } else {
             setStatusAlert(statusMessage, 'error', "Couldn't find job details on this page. Enter them below.");
             document.getElementById('jobFormContainer').classList.remove('hidden');
@@ -500,6 +503,60 @@ async function scrapeAndFillForm() {
     }
 }
 
+// Reduces a job posting URL to a stable key, so the same job matches across search and detail pages
+function jobKey(url) {
+    try {
+        const parsed = new URL(url);
+        const host = parsed.hostname;
+        let id = null;
+
+        if (host.includes('linkedin.')) {
+            id = parsed.pathname.match(/\/jobs\/view\/(?:[^/]*-)?(\d+)/)?.[1] || parsed.searchParams.get('currentJobId');
+        } else if (host.includes('seek.')) {
+            id = parsed.pathname.match(/\/job\/(\d+)/)?.[1] || parsed.searchParams.get('jobId');
+        } else if (host.includes('indeed.')) {
+            id = parsed.searchParams.get('jk') || parsed.searchParams.get('vjk');
+        }
+
+        if (id) {
+            return `${host.replace(/^www\./, '').split('.')[0]}:${id}`;
+        }
+        return (host.replace(/^www\./, '') + parsed.pathname.replace(/\/$/, '')).toLowerCase();
+    } catch {
+        return null;
+    }
+}
+
+// Warns (without blocking) when this job looks like one that's already been added
+async function checkForDuplicate(jobData) {
+    const notice = document.getElementById('duplicateNotice');
+
+    try {
+        const { jwtToken } = await chrome.storage.local.get('jwtToken');
+        if (!jwtToken) return;
+
+        const response = await fetch(ALL_JOBS_API_ENDPOINT, {
+            headers: { 'Authorization': `Bearer ${jwtToken}` }
+        });
+        await storeRefreshedToken(response);
+        if (!response.ok) return;
+
+        const applications = await response.json();
+        const key = jobData.jobURL ? jobKey(jobData.jobURL) : null;
+        const sameText = (a, b) => (a || '').trim().toLowerCase() === (b || '').trim().toLowerCase();
+
+        const match = applications.find(app => key && app.jobPostingURL && jobKey(app.jobPostingURL) === key)
+            || applications.find(app => jobData.companyName && sameText(app.company, jobData.companyName) && sameText(app.role, jobData.jobTitle));
+
+        if (match) {
+            const date = new Date(match.dateApplied).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+            notice.textContent = `You already added ${match.role} at ${match.company} on ${date} (${match.status}).`;
+            notice.classList.remove('hidden');
+        }
+    } catch (error) {
+        // The check is only a convenience, so saving still works if it fails
+    }
+}
 
 function submitJobForm() {
     const statusMessage = document.getElementById('statusMessage');

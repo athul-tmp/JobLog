@@ -15,35 +15,49 @@ public class DemoService : IDemoService
 
   // Seed applications for every demo account. Dates are relative to "now" so the dashboard
   // always looks current: AppliedDaysAgo, then each later stage as days after applying.
+  // Source picks the job board used for the (placeholder) job posting URL.
   private record SeedStage(string Status, int DaysAfterApplied);
-  private record SeedApplication(string Company, string Role, int AppliedDaysAgo, params SeedStage[] Stages);
+  private record SeedApplication(string Company, string Role, int AppliedDaysAgo, string Source, params SeedStage[] Stages);
 
   private static readonly SeedApplication[] SeedApplications =
   {
-    new("Tesla", "Firmware Engineer", 50, new SeedStage("Ghosted", 30)),
-    new("Amazon", "Cloud Solutions", 45,
+    new("Tesla", "Firmware Engineer", 50, "company", new SeedStage("Ghosted", 30)),
+    new("Amazon", "Cloud Solutions", 45, "linkedin",
         new SeedStage("Screening Interview", 3), new SeedStage("Mid-stage Interview", 7),
         new SeedStage("Final Interview", 12), new SeedStage("Offer", 18)),
-    new("Netflix", "UI Designer", 40, new SeedStage("Rejected", 3)),
-    new("Meta", "Product Manager", 35, new SeedStage("Screening Interview", 4), new SeedStage("Ghosted", 20)),
-    new("Microsoft", "Frontend Dev", 30,
+    new("Netflix", "UI Designer", 40, "linkedin", new SeedStage("Rejected", 3)),
+    new("Meta", "Product Manager", 35, "seek", new SeedStage("Screening Interview", 4), new SeedStage("Ghosted", 20)),
+    new("Microsoft", "Frontend Dev", 30, "linkedin",
         new SeedStage("Screening Interview", 4), new SeedStage("Mid-stage Interview", 8), new SeedStage("Final Interview", 13)),
-    new("Airbnb", "Backend Lead", 28,
+    new("Airbnb", "Backend Lead", 28, "seek",
         new SeedStage("Screening Interview", 5), new SeedStage("Mid-stage Interview", 9), new SeedStage("Rejected", 14)),
-    new("Stripe", "Fullstack Engineer", 21, new SeedStage("Screening Interview", 4), new SeedStage("Mid-stage Interview", 10)),
-    new("Apple", "iOS Developer", 12, new SeedStage("Screening Interview", 5)),
-    new("Uber", "Data Scientist", 6),
-    new("Google", "Software Engineer", 2),
+    new("Stripe", "Fullstack Engineer", 21, "company", new SeedStage("Screening Interview", 4), new SeedStage("Mid-stage Interview", 10)),
+    new("Apple", "iOS Developer", 12, "indeed", new SeedStage("Screening Interview", 5)),
+    new("Uber", "Data Scientist", 6, "linkedin"),
+    new("Google", "Software Engineer", 2, "seek"),
+
+    // No reply for over a month, so they show up under "Needs attention"
+    new("Notion", "Product Engineer", 41, "linkedin"),
+    new("Figma", "Design Engineer", 34, "indeed"),
 
     // Recent applications, several per day, so the daily trend chart has some shape
-    new("Slack", "Platform Engineer", 8),
-    new("Dropbox", "Backend Engineer", 5),
-    new("Atlassian", "Software Engineer", 3),
-    new("Canva", "Frontend Engineer", 3),
-    new("Spotify", "Data Engineer", 3),
-    new("Shopify", "Fullstack Developer", 1),
-    new("Adobe", "UX Engineer", 0),
-    new("Salesforce", "Cloud Engineer", 0),
+    new("Slack", "Platform Engineer", 8, "linkedin"),
+    new("Dropbox", "Backend Engineer", 5, "seek"),
+    new("Atlassian", "Software Engineer", 3, "seek"),
+    new("Canva", "Frontend Engineer", 3, "linkedin"),
+    new("Spotify", "Data Engineer", 3, "indeed"),
+    new("Shopify", "Fullstack Developer", 1, "linkedin"),
+    new("Adobe", "UX Engineer", 0, "company"),
+    new("Salesforce", "Cloud Engineer", 0, "seek"),
+  };
+
+  // Placeholder posting URLs on the right job board (company sites use example.com)
+  private static string SeedUrl(SeedApplication seed, int applicationNo) => seed.Source switch
+  {
+    "linkedin" => $"https://www.linkedin.com/jobs/view/{4000000000L + applicationNo}",
+    "seek" => $"https://www.seek.com.au/job/{80000000 + applicationNo}",
+    "indeed" => $"https://au.indeed.com/viewjob?jk=demo{applicationNo:D4}",
+    _ => $"https://{seed.Company.ToLowerInvariant()}.example.com/careers/{applicationNo}",
   };
 
   public static int SeedApplicationCount => SeedApplications.Length;
@@ -84,6 +98,7 @@ public class DemoService : IDemoService
         Company = seed.Company,
         Role = seed.Role,
         Status = seed.Stages.Length > 0 ? seed.Stages[^1].Status : "Applied",
+        JobPostingURL = SeedUrl(seed, applicationNo),
         DateApplied = appliedAt,
         ApplicationNo = applicationNo++
       };

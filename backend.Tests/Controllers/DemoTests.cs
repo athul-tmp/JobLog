@@ -84,6 +84,24 @@ public class DemoTests : IClassFixture<CustomWebApplicationFactory>
   }
 
   [Fact]
+  public async Task StartDemo_SeedsDataForEveryDashboardSection()
+  {
+    // Arrange
+    var (client, _) = await StartDemo();
+
+    // Act
+    var stats = await client.GetFromJsonAsync<DashboardAnalyticsDto>("/api/Analytics/summary");
+
+    // Assert
+    Assert.Contains(stats!.NeedsAttention, i => i.Reason == "NoReply");
+    Assert.Contains(stats.NeedsAttention, i => i.Reason == "InterviewStalled");
+    Assert.True(stats.Sources.Count >= 3);
+    Assert.DoesNotContain(stats.Sources, s => s.Source == "No link");
+    Assert.NotNull(stats.ResponseTimes.MedianDaysToFirstReply);
+    Assert.Contains(stats.ApplicationFlow, l => l.From == "screening" && l.To == "midStage");
+  }
+
+  [Fact]
   public async Task DemoSessions_AreIsolatedFromEachOther()
   {
     // Arrange

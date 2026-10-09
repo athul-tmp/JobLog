@@ -67,7 +67,7 @@ export const DemoAlert = () => {
 
   return (
     <Alert className="
-      mb-6 bg-blue-100 border-blue-500 text-blue-700 
+      mb-6 bg-blue-50 border-blue-200 text-blue-700
       dark:bg-blue-950/40 dark:text-blue-300 dark:border-blue-600
       flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-4 p-4
     ">

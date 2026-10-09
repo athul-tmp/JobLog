@@ -550,7 +550,7 @@ async function checkForDuplicate(jobData) {
 
         if (match) {
             const date = new Date(match.dateApplied).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-            notice.textContent = `You already added ${match.role} at ${match.company} on ${date} (${match.status}).`;
+            notice.textContent = `You already added this job on ${date} (${match.status}).`;
             notice.classList.remove('hidden');
         }
     } catch (error) {

@@ -59,12 +59,7 @@ export interface UpdateJobApplicationRequest {
   status?: string; 
 }
 
-// Dashbooard page
-export interface InterviewBreakdown {
-  type: string;
-  count: number;
-}
-
+// Dashboard page
 export interface MonthlyApplications {
   monthYear: string;
   count: number;
@@ -75,6 +70,36 @@ export interface ApplicationsPerDay {
   count: number;
 }
 
+export interface FlowLink {
+  from: string;
+  to: string;
+  count: number;
+}
+
+export interface AttentionItem {
+  id: number;
+  applicationNo: number;
+  company: string;
+  role: string;
+  status: string;
+  reason: 'NoReply' | 'InterviewStalled';
+  daysSinceUpdate: number;
+  jobPostingURL: string | null;
+}
+
+export interface SourceBreakdown {
+  source: string;
+  applications: number;
+  interviews: number;
+}
+
+export interface ResponseTimes {
+  medianDaysToFirstReply: number | null;
+  repliesCounted: number;
+  medianDaysToFirstInterview: number | null;
+  interviewsCounted: number;
+}
+
 export interface DashboardAnalytics {
   totalApplications: number;
   totalOffers: number;
@@ -82,17 +107,13 @@ export interface DashboardAnalytics {
   totalPending: number;
   totalInterviews: number;
   totalGhosted: number;
-  totalPastInterviews: number;
-  
-  interviewedAndRejected: number;
-  interviewedAndGhosted: number;
-
-  interviewedApplications: number;
-  offersAfterInterview: number;
   previousMonthToDateCount: number;
+  previousMonthToDateDays: number;
 
-  historicalInterviewBreakdown: InterviewBreakdown[];
-  interviewTypeBreakdown: InterviewBreakdown[];
   monthlyTrend: MonthlyApplications[];
   applicationsPerDay: ApplicationsPerDay[];
+  applicationFlow: FlowLink[];
+  needsAttention: AttentionItem[];
+  sources: SourceBreakdown[];
+  responseTimes: ResponseTimes;
 }

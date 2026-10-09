@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { JobApplication, UpdateJobApplicationRequest } from "@/types/types";
 import { format } from "date-fns";
-import { Search, ListFilter, RotateCcw, Link as LinkIcon, ChevronsRight, ChevronsLeft, MoreHorizontal, Eye, Trash2 } from "lucide-react";
+import { Search, ListFilter, RotateCcw, Link as LinkIcon, ChevronsRight, ChevronsLeft, MoreHorizontal, Eye, Trash2, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -100,32 +100,44 @@ const JobCard: React.FC<{ job: JobApplication, props: Omit<JobApplicationCardsPr
     const canUndo = job.statusHistory.length > 1;
 
     return (
-        <Card className="ring-1 ring-border/50 hover:ring-primary/50 transition-all cursor-pointer">
-            <CardHeader className="flex flex-row items-center justify-between p-4">
-                <div className="flex flex-col">
-                    <CardTitle className="text-lg font-bold">
+        <Card className="gap-0 py-0">
+            <CardHeader className="p-4 pb-2">
+                <CardTitle className="text-lg font-bold flex items-start gap-2">
+                    {/* Tap the name to open the details; the icon opens the job posting */}
+                    <button
+                        type="button"
+                        onClick={() => props.onOpenEditModal(job)}
+                        className="text-left hover:underline underline-offset-4 cursor-pointer"
+                    >
                         {job.company}
-                    </CardTitle>
-                    <CardDescription className="text-sm">
-                        {job.role}
-                    </CardDescription>
-                </div>
-                <Badge variant={getStatusVariant(job.status)} className="flex-shrink-0">
-                    {getDisplayStatus(job.status)}
-                </Badge>
+                    </button>
+                    {job.jobPostingURL && (
+                        <a
+                            href={job.jobPostingURL}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label={`Open the ${job.company} job posting`}
+                            className="mt-1 shrink-0 text-muted-foreground hover:text-foreground"
+                        >
+                            <ExternalLink className="h-4 w-4" />
+                        </a>
+                    )}
+                </CardTitle>
+                <CardDescription className="text-sm">
+                    {job.role}
+                </CardDescription>
             </CardHeader>
             
-            <CardContent className="space-y-3 p-4 pt-0 text-sm">
+            <CardContent className="space-y-2 px-4 pb-3 text-sm">
                 <div className="flex justify-between items-center text-muted-foreground">
                     <span># {job.applicationNo}</span>
                     <span>Applied: {format(new Date(job.dateApplied), "MMM d, yyyy")}</span>
                 </div>
-                <p className="text-foreground line-clamp-2">
-                    {job.notes || <span className="italic text-muted-foreground">No notes available.</span>}
-                </p>
+                {job.notes && <p className="text-foreground line-clamp-2">{job.notes}</p>}
             </CardContent>
 
-            <CardFooter className="flex justify-between gap-2 p-4 pt-0 border-t border-border/80">
+            {/* Status (editable) and actions; the status dropdown doubles as the status badge */}
+            <CardFooter className="mt-auto flex justify-between gap-2 px-4 py-3 border-t border-border/80">
                 
                 {/* Status update */}
                 <Select value={job.status} onValueChange={handleSelectChange}>
@@ -199,7 +211,7 @@ export const JobApplicationCards: React.FC<JobApplicationCardsProps> = (props) =
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedStatus, setSelectedStatus] = useState<string>("");
     const [currentPage, setCurrentPage] = useState(1);
-    const CARDS_PER_PAGE = 5;
+    const CARDS_PER_PAGE = 6; // even, so the two-column layout on tablets has no gaps
 
     // Filtered and Sorted Data
     const filteredApplications = useMemo(() => {
@@ -274,13 +286,13 @@ export const JobApplicationCards: React.FC<JobApplicationCardsProps> = (props) =
             </div>
             
             {/* Card Grid */}
-            <div className="grid gap-4">
+            <div className="grid gap-4 md:grid-cols-2">
                 {currentCards.length > 0 ? (
                     currentCards.map(job => (
                         <JobCard key={job.id} job={job} props={props} />
                     ))
                 ) : (
-                    <Card>
+                    <Card className="md:col-span-2">
                         <CardContent className="p-8 text-center text-muted-foreground">
                             No applications match your current search/filters.
                         </CardContent>

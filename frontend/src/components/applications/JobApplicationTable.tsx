@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { JobApplication, UpdateJobApplicationRequest } from "@/types/types";
 import { format } from "date-fns";
-import { ArrowUpDown, MoreHorizontal, Eye, Link as LinkIcon, ChevronsRight, ChevronsLeft, Search, ListFilter, RotateCcw, ArrowUp, ArrowDown, Trash2 } from "lucide-react";
+import { ArrowUpDown, MoreHorizontal, Eye, Link as LinkIcon, ChevronsRight, ChevronsLeft, Search, ListFilter, RotateCcw, ArrowUp, ArrowDown, Trash2, ExternalLink } from "lucide-react";
 
 import {
   ColumnDef,
@@ -222,10 +222,10 @@ export const columns: ColumnDef<JobApplication>[] = [
   // Application No. 
   {
     accessorKey: "applicationNo", 
-    header: "Application No.",
+    header: () => <span className="pl-2" title="Application number">#</span>,
     cell: ({ row }) => { 
         const appNo = row.getValue("applicationNo") as number;
-        return <div className="text-center font-mono text-xs font-semibold text-foreground">{appNo}</div>;
+        return <div className="pl-2 font-mono text-xs font-semibold text-foreground">{appNo}</div>;
     },
     size: 100, 
     enableHiding: false,
@@ -238,7 +238,7 @@ export const columns: ColumnDef<JobApplication>[] = [
     header: ({ column }) => {
       return (
         <Button
-          className="cursor-pointer"
+          className="-ml-3 cursor-pointer"
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
@@ -247,7 +247,36 @@ export const columns: ColumnDef<JobApplication>[] = [
         </Button>
       );
     },
-    cell: ({ row }) => <div className="font-medium">{row.getValue("company")}</div>,
+    // Click the name to open the details; the icon opens the job posting.
+    // Long names are cut to keep the table on screen; hover shows the full text.
+    cell: ({ row, table }) => {
+        const job = row.original;
+        const { onOpenEditModal } = table.options.meta as { onOpenEditModal: (job: JobApplication) => void };
+        return (
+            <div className="flex items-center gap-1.5 max-w-[200px]">
+                <button
+                    type="button"
+                    onClick={() => onOpenEditModal(job)}
+                    className="min-w-0 truncate text-left font-medium hover:underline underline-offset-4 cursor-pointer"
+                    title={job.company}
+                >
+                    {job.company}
+                </button>
+                {job.jobPostingURL && (
+                    <a
+                        href={job.jobPostingURL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={`Open the ${job.company} job posting`}
+                        title="Open job posting"
+                        className="shrink-0 text-muted-foreground hover:text-foreground"
+                    >
+                        <ExternalLink className="h-3.5 w-3.5" />
+                    </a>
+                )}
+            </div>
+        );
+    },
   },
 
   // Role/Title
@@ -256,7 +285,7 @@ export const columns: ColumnDef<JobApplication>[] = [
     header: ({ column }) => {
       return (
         <Button
-          className="cursor-pointer"
+          className="-ml-3 cursor-pointer"
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
@@ -265,7 +294,10 @@ export const columns: ColumnDef<JobApplication>[] = [
         </Button>
       );
     },
-    cell: ({ row }) => <div>{row.getValue("role")}</div>,
+    cell: ({ row }) => {
+        const role = row.getValue("role") as string;
+        return <div className="max-w-[200px] truncate" title={role}>{role}</div>;
+    },
   },
 
   // Notes 
@@ -274,12 +306,10 @@ export const columns: ColumnDef<JobApplication>[] = [
     header: "Notes",
     cell: ({ row }) => {
         const notes = row.getValue("notes") as string | null;
-        if (!notes) return <div className="text-muted-foreground italic">No notes</div>;
-        
-        // Truncate long notes for cleaner table view
-        const displayNotes = notes.length > 50 ? notes.substring(0, 50) + '...' : notes;
-        
-        return <div className="text-sm max-w-xs">{displayNotes}</div>;
+        if (!notes) return <span className="text-muted-foreground" aria-label="No notes">—</span>;
+
+        // One line that fits the column; hover shows the full text (also visible in View/Edit)
+        return <div className="text-sm max-w-[180px] truncate" title={notes}>{notes}</div>;
     },
     enableHiding: true,
   },
@@ -317,7 +347,7 @@ export const columns: ColumnDef<JobApplication>[] = [
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="justify-end w-full pr-0 cursor-pointer"
+          className="-ml-3 cursor-pointer"
         >
           Date Applied
           {renderSortIcon(column.getIsSorted())}
@@ -329,8 +359,8 @@ export const columns: ColumnDef<JobApplication>[] = [
         // Format date (e.g., May 15, 2024)
         const dateObject = new Date(date);
         return dateObject.toString() !== 'Invalid Date' 
-            ? <div className="text-right text-sm">{format(dateObject, "MMM d, yyyy")}</div>
-            : <div className="text-right text-sm text-red-500">Invalid Date</div>;
+            ? <div className="text-sm">{format(dateObject, "MMM d, yyyy")}</div>
+            : <div className="text-sm text-red-500">Invalid Date</div>;
     },
     enableHiding: true,
     sortingFn: (rowA, rowB, columnId) => {
@@ -355,6 +385,7 @@ export const columns: ColumnDef<JobApplication>[] = [
   // Actions Column
   {
     id: "actions",
+    size: 56, // just the menu button, so spare width goes to the text columns instead
     enableHiding: false,
     cell: ({ row, table }) => {
       const job = row.original;
@@ -366,13 +397,16 @@ export const columns: ColumnDef<JobApplication>[] = [
       }
       const { onUndoStatusChange, onOpenEditModal, onRequestDelete } = table.options.meta as TableMeta;
 
+      // Right-aligned so the menu sits at the table's edge rather than after a wide empty gap
       return (
-        <ActionsCell
-            job={job}
-            onUndoStatusChange={onUndoStatusChange}
-            onOpenEditModal={onOpenEditModal}
-            onRequestDelete={onRequestDelete}
-        />
+        <div className="flex justify-end pr-2">
+            <ActionsCell
+                job={job}
+                onUndoStatusChange={onUndoStatusChange}
+                onOpenEditModal={onOpenEditModal}
+                onRequestDelete={onRequestDelete}
+            />
+        </div>
       );
     },
   },

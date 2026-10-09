@@ -221,9 +221,9 @@ export default function ApplicationsPage() {
                     {/* Error Display */}
                     {dataError && <Alert variant="destructive"><AlertDescription>{dataError}</AlertDescription></Alert>}
                     
-                    {/* Job Applications Table (Shown on large screens) */}
+                    {/* Job Applications Table (1280px+, where all columns fit without sideways scrolling) */}
                     {isReady && (
-                        <Card className="ring-1 ring-primary/40 hidden lg:block">
+                        <Card className="hidden xl:block">
                             <CardContent>
                                 <div className="overflow-x-auto">
                                     {applications.length > 0 ? (
@@ -249,9 +249,9 @@ export default function ApplicationsPage() {
                         </Card>
                     )}
 
-                    {/* Job Application Cards (Shown on small/medium screens) */}
+                    {/* Job Application Cards (below 1280px) */}
                     {isReady && (
-                        <div className="lg:hidden">
+                        <div className="xl:hidden">
                             {applications.length > 0 ? (
                                 <JobApplicationCards 
                                     data={applications} 

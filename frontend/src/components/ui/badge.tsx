@@ -18,14 +18,15 @@ const badgeVariants = cva(
         outline:
           "text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
         // custom colours
+        // -700 shades where -600 is below 4.5:1 contrast with white text
         applied:
-          "border-transparent bg-yellow-600 text-primary-foreground",
+          "border-transparent bg-yellow-700 text-primary-foreground",
         offer:
-          "border-transparent bg-green-600 text-primary-foreground",
+          "border-transparent bg-green-700 text-primary-foreground",
         interview:
           "border-transparent bg-blue-600 text-primary-foreground",
         screeningInterview:
-          "border-transparent bg-orange-600 text-primary-foreground",
+          "border-transparent bg-orange-700 text-primary-foreground",
         finalInterview:
           "border-transparent bg-purple-600 text-primary-foreground",
         rejected:

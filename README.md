@@ -30,7 +30,8 @@ It is designed to provide clarity, organisation, and insights throughout the job
 ## ✨ Features <a id="features"></a>
 
 ### Application Tracking
-* **CRUD Operations:** Easily add, edit, and view all job applications.
+* **CRUD Operations:** Add, view, edit and delete job applications.
+* **Status Timeline:** Every application keeps its full status history, shown as a timeline with the days between stages.
 * **Data Organisation:** Sort by company, role, and date; search by role/company; and filter by status.
 * **UI/UX:** Dedicated views for desktop (**TanStack Table**) and mobile (**Responsive card view**).
 
@@ -62,17 +63,19 @@ It is designed to provide clarity, organisation, and insights throughout the job
 
 ### UI / UX
 * **Modern Design:** Built with **Tailwind CSS** and **shadcn/ui**.
-* **Experience:** Fully responsive design, dark/light mode themes, and a landing-page screenshot carousel.
+* **Experience:** Fully responsive design (wide charts scroll sideways on phones), dark/light mode themes, and a landing page with a screenshot carousel and feature overview.
+* **Getting Started:** New accounts see a short getting-started guide instead of empty charts.
+* **Accessibility:** Status badges meet WCAG AA colour contrast.
 * **Cold-Start Handling:** The landing page, login page and extension ping a health endpoint on load, so the serverless backend is already waking up by the time you log in.
 
 ---
 
 ## 🧪 Testing <a id="testing"></a>
 
-The backend is covered by a suite of **94 automated tests** using **xUnit**, **Moq**, and the **EF Core In-Memory Provider**.
+The backend is covered by a suite of **96 automated tests** using **xUnit**, **Moq**, and the **EF Core In-Memory Provider**.
 
-* **Unit Tests (47):** Cover core business logic across services, including status transition rules, JWT token generation, analytics calculations, and authentication logic, using mocked dependencies for full isolation.
-* **Integration Tests (47):** Use `WebApplicationFactory` to exercise the full HTTP pipeline, including routing, JWT authentication, and controller behaviour, against a real (in-memory) database. Includes security tests for the demo account guard, input validation, rate limiting, session renewal and session revocation, plus per-visitor demo isolation and cleanup.
+* **Unit Tests (48):** Cover core business logic across services, including status transition rules, JWT token generation, analytics calculations, and authentication logic, using mocked dependencies for full isolation.
+* **Integration Tests (48):** Use `WebApplicationFactory` to exercise the full HTTP pipeline, including routing, JWT authentication, and controller behaviour, against a real (in-memory) database. Includes security tests for the demo account guard, input validation, rate limiting, session renewal and session revocation, plus per-visitor demo isolation and cleanup.
 * **CI Pipeline:** Tests run automatically on every push via **GitHub Actions**, and gate production deployment. A failing test blocks the release.
 
 Run the full suite locally:
@@ -164,7 +167,7 @@ The extension popup, demonstrating successful data capture and theme responsiven
 | **Authentication** | `JWT` (HttpOnly Cookies), `BCrypt` | Sliding 30-day sessions with token-version revocation and secure password hashing. |
 | **Email** | `Brevo` | Transactional email API for user verification and password reset flows. |
 | **Extension** | `HTML`, `CSS`, `Vanilla JavaScript` | Browser-specific APIs (chrome.scripting, chrome.storage). |
-| **Testing** | `xUnit, Moq, EF Core InMemory` | 94 tests (unit and integration), CI gated deployment. |
+| **Testing** | `xUnit, Moq, EF Core InMemory` | 96 tests (unit and integration), CI gated deployment. |
 
 ---
 

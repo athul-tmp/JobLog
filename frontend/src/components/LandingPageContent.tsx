@@ -11,7 +11,8 @@ import { ScreenshotCarousel } from "@/components/ScreenshotCarousel";
 import { toast } from "sonner";
 import { WakingUpMessage } from "@/components/LoadingScreen";
 
-const CHROME_EXTENSION_URL = "https://chromewebstore.google.com/detail/mbbminokbdldbonjhceefnjncgadogcj?utm_source=item-share-cb";
+import { CHROME_EXTENSION_URL } from "@/lib/links";
+import LandingFeatures from "@/components/landing/LandingFeatures";
 
 export default function LandingPageContent() {
   const { isAuthenticated, authLoading, startDemo } = useAuth();
@@ -48,7 +49,7 @@ export default function LandingPageContent() {
           <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 items-center text-left">
               
               {/* Left Column: Text */}
-              <div className="space-y-6 mx-auto md:order-1 order-2 md:text-left text-center">
+              <div className="space-y-6 mx-auto md:text-left text-center">
                   <h1 className="text-5xl md:text-6xl font-extrabold tracking-tighter text-foreground leading-tight">
                       Stay Organised
                       <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-pink-500 block">
@@ -101,10 +102,37 @@ export default function LandingPageContent() {
               </div>
 
               {/* Right Column: Images */}
-              <div className="w-full md:order-2 order-1">
+              <div className="w-full">
                   <ScreenshotCarousel />
               </div>
 
+          </div>
+        </section>
+
+        <LandingFeatures />
+
+        {/* Final call to action */}
+        <section className="border-t bg-muted/30">
+          <div className="container mx-auto max-w-3xl px-6 py-16 text-center">
+            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">Ready to get organised?</h2>
+            <p className="mt-3 text-muted-foreground">Create a free account, or explore a private demo with sample data first.</p>
+            <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4">
+              <Link href="/register" passHref>
+                <Button size="lg" className="h-12 text-lg px-8 shadow-lg cursor-pointer w-full sm:w-auto">
+                  Get Started
+                </Button>
+              </Link>
+              <Button
+                size="lg"
+                variant="outline"
+                className="h-12 text-lg px-8 border-border cursor-pointer"
+                onClick={handleDemoLogin}
+                disabled={authLoading}
+              >
+                {authLoading ? "Starting Demo..." : "Try Demo"}
+                <ArrowUpRight className="ml-2 h-5 w-5" />
+              </Button>
+            </div>
           </div>
         </section>
       </main>

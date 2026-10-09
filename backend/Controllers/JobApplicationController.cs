@@ -161,6 +161,31 @@ public class JobApplicationController : ControllerBase
     }
   }
 
+  // Delete one job application | Route: DELETE /api/JobApplication/{id}
+  [HttpDelete("{id:int}")]
+  public async Task<IActionResult> DeleteApplication(int id)
+  {
+    try
+    {
+      var userId = GetUserId();
+      await _jobApplicationService.DeleteApplication(id, userId);
+
+      return Ok(new { message = "Job application deleted." });
+    }
+    catch (KeyNotFoundException)
+    {
+      return NotFound(new { message = "Job Application not found or access denied." });
+    }
+    catch (UnauthorizedAccessException ex)
+    {
+      return Unauthorized(new { message = ex.Message });
+    }
+    catch (Exception)
+    {
+      return StatusCode(500, new { message = "An error occurred while deleting the application." });
+    }
+  }
+
   // Mark long-unanswered applications as Ghosted | Route: POST /api/JobApplication/mark-unanswered-ghosted
   [HttpPost("mark-unanswered-ghosted")]
   public async Task<IActionResult> MarkUnansweredAsGhosted()

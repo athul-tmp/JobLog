@@ -12,7 +12,7 @@ export function DashboardNavigation({ currentPath }: { currentPath: string }) {
     const activeTab = currentPath.includes('applications') ? 'applications' : 'dashboard';
 
     return (
-        <div className="flex justify-center my-8 px-2 sm:px-0">
+        <div className="flex justify-center mb-6 px-2 sm:px-0">
             <Tabs value={activeTab} onValueChange={navigate}>
                 <TabsList
                 className="

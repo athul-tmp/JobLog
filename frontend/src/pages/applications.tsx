@@ -21,6 +21,11 @@ import { JobApplicationTable } from "@/components/applications/JobApplicationTab
 import { toast } from "sonner";
 import { DemoAlert } from "@/components/DemoAlert";
 import { JobApplicationCards } from "@/components/applications/JobApplicationCards";
+import { Button } from "@/components/ui/button";
+import {
+    AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription,
+    AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 // Sorting logic
 const sortApplications = (applications: JobApplication[]): JobApplication[] => {
@@ -130,14 +135,18 @@ function useApplicationData() {
         }
     }, [handleJobUpdated]);
 
-    return { applications, isLoading, error, handleJobAdded, handleJobUpdated, handleUndoStatusChange, fetchApplications };
+    const handleJobDeleted = useCallback((jobId: number) => {
+        setApplications(prev => prev.filter(job => job.id !== jobId));
+    }, []);
+
+    return { applications, isLoading, error, handleJobAdded, handleJobUpdated, handleJobDeleted, handleUndoStatusChange, fetchApplications };
 }
 
 
 export default function ApplicationsPage() {
     const { isAuthenticated, authLoading } = useAuth();
     const router = useRouter();
-    const { applications, isLoading: isDataLoading, error: dataError, handleJobAdded,handleJobUpdated, handleUndoStatusChange } = useApplicationData();
+    const { applications, isLoading: isDataLoading, error: dataError, handleJobAdded, handleJobUpdated, handleJobDeleted, handleUndoStatusChange } = useApplicationData();
 
     // State for managing the Edit Modal
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -152,6 +161,29 @@ export default function ApplicationsPage() {
         setIsEditModalOpen(false);
         setSelectedJobToEdit(null);
     }, []);
+
+    // Delete confirmation
+    const [jobPendingDelete, setJobPendingDelete] = useState<JobApplication | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
+
+    const confirmDelete = async () => {
+        if (!jobPendingDelete) return;
+        setIsDeleting(true);
+        try {
+            await JobApplicationService.deleteJobApplication(jobPendingDelete.id);
+            handleJobDeleted(jobPendingDelete.id);
+            toast.success("Application deleted", {
+                description: `${jobPendingDelete.company} · ${jobPendingDelete.role}`,
+            });
+            setJobPendingDelete(null);
+        } catch (error) {
+            toast.error("Delete failed", {
+                description: typeof error === 'string' ? error : "Could not delete the application.",
+            });
+        } finally {
+            setIsDeleting(false);
+        }
+    };
 
     // Redirect if not authenticated
     useEffect(() => {
@@ -189,9 +221,9 @@ export default function ApplicationsPage() {
                     {/* Error Display */}
                     {dataError && <Alert variant="destructive"><AlertDescription>{dataError}</AlertDescription></Alert>}
                     
-                    {/* Job Applications Table (Shown on large screens) */}
+                    {/* Job Applications Table (1280px+, where all columns fit without sideways scrolling) */}
                     {isReady && (
-                        <Card className="ring-1 ring-primary/40 hidden lg:block">
+                        <Card className="hidden xl:block">
                             <CardContent>
                                 <div className="overflow-x-auto">
                                     {applications.length > 0 ? (
@@ -200,6 +232,7 @@ export default function ApplicationsPage() {
                                             onJobUpdated={handleJobUpdated} 
                                             onUndoStatusChange={handleUndoStatusChange}
                                             onOpenEditModal={handleOpenEditModal} 
+                                            onRequestDelete={setJobPendingDelete}
                                         />
                                         
                                     ) : (
@@ -216,18 +249,19 @@ export default function ApplicationsPage() {
                         </Card>
                     )}
 
-                    {/* Job Application Cards (Shown on small/medium screens) */}
+                    {/* Job Application Cards (below 1280px) */}
                     {isReady && (
-                        <div className="lg:hidden">
+                        <div className="xl:hidden">
                             {applications.length > 0 ? (
                                 <JobApplicationCards 
                                     data={applications} 
                                     onJobUpdated={handleJobUpdated} 
                                     onUndoStatusChange={handleUndoStatusChange}
                                     onOpenEditModal={handleOpenEditModal} 
+                                    onRequestDelete={setJobPendingDelete}
                                 />
                             ) : (
-                                <Card className="ring-1 ring-primary/40">
+                                <Card>
                                     <CardContent className="p-10 flex flex-col items-center justify-center">
                                         <Search className="w-8 h-8 text-muted-foreground mx-auto mb-4"/>
                                         <h3 className="text-lg font-semibold text-foreground">No Applications Found</h3>
@@ -252,6 +286,23 @@ export default function ApplicationsPage() {
                     onJobUpdated={handleJobUpdated}
                 />
             )}
+
+            <AlertDialog open={jobPendingDelete !== null} onOpenChange={open => { if (!open && !isDeleting) setJobPendingDelete(null); }}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Delete this application?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            {jobPendingDelete && <><strong>{jobPendingDelete.company}</strong> · {jobPendingDelete.role} and its status history will be permanently deleted. This can&apos;t be undone.</>}
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+                        <Button variant="destructive" onClick={confirmDelete} disabled={isDeleting} className="cursor-pointer">
+                            {isDeleting ? 'Deleting...' : 'Delete'}
+                        </Button>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </>
     );
 }

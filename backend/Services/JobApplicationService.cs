@@ -13,6 +13,7 @@ public interface IJobApplicationService
   Task DeleteAllUserApplications(int userId, string currentPassword);
   Task<JobApplication> UndoLastStatusChange(int applicationId, int userId);
   Task<int> MarkUnansweredAsGhosted(int userId);
+  Task DeleteApplication(int applicationId, int userId);
 }
 
 public class JobApplicationService : IJobApplicationService
@@ -31,6 +32,21 @@ public class JobApplicationService : IJobApplicationService
   public JobApplicationService(ApplicationDbContext dbContext)
   {
     _dbContext = dbContext;
+  }
+
+  // Delete a single application (and its status history) belonging to the user
+  public async Task DeleteApplication(int applicationId, int userId)
+  {
+    var application = await GetApplicationById(applicationId, userId);
+
+    if (application == null)
+    {
+      throw new KeyNotFoundException("Job Application not found or does not belong to user.");
+    }
+
+    _dbContext.JobStatusHistories.RemoveRange(application.StatusHistory);
+    _dbContext.JobApplications.Remove(application);
+    await _dbContext.SaveChangesAsync();
   }
 
   // Marks every application still at "Applied" with no reply for AnalyticsService.NoReplyDays+ days as Ghosted

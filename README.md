@@ -32,6 +32,7 @@ It is designed to provide clarity, organisation, and insights throughout the job
 ### Application Tracking
 * **CRUD Operations:** Add, view, edit and delete job applications.
 * **Status Timeline:** Every application keeps its full status history, shown as a timeline with the days between stages.
+* **Duplicate Warning:** Adding a job you've already added (same posting link or same company and role) shows a warning before saving, in the web app and the extension.
 * **Data Organisation:** Sort by company, role, and date; search by role/company; and filter by status.
 * **UI/UX:** Dedicated views for desktop (**TanStack Table**) and mobile (**Responsive card view**).
 

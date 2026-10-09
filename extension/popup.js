@@ -504,6 +504,7 @@ async function scrapeAndFillForm() {
 }
 
 // Reduces a job posting URL to a stable key, so the same job matches across search and detail pages
+// Keep in sync with jobKey() in frontend/src/lib/duplicates.ts
 function jobKey(url) {
     try {
         const parsed = new URL(url);
@@ -550,7 +551,7 @@ async function checkForDuplicate(jobData) {
 
         if (match) {
             const date = new Date(match.dateApplied).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-            notice.textContent = `You already added ${match.role} at ${match.company} on ${date} (${match.status}).`;
+            notice.textContent = `You already added this job on ${date} (${match.status}).`;
             notice.classList.remove('hidden');
         }
     } catch (error) {

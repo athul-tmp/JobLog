@@ -177,9 +177,15 @@ export default function SankeyChart({ data }: SankeyChartProps) {
         },
     };
 
+    // Five columns need room for their labels: on narrow screens keep a readable width and scroll sideways
     return (
-        <div className="relative w-full h-[400px]">
-            <Chart type="sankey" data={chartData} options={options} />
-        </div>
+        <>
+            <div className="w-full overflow-x-auto">
+                <div className="relative h-[400px] min-w-[760px]">
+                    <Chart type="sankey" data={chartData} options={options} />
+                </div>
+            </div>
+            <p className="mt-2 text-xs text-muted-foreground text-center md:hidden">Swipe sideways to see the whole flow.</p>
+        </>
     );
 }

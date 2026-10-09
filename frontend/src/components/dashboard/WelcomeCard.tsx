@@ -34,7 +34,7 @@ export default function WelcomeCard() {
                 <ol className="grid gap-4 sm:grid-cols-3 mt-6">
                     {STEPS.map((step, index) => (
                         <li key={step.title} className="rounded-lg border p-4">
-                            <div className="flex items-center gap-2 text-primary">
+                            <div className="flex items-center gap-2 text-primary dark:text-purple-400">
                                 <step.icon className="h-5 w-5" />
                                 <span className="text-xs font-semibold uppercase tracking-wide">Step {index + 1}</span>
                             </div>

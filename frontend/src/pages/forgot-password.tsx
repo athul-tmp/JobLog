@@ -135,7 +135,7 @@ export default function ForgotPasswordPage() {
                                     )}
                                 </Button>
                                 <div className="text-sm text-center text-muted-foreground">
-                                    <Link href="/login" className="font-semibold text-primary hover:underline">
+                                    <Link href="/login" className="font-semibold text-primary dark:text-purple-400 hover:underline">
                                         Return to Login
                                     </Link>
                                 </div>

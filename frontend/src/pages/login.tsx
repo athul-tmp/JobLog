@@ -127,7 +127,7 @@ export default function LoginPage() {
                                 <div className="flex justify-between items-center">
                                     <Link 
                                         href="/forgot-password" 
-                                        className="text-sm font-medium text-primary hover:underline"
+                                        className="text-sm font-medium text-primary dark:text-purple-400 hover:underline"
                                     >
                                         Forgot Password?
                                     </Link>
@@ -141,7 +141,7 @@ export default function LoginPage() {
                             <WakingUpMessage isActive={authLoading} />
                             <div className="text-sm text-center text-muted-foreground">
                                 Don&apos;t have an account?{" "}
-                                <Link href="/register" className="font-semibold text-primary hover:underline">
+                                <Link href="/register" className="font-semibold text-primary dark:text-purple-400 hover:underline">
                                     Sign Up
                                 </Link>
                             </div>

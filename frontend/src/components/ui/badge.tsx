@@ -17,22 +17,22 @@ const badgeVariants = cva(
           "border-transparent bg-destructive text-white [a&]:hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
         outline:
           "text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
-        // custom colours
-        // -700 shades where -600 is below 4.5:1 contrast with white text
+        // status colours: tinted with coloured text in light mode, filled in dark mode (both meet WCAG AA contrast)
+        // dark fills use -700 shades where -600 is below 4.5:1 contrast with white text
         applied:
-          "border-transparent bg-yellow-700 text-primary-foreground",
+          "border-amber-200 bg-amber-100 text-amber-800 dark:border-transparent dark:bg-yellow-700 dark:text-primary-foreground",
         offer:
-          "border-transparent bg-green-700 text-primary-foreground",
+          "border-green-200 bg-green-100 text-green-800 dark:border-transparent dark:bg-green-700 dark:text-primary-foreground",
         interview:
-          "border-transparent bg-blue-600 text-primary-foreground",
+          "border-blue-200 bg-blue-100 text-blue-800 dark:border-transparent dark:bg-blue-600 dark:text-primary-foreground",
         screeningInterview:
-          "border-transparent bg-orange-700 text-primary-foreground",
+          "border-orange-200 bg-orange-100 text-orange-800 dark:border-transparent dark:bg-orange-700 dark:text-primary-foreground",
         finalInterview:
-          "border-transparent bg-purple-600 text-primary-foreground",
+          "border-purple-200 bg-purple-100 text-purple-800 dark:border-transparent dark:bg-purple-600 dark:text-primary-foreground",
         rejected:
-          "border-transparent bg-red-600 text-primary-foreground",
+          "border-red-200 bg-red-100 text-red-800 dark:border-transparent dark:bg-red-600 dark:text-primary-foreground",
         ghosted:
-          "border-transparent bg-gray-600 text-primary-foreground",
+          "border-gray-200 bg-gray-100 text-gray-700 dark:border-transparent dark:bg-gray-600 dark:text-primary-foreground",
       },
     },
     defaultVariants: {

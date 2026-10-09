@@ -179,11 +179,11 @@ export default function ResetPasswordPage() {
                                 )}
                                 <div className="text-sm text-center text-muted-foreground">
                                     {resetSuccess ? (
-                                        <Link href="/login" className="font-semibold text-primary hover:underline">
+                                        <Link href="/login" className="font-semibold text-primary dark:text-purple-400 hover:underline">
                                             Proceed to Login
                                         </Link>
                                     ) : (
-                                        <Link href="/login" className="font-semibold text-primary hover:underline">
+                                        <Link href="/login" className="font-semibold text-primary dark:text-purple-400 hover:underline">
                                             Return to Login
                                         </Link>
                                     )}

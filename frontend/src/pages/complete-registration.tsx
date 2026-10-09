@@ -130,7 +130,7 @@ export default function CompleteRegistrationPage() {
                                 {error}
                             </p>
                             <p className="mt-4 text-sm text-muted-foreground text-center">
-                                Please check your email again or restart the registration process from the <Link href="/register" className="font-semibold text-primary hover:underline">register page</Link>.
+                                Please check your email again or restart the registration process from the <Link href="/register" className="font-semibold text-primary dark:text-purple-400 hover:underline">register page</Link>.
                             </p>
                         </CardContent>
                     </Card>

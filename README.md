@@ -305,7 +305,11 @@ If you wish to test the browser extension locally:
 ---
 ## 📃 License <a id="license"></a>
 
-This project is licensed under the [MIT License](./LICENSE).
+Copyright (c) 2025–2026 Athul Thampan.
+
+This project is licensed under the [GNU Affero General Public License v3.0](./LICENSE) (AGPL-3.0). You're free to use, study and modify the code; if you run a modified version as a network service, you must make its source code available to its users under the same license.
+
+Versions up to and including v1.8.0 were published under the MIT License.
 
 ---
 

@@ -1,24 +1,13 @@
 const USER_API_ENDPOINT = 'https://api.joblog.athulthampan.com/api/User/login'; 
 const JOB_API_ENDPOINT = 'https://api.joblog.athulthampan.com/api/JobApplication';
 const HEALTH_API_ENDPOINT = 'https://api.joblog.athulthampan.com/api/health';
+const ALL_JOBS_API_ENDPOINT = 'https://api.joblog.athulthampan.com/api/JobApplication/all';
 
 // Theme Toggle Logic
 
-// Initializes the theme from localStorage/system
+// Initializes the theme from localStorage, defaulting to dark like the web app
 function initializeTheme() {
-    const body = document.body;
-    const storedTheme = localStorage.getItem('joblog-theme');
-    
-    let initialTheme;
-    if (storedTheme) {
-        initialTheme = storedTheme;
-    } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
-        initialTheme = 'light';
-    } else {
-        initialTheme = 'dark';
-    }
-
-    setTheme(initialTheme);
+    setTheme(localStorage.getItem('joblog-theme') || 'dark');
 }
 
 // Sets the theme
@@ -52,11 +41,13 @@ initializeTheme();
 
 // Helper Functions
 
-// Helper function to set status
+// Helper function to set a status line (type: info, error or success)
 function setStatusAlert(element, type, message) {
     element.textContent = message;
-    element.classList.remove('hidden', 'alert-error', 'alert-success', 'alert-info');
-    element.classList.add('alert', `alert-${type}`);
+    element.classList.remove('hidden', 'status-error', 'status-success');
+    if (type !== 'info') {
+        element.classList.add(`status-${type}`);
+    }
 }
 
 // Helper function to show/hide validation errors
@@ -110,7 +101,7 @@ async function warmUpBackend() {
 }
 
 function scheduleWakingUpMessage(element) {
-    return setTimeout(() => setStatusAlert(element, 'info', 'Waking up the server...'), 3500);
+    return setTimeout(() => setStatusAlert(element, 'info', 'Waking up the server, this can take a few seconds...'), 3500);
 }
 
 // Function to check authorisation and render adding data
@@ -126,10 +117,9 @@ async function checkAuthAndRender() {
     
     headerLogoutBtn.classList.toggle('hidden', !isLoggedIn);
     
-    loginStatus.classList.add('hidden'); 
-
     if (isLoggedIn) {
-        setStatusAlert(statusMessage, 'info', 'Ready to add.');
+        loginStatus.classList.add('hidden');
+        statusMessage.textContent = '';
     }
 }
 
@@ -180,17 +170,16 @@ async function handleLogin(e) {
         if (response.ok) {
             if (data.token) {
                 await chrome.storage.local.set({ jwtToken: data.token });
-                setStatusAlert(loginStatus, 'success', 'Login successful!');
                 await checkAuthAndRender();
                 await scrapeAndFillForm();
             } else {
-                setStatusAlert(loginStatus, 'error', 'Login failed. Server did not return a token. (Check C# API)');
+                setStatusAlert(loginStatus, 'error', 'Something went wrong while logging in. Please try again.');
             }
         } else {
-            setStatusAlert(loginStatus, 'error', data.message || 'Login failed: Invalid email or password.');
+            setStatusAlert(loginStatus, 'error', data.message || 'Invalid email or password.');
         }
     } catch (error) {
-        setStatusAlert(loginStatus, 'error', 'Could not reach JobLog. The server may still be starting up.');
+        setStatusAlert(loginStatus, 'error', "Couldn't reach JobLog. Please try again in a moment.");
         console.error('Login fetch error:', error);
     } finally {
         clearTimeout(cancelWakingUp);
@@ -200,22 +189,21 @@ async function handleLogin(e) {
 }
 
 // Function to handle log out
-async function handleLogout() {
+async function handleLogout(message = "You've been logged out.") {
     await chrome.storage.local.remove('jwtToken');
-    const loginStatus = document.getElementById('loginStatus');
-    setStatusAlert(loginStatus, 'info', 'Logged out.');
-    checkAuthAndRender();
+    await checkAuthAndRender();
+    setStatusAlert(document.getElementById('loginStatus'), 'info', message);
 }
 
 // Function to prepare and send data to backend
 async function sendToBackend(jobData) {
     const statusMessage = document.getElementById('statusMessage');
     const submitBtn = document.getElementById('submitBtn');
-    const initiateBtn = document.getElementById('initiateBtn');
     const jobFormContainer = document.getElementById('jobFormContainer');
     const finalStatus = 'Applied';
 
     submitBtn.disabled = true;
+    submitBtn.textContent = 'Saving...';
 
     const cancelWakingUp = scheduleWakingUpMessage(statusMessage);
 
@@ -224,8 +212,9 @@ async function sendToBackend(jobData) {
 
     if (!jwtToken) {
         clearTimeout(cancelWakingUp);
-        setStatusAlert(statusMessage, 'error', 'Error: Not logged in. Please log in first.');
         submitBtn.disabled = false;
+        submitBtn.textContent = 'Save Application';
+        handleLogout('Please log in first.');
         return;
     }
 
@@ -251,30 +240,27 @@ async function sendToBackend(jobData) {
         await storeRefreshedToken(response);
 
         if (response.ok) {
-            setStatusAlert(statusMessage, 'success', `SUCCESS: Job '${jobData.jobTitle}' added!`);
-            
+            setStatusAlert(statusMessage, 'success', `Saved ${jobData.jobTitle} at ${jobData.companyName} to JobLog.`);
             jobFormContainer.classList.add('hidden');
-            initiateBtn.classList.add('hidden');
-            
-            submitBtn.disabled = false; 
+            document.getElementById('rescanBtn').classList.add('hidden');
 
             setTimeout(() => {
-                window.close(); 
+                window.close();
             }, 1500);
-            
+
         } else if (response.status === 401) {
-            setStatusAlert(statusMessage, 'error', 'Error: Unauthorized. Token expired/invalid.');
-            handleLogout();
+            handleLogout('Your session has expired. Please log in again.');
         } else {
-            const errorBody = await response.json().catch(() => ({ message: 'Server error.' }));
-            setStatusAlert(statusMessage, 'error', `API Error (${response.status}): ${errorBody.message.substring(0, 50)}...`);
+            const errorBody = await response.json().catch(() => ({}));
+            setStatusAlert(statusMessage, 'error', errorBody.message || "Couldn't save the application. Please try again.");
         }
     } catch (error) {
-        setStatusAlert(statusMessage, 'error', 'Could not reach JobLog. The server may still be starting up.');
+        setStatusAlert(statusMessage, 'error', "Couldn't reach JobLog. Please try again in a moment.");
     } finally {
         clearTimeout(cancelWakingUp);
-        if (!statusMessage.classList.contains('alert-success')) {
+        if (!statusMessage.classList.contains('status-success')) {
             submitBtn.disabled = false;
+            submitBtn.textContent = 'Save Application';
         }
     }
 }
@@ -386,9 +372,7 @@ async function scrapeJobFromPage() {
                     name = name.replace(/Verified$/i, '').trim();
                 }
 
-                jobData.companyName = name.length <= 1 ? 'Unknown Company' : name;
-            } else {
-                jobData.companyName = 'Unknown Company';
+                jobData.companyName = name.length <= 1 ? null : name;
             }
 
             const locationElement = document.querySelector('[data-automation="job-detail-location"]');
@@ -446,11 +430,11 @@ async function scrapeJobFromPage() {
     }
 
     function scrapeGeneric(jobData) {
-        jobData.jobTitle = document.title.split('|')[0].trim() || 'Unknown Job Title';
+        jobData.jobTitle = document.title.split('|')[0].trim() || null;
 
         if (!jobData.companyName) {
             const match = document.title.match(/ at (.*?) \|/);
-            jobData.companyName = match ? match[1].trim() : 'Unknown Company';
+            jobData.companyName = match ? match[1].trim() : null;
         }
         return jobData;
     }
@@ -496,22 +480,81 @@ function fillFormFromJobData(jobData) {
 
 async function scrapeAndFillForm() {
     const statusMessage = document.getElementById('statusMessage');
-    setStatusAlert(statusMessage, 'info', 'Searching for job details...');
+    setStatusAlert(statusMessage, 'info', 'Reading the job page...');
     document.getElementById('jobFormContainer').classList.add('hidden');
+    document.getElementById('duplicateNotice').classList.add('hidden');
 
     try {
         const jobData = await scrapeActiveTabJob();
 
-        if (jobData && jobData.jobTitle && jobData.jobTitle !== 'Unknown Job Title') {
+        if (jobData && jobData.jobTitle) {
             fillFormFromJobData(jobData);
-            setStatusAlert(statusMessage, 'info', 'Review the details, then save (Cmd/Ctrl+Shift+J).');
+            setStatusAlert(statusMessage, 'info', 'Check the details, then save.');
+            checkForDuplicate(jobData);
         } else {
-            setStatusAlert(statusMessage, 'error', 'No job details found on this page. Please enter manually.');
+            setStatusAlert(statusMessage, 'error', "Couldn't find job details on this page. Enter them below.");
             document.getElementById('jobFormContainer').classList.remove('hidden');
         }
     } catch (error) {
-        setStatusAlert(statusMessage, 'error', error instanceof Error ? error.message : 'Unexpected error occurred.');
+        // Chrome pages and the Web Store can't be read by extensions
+        setStatusAlert(statusMessage, 'error', "Can't read this page. Open a job posting, or enter the details below.");
+        document.getElementById('jobFormContainer').classList.remove('hidden');
         console.error(error);
+    }
+}
+
+// Reduces a job posting URL to a stable key, so the same job matches across search and detail pages
+function jobKey(url) {
+    try {
+        const parsed = new URL(url);
+        const host = parsed.hostname;
+        let id = null;
+
+        if (host.includes('linkedin.')) {
+            id = parsed.pathname.match(/\/jobs\/view\/(?:[^/]*-)?(\d+)/)?.[1] || parsed.searchParams.get('currentJobId');
+        } else if (host.includes('seek.')) {
+            id = parsed.pathname.match(/\/job\/(\d+)/)?.[1] || parsed.searchParams.get('jobId');
+        } else if (host.includes('indeed.')) {
+            id = parsed.searchParams.get('jk') || parsed.searchParams.get('vjk');
+        }
+
+        if (id) {
+            return `${host.replace(/^www\./, '').split('.')[0]}:${id}`;
+        }
+        return (host.replace(/^www\./, '') + parsed.pathname.replace(/\/$/, '')).toLowerCase();
+    } catch {
+        return null;
+    }
+}
+
+// Warns (without blocking) when this job looks like one that's already been added
+async function checkForDuplicate(jobData) {
+    const notice = document.getElementById('duplicateNotice');
+
+    try {
+        const { jwtToken } = await chrome.storage.local.get('jwtToken');
+        if (!jwtToken) return;
+
+        const response = await fetch(ALL_JOBS_API_ENDPOINT, {
+            headers: { 'Authorization': `Bearer ${jwtToken}` }
+        });
+        await storeRefreshedToken(response);
+        if (!response.ok) return;
+
+        const applications = await response.json();
+        const key = jobData.jobURL ? jobKey(jobData.jobURL) : null;
+        const sameText = (a, b) => (a || '').trim().toLowerCase() === (b || '').trim().toLowerCase();
+
+        const match = applications.find(app => key && app.jobPostingURL && jobKey(app.jobPostingURL) === key)
+            || applications.find(app => jobData.companyName && sameText(app.company, jobData.companyName) && sameText(app.role, jobData.jobTitle));
+
+        if (match) {
+            const date = new Date(match.dateApplied).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+            notice.textContent = `You already added ${match.role} at ${match.company} on ${date} (${match.status}).`;
+            notice.classList.remove('hidden');
+        }
+    } catch (error) {
+        // The check is only a convenience, so saving still works if it fails
     }
 }
 
@@ -521,7 +564,6 @@ function submitJobForm() {
     const submitBtn = document.getElementById('submitBtn');
 
     if (jobFormContainer.classList.contains('hidden')) {
-        setStatusAlert(statusMessage, 'error', 'Scrape a job first (Cmd/Ctrl+J).');
         return;
     }
 
@@ -542,16 +584,15 @@ function submitJobForm() {
         hasError = true;
     }
     if (!role) {
-        setInputError('roleError', 'Role/Title is required.');
+        setInputError('roleError', 'Role is required.');
         hasError = true;
     }
 
     if (hasError) {
-        setStatusAlert(statusMessage, 'error', 'Please correct the highlighted errors.');
         return;
     }
 
-    setStatusAlert(statusMessage, 'info', 'Saving data to JobLog...');
+    setStatusAlert(statusMessage, 'info', 'Saving to JobLog...');
 
     sendToBackend({
         companyName: company,
@@ -573,7 +614,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     document.addEventListener('keydown', (event) => {
-        const isSaveShortcut = (event.metaKey || event.ctrlKey) && event.shiftKey && event.key.toLowerCase() === 'j';
+        // Ctrl/Cmd+Enter saves; Ctrl/Cmd+Shift+J still works for anyone used to the old shortcut
+        const isModifier = event.metaKey || event.ctrlKey;
+        const isSaveShortcut = isModifier && (event.key === 'Enter' || (event.shiftKey && event.key.toLowerCase() === 'j'));
         if (isSaveShortcut) {
             event.preventDefault();
             submitJobForm();
@@ -586,7 +629,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     
     document.getElementById('loginForm').addEventListener('submit', handleLogin);
-    document.getElementById('header-logout-btn').addEventListener('click', handleLogout);
+    document.getElementById('header-logout-btn').addEventListener('click', () => handleLogout());
 
     const passwordInput = document.getElementById('password');
     const passwordToggleBtn = document.getElementById('password-toggle');
@@ -598,16 +641,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             passwordInput.type = 'text';
             eyeIcon.classList.add('hidden');
             eyeOffIcon.classList.remove('hidden');
-            passwordToggleBtn.title = "Hide Password";
+            passwordToggleBtn.title = "Hide password";
         } else {
             passwordInput.type = 'password';
             eyeIcon.classList.remove('hidden');
             eyeOffIcon.classList.add('hidden');
-            passwordToggleBtn.title = "Show Password";
+            passwordToggleBtn.title = "Show password";
         }
     });
 
-    document.getElementById('initiateBtn').addEventListener('click', scrapeAndFillForm);
+    document.getElementById('rescanBtn').addEventListener('click', scrapeAndFillForm);
 
     document.getElementById('jobForm').addEventListener('submit', (event) => {
         event.preventDefault();

@@ -265,4 +265,28 @@ public class JobApplicationControllerTests : IClassFixture<CustomWebApplicationF
     Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     Assert.Equal(1, body.GetProperty("updated").GetInt32());
   }
+
+  [Fact]
+  public async Task DeleteApplication_ReturnsOk_ForOwnApplication_AndNotFound_ForAnotherUsers()
+  {
+    // Arrange
+    using var scope = _factory.Services.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    var tokenService = scope.ServiceProvider.GetRequiredService<ITokenService>();
+    var (client, user) = CreateAuthenticatedClient(dbContext, tokenService);
+    var (_, otherUser) = CreateAuthenticatedClient(dbContext, tokenService);
+
+    var mine = new JobApplication { UserId = user.Id, Company = "Mine", Role = "Dev", Status = "Applied", DateApplied = DateTime.UtcNow, ApplicationNo = 1 };
+    var theirs = new JobApplication { UserId = otherUser.Id, Company = "Theirs", Role = "Dev", Status = "Applied", DateApplied = DateTime.UtcNow, ApplicationNo = 1 };
+    dbContext.JobApplications.AddRange(mine, theirs);
+    dbContext.SaveChanges();
+
+    // Act
+    var deleteMine = await client.DeleteAsync($"/api/JobApplication/{mine.Id}");
+    var deleteTheirs = await client.DeleteAsync($"/api/JobApplication/{theirs.Id}");
+
+    // Assert
+    Assert.Equal(HttpStatusCode.OK, deleteMine.StatusCode);
+    Assert.Equal(HttpStatusCode.NotFound, deleteTheirs.StatusCode);
+  }
 }

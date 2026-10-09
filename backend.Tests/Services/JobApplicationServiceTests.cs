@@ -442,4 +442,33 @@ public class JobApplicationServiceTests
     Assert.Equal("Screening Interview", interviewing.Status);
     Assert.Equal("Applied", otherUser.Status);
   }
+
+  [Fact]
+  public async Task DeleteApplication_RemovesOwnApplicationAndHistory_ButNotOthers()
+  {
+    // Arrange
+    var dbContext = CreateDbContext();
+    var mine = new JobApplication
+    {
+      UserId = 1, Company = "Mine", Role = "Dev", Status = "Applied", DateApplied = DateTime.UtcNow, ApplicationNo = 1
+    };
+    mine.StatusHistory.Add(new JobStatusHistory { JobApplicationId = 0, Status = "Applied" });
+    var theirs = new JobApplication
+    {
+      UserId = 2, Company = "Theirs", Role = "Dev", Status = "Applied", DateApplied = DateTime.UtcNow, ApplicationNo = 1
+    };
+    dbContext.JobApplications.AddRange(mine, theirs);
+    dbContext.SaveChanges();
+
+    var service = new JobApplicationService(dbContext);
+
+    // Act
+    await service.DeleteApplication(mine.Id, 1);
+
+    // Assert
+    Assert.False(dbContext.JobApplications.Any(a => a.Id == mine.Id));
+    Assert.False(dbContext.JobStatusHistories.Any(h => h.JobApplicationId == mine.Id));
+    await Assert.ThrowsAsync<KeyNotFoundException>(() => service.DeleteApplication(theirs.Id, 1));
+    Assert.True(dbContext.JobApplications.Any(a => a.Id == theirs.Id));
+  }
 }

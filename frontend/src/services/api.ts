@@ -314,6 +314,15 @@ export const JobApplicationService = {
     }
   },
   
+  // Delete a single job application
+  deleteJobApplication: async (jobId: number): Promise<void> => {
+    try {
+      await apiClient.delete(`/JobApplication/${jobId}`);
+    } catch (error) {
+      return handleApiError(error, "Failed to delete the application.");
+    }
+  },
+
   // Mark every application with no reply for 30+ days as Ghosted; returns how many were updated
   markUnansweredAsGhosted: async (): Promise<number> => {
     try {

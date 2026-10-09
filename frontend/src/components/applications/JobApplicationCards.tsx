@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { JobApplication, UpdateJobApplicationRequest } from "@/types/types";
 import { format } from "date-fns";
-import { Search, ListFilter, RotateCcw, Link as LinkIcon, ChevronsRight, ChevronsLeft, MoreHorizontal, Eye } from "lucide-react";
+import { Search, ListFilter, RotateCcw, Link as LinkIcon, ChevronsRight, ChevronsLeft, MoreHorizontal, Eye, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -55,6 +55,7 @@ interface JobApplicationCardsProps {
     onJobUpdated: (updatedJob: JobApplication) => void;
     onOpenEditModal: (job: JobApplication) => void;
     onUndoStatusChange: (jobId: number) => Promise<void>;
+    onRequestDelete: (job: JobApplication) => void;
 }
 
 // Card component for individual job application
@@ -178,6 +179,14 @@ const JobCard: React.FC<{ job: JobApplication, props: Omit<JobApplicationCardsPr
                                 </a>
                             </DropdownMenuItem>
                         )}
+
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                            onClick={() => props.onRequestDelete(job)}
+                            className="cursor-pointer text-red-600 focus:text-red-600"
+                        >
+                          <Trash2 className="w-4 h-4 mr-2"/> Delete
+                        </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
             </CardFooter>

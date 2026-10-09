@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { JobApplication, UpdateJobApplicationRequest } from "@/types/types";
 import { format } from "date-fns";
-import { ArrowUpDown, MoreHorizontal, Eye, Link as LinkIcon, ChevronsRight, ChevronsLeft, Search, ListFilter, RotateCcw, ArrowUp, ArrowDown } from "lucide-react";
+import { ArrowUpDown, MoreHorizontal, Eye, Link as LinkIcon, ChevronsRight, ChevronsLeft, Search, ListFilter, RotateCcw, ArrowUp, ArrowDown, Trash2 } from "lucide-react";
 
 import {
   ColumnDef,
@@ -82,6 +82,7 @@ interface ActionsCellProps {
     job: JobApplication;
     onUndoStatusChange: (jobId: number) => Promise<void>;
     onOpenEditModal: (job: JobApplication) => void;
+    onRequestDelete: (job: JobApplication) => void;
 }
 
 
@@ -147,7 +148,7 @@ const StatusSelectCell: React.FC<StatusSelectCellProps> = ({ job, onJobUpdated }
     );
 };
 
-const ActionsCell: React.FC<ActionsCellProps> = ({ job, onUndoStatusChange, onOpenEditModal }) => {
+const ActionsCell: React.FC<ActionsCellProps> = ({ job, onUndoStatusChange, onOpenEditModal, onRequestDelete }) => {
     const hasUrl = !!job.jobPostingURL;
     
     const handleUndo = () => {
@@ -191,6 +192,13 @@ const ActionsCell: React.FC<ActionsCellProps> = ({ job, onUndoStatusChange, onOp
                     </a>
                 </DropdownMenuItem>
             )}
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+                onClick={() => onRequestDelete(job)}
+                className="cursor-pointer text-red-600 focus:text-red-600"
+            >
+              <Trash2 className="w-4 h-4 mr-2"/> Delete
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
     );
@@ -354,14 +362,16 @@ export const columns: ColumnDef<JobApplication>[] = [
       type TableMeta = {
           onUndoStatusChange: (jobId: number) => Promise<void>;
           onOpenEditModal: (job: JobApplication) => void;
+          onRequestDelete: (job: JobApplication) => void;
       }
-      const { onUndoStatusChange, onOpenEditModal } = table.options.meta as TableMeta;
+      const { onUndoStatusChange, onOpenEditModal, onRequestDelete } = table.options.meta as TableMeta;
 
       return (
         <ActionsCell
             job={job}
             onUndoStatusChange={onUndoStatusChange}
             onOpenEditModal={onOpenEditModal}
+            onRequestDelete={onRequestDelete}
         />
       );
     },
@@ -374,9 +384,10 @@ interface JobApplicationTableProps {
     onJobUpdated: (updatedJob: JobApplication) => void; 
     onOpenEditModal: (job: JobApplication) => void; 
     onUndoStatusChange: (jobId: number) => Promise<void>;
+    onRequestDelete: (job: JobApplication) => void;
 }
 
-export function JobApplicationTable({ data, onJobUpdated, onOpenEditModal, onUndoStatusChange }: JobApplicationTableProps) {
+export function JobApplicationTable({ data, onJobUpdated, onOpenEditModal, onUndoStatusChange, onRequestDelete }: JobApplicationTableProps) {
   const [sorting, setSorting] = useState<SortingState>([{ id: 'dateApplied', desc: true }]); // Default sort by date desc
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -404,6 +415,7 @@ export function JobApplicationTable({ data, onJobUpdated, onOpenEditModal, onUnd
         onJobUpdated,
         onUndoStatusChange,
         onOpenEditModal,
+        onRequestDelete,
     },
     initialState: {
         pagination: {

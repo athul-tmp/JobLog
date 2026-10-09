@@ -139,7 +139,7 @@ export default function DashboardPage() {
                             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
                                 
                                 {/* Total Applications Card */}
-                                <Card className="ring-1 ring-primary/40">
+                                <Card>
                                     <CardHeader className="flex flex-row items-center justify-between space-y-0">
                                         <CardTitle className="text-sm sm:text-base">Total Applications</CardTitle>
                                     </CardHeader>
@@ -150,7 +150,7 @@ export default function DashboardPage() {
                                 </Card>
 
                                 {/* Awaiting Reply Card */}
-                                <Card className="ring-1 ring-primary/40">
+                                <Card>
                                     <CardHeader className="flex flex-row items-center justify-between space-y-0">
                                         <CardTitle className="text-sm sm:text-base">Awaiting Reply</CardTitle>
                                     </CardHeader>
@@ -161,7 +161,7 @@ export default function DashboardPage() {
                                 </Card>
 
                                 {/* Active Interviews Card */}
-                                <Card className="ring-1 ring-primary/40">
+                                <Card>
                                     <CardHeader className="flex flex-row items-center justify-between space-y-0">
                                         <CardTitle className="text-sm sm:text-base">Active Interviews</CardTitle>
                                     </CardHeader>
@@ -172,7 +172,7 @@ export default function DashboardPage() {
                                 </Card>
                                 
                                 {/* Total Offers Card */}
-                                <Card className="ring-1 ring-primary/40">
+                                <Card>
                                     <CardHeader className="flex flex-row items-center justify-between space-y-0">
                                         <CardTitle className="text-sm sm:text-base">Total Offers</CardTitle>
                                     </CardHeader>
@@ -183,7 +183,7 @@ export default function DashboardPage() {
                                 </Card>
 
                                 {/* Total Ghosted Card */}
-                                <Card className="ring-1 ring-primary/40">
+                                <Card>
                                     <CardHeader className="flex flex-row items-center justify-between space-y-0">
                                         <CardTitle className="text-sm sm:text-base">Total Ghosted</CardTitle>
                                     </CardHeader>
@@ -194,7 +194,7 @@ export default function DashboardPage() {
                                 </Card>
 
                                 {/* Total Rejections Card */}
-                                <Card className="ring-1 ring-primary/40">
+                                <Card>
                                     <CardHeader className="flex flex-row items-center justify-between space-y-0">
                                         <CardTitle className="text-sm sm:text-base">Total Rejections</CardTitle>
                                     </CardHeader>
@@ -208,7 +208,7 @@ export default function DashboardPage() {
                             
                             {/* Applications Flow (Sankey) */}
                             <div className="grid grid-cols-1">
-                                <Card className="ring-1 ring-primary/40">
+                                <Card>
                                     <CardHeader>
                                         <CardTitle className="text-sm sm:text-base text-center sm:text-left">Applications Flow</CardTitle>
                                     </CardHeader>
@@ -220,7 +220,7 @@ export default function DashboardPage() {
 
                             {/* Needs Attention + Job Boards */}
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                <Card className="ring-1 ring-primary/40">
+                                <Card>
                                     <CardHeader>
                                         <CardTitle className="text-sm sm:text-base text-center sm:text-left">
                                             Needs Attention{stats.needsAttention.length > 0 && ` (${stats.needsAttention.length})`}
@@ -232,7 +232,7 @@ export default function DashboardPage() {
                                 </Card>
 
                                 <div className="flex flex-col gap-6">
-                                    <Card className="ring-1 ring-primary/40">
+                                    <Card>
                                         <CardHeader>
                                             <CardTitle className="text-sm sm:text-base text-center sm:text-left">Job Boards</CardTitle>
                                         </CardHeader>
@@ -241,7 +241,7 @@ export default function DashboardPage() {
                                         </CardContent>
                                     </Card>
 
-                                    <Card className="ring-1 ring-primary/40">
+                                    <Card>
                                         <CardHeader>
                                             <CardTitle className="text-sm sm:text-base text-center sm:text-left">Response Time</CardTitle>
                                         </CardHeader>
@@ -254,7 +254,7 @@ export default function DashboardPage() {
 
                             {/* Daily Trend Chart  */}
                             <div className="grid grid-cols-1">
-                                <Card className="ring-1 ring-primary/40">
+                                <Card>
                                     <CardHeader>
                                         <CardTitle className="text-sm sm:text-base text-center sm:text-left">Daily Application Trend ({currentMonthName})</CardTitle>
                                     </CardHeader>

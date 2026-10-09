@@ -261,7 +261,7 @@ export default function ApplicationsPage() {
                                     onRequestDelete={setJobPendingDelete}
                                 />
                             ) : (
-                                <Card className="ring-1 ring-primary/40">
+                                <Card>
                                     <CardContent className="p-10 flex flex-col items-center justify-center">
                                         <Search className="w-8 h-8 text-muted-foreground mx-auto mb-4"/>
                                         <h3 className="text-lg font-semibold text-foreground">No Applications Found</h3>

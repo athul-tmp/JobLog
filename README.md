@@ -35,11 +35,12 @@ It is designed to provide clarity, organisation, and insights throughout the job
 * **UI/UX:** Dedicated views for desktop (**TanStack Table**) and mobile (**Responsive card view**).
 
 ### Dashboard & Analytics
-* **Key Metrics:** Track total applications, offers, rejections, interviews, etc.
-* **Visual Insights:**
-    * Active Interview Type Breakdown, Past Interview Type Breakdown and Interview Outcomes (Chart.js Pie Charts).
-    * Daily Application Trend Line Chart with monthly comparison.
-    * Application Flow Visualisation (Google Charts Sankey).
+* **Key Metrics:** Track total applications, applications awaiting a reply, active interviews, offers, rejections and ghosted applications.
+* **Applications Flow:** A Sankey chart following every application through Screening, Mid-stage and Final interviews, with outcomes shown where they happened.
+* **Needs Attention:** Interviews with no update for 7+ days (worth a follow-up) and applications with no reply for 30+ days, with one-click or bulk "Mark as Ghosted".
+* **Job Boards:** Applications and interviews per job board (LinkedIn, Seek, Indeed, company sites), worked out from the job posting link.
+* **Response Time:** Typical number of days until a company first replies, and until a first interview.
+* **Daily Trend:** Applications per day this month, compared against the same days of last month.
  
 ### Authentication & Security
 * **Secure Identity:** Account registration with Brevo email verification.
@@ -68,10 +69,10 @@ It is designed to provide clarity, organisation, and insights throughout the job
 
 ## 🧪 Testing <a id="testing"></a>
 
-The backend is covered by a suite of **81 automated tests** using **xUnit**, **Moq**, and the **EF Core In-Memory Provider**.
+The backend is covered by a suite of **94 automated tests** using **xUnit**, **Moq**, and the **EF Core In-Memory Provider**.
 
-* **Unit Tests (37):** Cover core business logic across services, including status transition rules, JWT token generation, analytics calculations, and authentication logic, using mocked dependencies for full isolation.
-* **Integration Tests (44):** Use `WebApplicationFactory` to exercise the full HTTP pipeline, including routing, JWT authentication, and controller behaviour, against a real (in-memory) database. Includes security tests for the demo account guard, input validation, rate limiting, session renewal and session revocation, plus per-visitor demo isolation and cleanup.
+* **Unit Tests (47):** Cover core business logic across services, including status transition rules, JWT token generation, analytics calculations, and authentication logic, using mocked dependencies for full isolation.
+* **Integration Tests (47):** Use `WebApplicationFactory` to exercise the full HTTP pipeline, including routing, JWT authentication, and controller behaviour, against a real (in-memory) database. Includes security tests for the demo account guard, input validation, rate limiting, session renewal and session revocation, plus per-visitor demo isolation and cleanup.
 * **CI Pipeline:** Tests run automatically on every push via **GitHub Actions**, and gate production deployment. A failing test blocks the release.
 
 Run the full suite locally:
@@ -95,32 +96,42 @@ The application's introduction, highlighting key features and providing access t
 
 The analytics hub where you can visualise your job search.
 
-**1. Key metrics, Stages, & Outcomes**
+**1. Overview**
 
-The high-level summary of all activity, coupled with interview stage breakdowns and interview outcomes.
+The high-level summary of all activity: total applications, applications awaiting a reply, active interviews, offers, ghosted applications and rejections.
 
 <div align="center">
-  <img src="frontend/public/images/dashboard1-dark.png" alt="Dashboard Metrics and Pie Charts Screenshot" width="600">
+  <img src="frontend/public/images/dashboard1-dark.png" alt="Dashboard Key Metrics Screenshot" width="600">
 </div>
 
 <br>
 
-**2. Daily Application Trend**
+**2. Applications Flow**
 
-A line chart showing the consistency of your daily application efforts compared to previous periods.
+A Sankey diagram following every application from submission through Screening, Mid-stage and Final interviews, with each outcome shown at the stage where it happened.
 
 <div align="center">
-  <img src="frontend/public/images/dashboard2-dark.png" alt="Daily Application Trend Line Chart Screenshot" width="600">
+  <img src="frontend/public/images/dashboard2-dark.png" alt="Applications Flow Sankey Chart Screenshot" width="600">
 </div>
 
 <br>
 
-**3. Application Flow**
+**3. Needs Attention, Job Boards & Response Time**
 
-A Sankey diagram illustrating how applications transition through the pipeline from initial submission to final status.
+Interviews worth following up and long-unanswered applications (with one-click "Mark as Ghosted"), applications and interviews per job board, and how long companies typically take to reply.
 
 <div align="center">
-  <img src="frontend/public/images/dashboard3-dark.png" alt="Application Flow Sankey Chart Screenshot" width="600">
+  <img src="frontend/public/images/dashboard3-dark.png" alt="Needs Attention, Job Boards and Response Time Screenshot" width="600">
+</div>
+
+<br>
+
+**4. Daily Application Trend**
+
+Applications per day this month, compared against the same days of last month.
+
+<div align="center">
+  <img src="frontend/public/images/dashboard4-dark.png" alt="Daily Application Trend Line Chart Screenshot" width="600">
 </div>
 
 ### Application Tracker Page
@@ -153,7 +164,7 @@ The extension popup, demonstrating successful data capture and theme responsiven
 | **Authentication** | `JWT` (HttpOnly Cookies), `BCrypt` | Sliding 30-day sessions with token-version revocation and secure password hashing. |
 | **Email** | `Brevo` | Transactional email API for user verification and password reset flows. |
 | **Extension** | `HTML`, `CSS`, `Vanilla JavaScript` | Browser-specific APIs (chrome.scripting, chrome.storage). |
-| **Testing** | `xUnit, Moq, EF Core InMemory` | 81 tests (unit and integration), CI gated deployment. |
+| **Testing** | `xUnit, Moq, EF Core InMemory` | 94 tests (unit and integration), CI gated deployment. |
 
 ---
 
@@ -235,7 +246,7 @@ For local development, JobLog uses **Docker Compose** to run the PostgreSQL data
 }
 ```
 
-If the Brevo settings are left empty, no emails are sent, so registration and password-reset links won't arrive. Rate limits can optionally be tuned under `RateLimiting` (`AuthPermitLimit`, `EmailPermitLimit`, `GlobalPermitLimit`).
+If the Brevo settings are left empty, no emails are sent, so registration and password-reset links won't arrive. Rate limits can optionally be tuned under `RateLimiting` (`AuthPermitLimit`, `EmailPermitLimit`, `GlobalPermitLimit`, `DemoPermitLimit`).
 
 ### 1. Start Database (via Docker Compose)
 

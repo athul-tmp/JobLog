@@ -15,23 +15,30 @@ import { useTheme } from "next-themes"
 
 const IMAGES = [
     { 
-        alt: "Dashboard Key Metrics",
+        alt: "Dashboard Overview",
         light: "/images/dashboard1-light.png",
         dark: "/images/dashboard1-dark.png",
         width: 1200, 
-        height: 600, 
+        height: 600,
     },
     { 
-        alt: "Dashboard Daily Trend",
+        alt: "Dashboard Applications Flow",
         light: "/images/dashboard2-light.png",
         dark: "/images/dashboard2-dark.png",
         width: 1200, 
         height: 600,
     },
     { 
-        alt: "Dashboard Application Flow",
+        alt: "Dashboard Needs Attention, Job Boards and Response Time",
         light: "/images/dashboard3-light.png",
         dark: "/images/dashboard3-dark.png",
+        width: 1200, 
+        height: 600,
+    },
+    { 
+        alt: "Dashboard Daily Trend",
+        light: "/images/dashboard4-light.png",
+        dark: "/images/dashboard4-dark.png",
         width: 1200, 
         height: 600,
     },

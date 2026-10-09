@@ -2,22 +2,25 @@ import React from "react";
 import { Chart } from "react-chartjs-2";
 import { Chart as ChartJS, LinearScale, Tooltip, TooltipItem } from "chart.js";
 import { SankeyController, Flow, SankeyDataPoint } from "chartjs-chart-sankey";
-import { DashboardAnalytics } from '@/types/types';
+import { FlowLink } from '@/types/types';
 import { useTheme } from "next-themes";
 
 ChartJS.register(SankeyController, Flow, LinearScale, Tooltip);
 
-// Node keys, display labels and colours (no-interview outcomes are lighter shades)
+// Base node keys (from the analytics API), display labels and colours.
+// No-interview outcomes are lighter shades of the after-interview ones.
 const NODE_LABELS: Record<string, string> = {
     applications: 'Total Applications',
     awaiting: 'Awaiting Reply',
     rejectedNoInterview: 'Rejected (No Interview)',
     ghostedNoInterview: 'Ghosted (No Interview)',
-    interview: 'Interviewed',
-    inProgress: 'In Progress',
+    screening: 'Screening',
+    midStage: 'Mid-stage',
+    final: 'Final',
     offer: 'Offer',
     rejected: 'Rejected',
     ghosted: 'Ghosted',
+    inProgress: 'In Progress',
 };
 
 const NODE_COLORS: Record<string, string> = {
@@ -25,27 +28,32 @@ const NODE_COLORS: Record<string, string> = {
     awaiting: '#d08700',
     rejectedNoInterview: '#ff6467',
     ghostedNoInterview: '#99a1af',
-    interview: '#155dfc',
-    inProgress: '#51a2ff',
+    screening: '#51a2ff',
+    midStage: '#2b7fff',
+    final: '#155dfc',
     offer: '#00a63e',
     rejected: '#e7000b',
     ghosted: '#4a5565',
+    inProgress: '#00b8db',
 };
 
-// Columns: outcomes without an interview end beside "Interviewed",
-// so only post-interview outcomes share the last column
-const NODE_COLUMNS: Record<string, number> = {
-    applications: 0,
-    awaiting: 1, rejectedNoInterview: 1, ghostedNoInterview: 1, interview: 1,
-    offer: 2, rejected: 2, ghosted: 2, inProgress: 2,
+// Column of each node that other nodes flow out of; exits sit one column to the right of their source
+const SOURCE_COLUMNS: Record<string, number> = { applications: 0, screening: 1, midStage: 2, final: 3 };
+
+// Outcomes reached from several stages get one node per stage (e.g. "rejected@screening"),
+// so every flow only travels to the next column and flows never cross each other
+const PER_STAGE_OUTCOMES = ['offer', 'rejected', 'ghosted', 'inProgress'];
+
+// Top-to-bottom order within a column: the next interview stage first, then exits
+const BASE_PRIORITY: Record<string, number> = {
+    screening: 0, midStage: 0, final: 0,
+    offer: 1, awaiting: 2, inProgress: 3, rejected: 4, rejectedNoInterview: 4, ghosted: 5, ghostedNoInterview: 5,
 };
 
-// Top-to-bottom order of nodes within each column. "Interviewed" sits at the top of
-// its column so its outcomes line up beside it instead of flowing across the chart
-const NODE_PRIORITY: Record<string, number> = {
-    interview: 0, awaiting: 1, rejectedNoInterview: 2, ghostedNoInterview: 3,
-    offer: 4, rejected: 5, ghosted: 6, inProgress: 7,
-};
+// Flows smaller than this share of all applications are drawn at this size so they stay readable
+const MIN_FLOW_SHARE = 0.04;
+
+const baseKey = (key: string) => key.split('@')[0];
 
 const THEME_COLORS = {
   light: {
@@ -56,33 +64,28 @@ const THEME_COLORS = {
   },
 };
 
+// Chart data point: `flow` is the drawn size, `count` the real number of applications
+type DisplayFlow = SankeyDataPoint & { count: number };
+
 interface SankeyChartProps {
-    data: DashboardAnalytics;
+    data: FlowLink[];
 }
 
 export default function SankeyChart({ data }: SankeyChartProps) {
     const { resolvedTheme } = useTheme();
     const themeKey = (resolvedTheme || 'dark') as 'light' | 'dark';
     const themeColors = THEME_COLORS[themeKey];
-    // Every flow counts applications, so each node's inflow equals its outflow
-    const rejectedNoInterview = data.totalRejections - data.interviewedAndRejected;
-    const ghostedNoInterview = data.totalGhosted - data.interviewedAndGhosted;
-    const offersNoInterview = data.totalOffers - data.offersAfterInterview;
 
-    const flows: SankeyDataPoint[] = [
-        { from: 'applications', to: 'awaiting', flow: data.totalPending },
-        { from: 'applications', to: 'rejectedNoInterview', flow: rejectedNoInterview },
-        { from: 'applications', to: 'ghostedNoInterview', flow: ghostedNoInterview },
-        { from: 'applications', to: 'offer', flow: offersNoInterview },
-        { from: 'applications', to: 'interview', flow: data.interviewedApplications },
-        { from: 'interview', to: 'offer', flow: data.offersAfterInterview },
-        { from: 'interview', to: 'rejected', flow: data.interviewedAndRejected },
-        { from: 'interview', to: 'ghosted', flow: data.interviewedAndGhosted },
-        { from: 'interview', to: 'inProgress', flow: data.totalInterviews },
-    ].filter(f => f.flow > 0); // Colours are keyed by node, so empty flows can simply be dropped
+    const links = data
+        .filter(l => l.count > 0)
+        .map(l => ({
+            from: l.from,
+            to: PER_STAGE_OUTCOMES.includes(l.to) ? `${l.to}@${l.from}` : l.to,
+            count: l.count,
+        }));
 
     // Check if there is any flow to visualise
-    if (flows.length === 0) {
+    if (links.length === 0) {
         return (
             <div className="flex items-center justify-center w-full h-[300px]">
                 <p className="text-center text-muted-foreground">
@@ -92,16 +95,53 @@ export default function SankeyChart({ data }: SankeyChartProps) {
         );
     }
 
+    // Columns and in-column order for every node
+    const nodeKeys = Array.from(new Set(links.flatMap(l => [l.from, l.to])));
+    const columns: Record<string, number> = {};
+    for (const key of nodeKeys) {
+        columns[key] = key in SOURCE_COLUMNS
+            ? SOURCE_COLUMNS[key]
+            : SOURCE_COLUMNS[links.find(l => l.to === key)!.from] + 1;
+    }
+    const priority = Object.fromEntries(nodeKeys.map(key => [key, BASE_PRIORITY[baseKey(key)] ?? 0]));
+
+    // Display sizes: floor small exits, then size each upstream flow from what flows out of its target,
+    // working right to left so every node's inflow still equals its outflow
+    const total = links.filter(l => columns[l.from] === 0).reduce((sum, l) => sum + l.count, 0);
+    const minFlow = Math.max(1, total * MIN_FLOW_SHARE);
+    const display = new Map<typeof links[number], number>();
+    const byColumnDesc = [...nodeKeys].sort((a, b) => columns[b] - columns[a]);
+    for (const key of byColumnDesc) {
+        const incoming = links.filter(l => l.to === key);
+        const outgoing = links.filter(l => l.from === key);
+        if (outgoing.length === 0) {
+            incoming.forEach(l => display.set(l, Math.max(l.count, minFlow)));
+        } else {
+            const displayedOut = outgoing.reduce((sum, l) => sum + (display.get(l) ?? l.count), 0);
+            const realIn = incoming.reduce((sum, l) => sum + l.count, 0);
+            incoming.forEach(l => display.set(l, displayedOut * (l.count / realIn)));
+        }
+    }
+
+    const flows: DisplayFlow[] = links.map(l => ({ from: l.from, to: l.to, flow: display.get(l) ?? l.count, count: l.count }));
+
+    // Labels use real counts: the larger of what flows in and out of each node
+    const labels = Object.fromEntries(nodeKeys.map(key => {
+        const inflow = links.filter(l => l.to === key).reduce((sum, l) => sum + l.count, 0);
+        const outflow = links.filter(l => l.from === key).reduce((sum, l) => sum + l.count, 0);
+        return [key, `${NODE_LABELS[baseKey(key)]} (${Math.max(inflow, outflow)})`];
+    }));
+
     const chartData = {
         datasets: [
             {
                 label: 'Application Flow',
                 data: flows,
-                labels: NODE_LABELS,
-                priority: NODE_PRIORITY,
-                column: NODE_COLUMNS,
-                colorFrom: (ctx: { raw: SankeyDataPoint }) => NODE_COLORS[ctx.raw.from],
-                colorTo: (ctx: { raw: SankeyDataPoint }) => NODE_COLORS[ctx.raw.to],
+                labels,
+                priority,
+                column: columns,
+                colorFrom: (ctx: { raw: SankeyDataPoint }) => NODE_COLORS[baseKey(ctx.raw.from)],
+                colorTo: (ctx: { raw: SankeyDataPoint }) => NODE_COLORS[baseKey(ctx.raw.to)],
                 colorMode: 'gradient' as const,
                 alpha: 0.6,
                 borderWidth: 0,
@@ -109,7 +149,7 @@ export default function SankeyChart({ data }: SankeyChartProps) {
                 nodePadding: 20,
                 nodeLabels: {
                     color: themeColors.textColor,
-                    font: { size: 14 },
+                    font: { size: 13 },
                 },
                 parsing: { from: 'from', to: 'to', flow: 'flow' },
             },
@@ -125,12 +165,12 @@ export default function SankeyChart({ data }: SankeyChartProps) {
                     title: () => '',
                     // Swatch shows the destination node's colour (the plugin leaves it white)
                     labelColor: ({ raw }: TooltipItem<'sankey'>) => {
-                        const color = NODE_COLORS[(raw as SankeyDataPoint).to];
+                        const color = NODE_COLORS[baseKey((raw as DisplayFlow).to)];
                         return { backgroundColor: color, borderColor: color };
                     },
                     label: ({ raw }: TooltipItem<'sankey'>) => {
-                        const { from, to, flow } = raw as SankeyDataPoint;
-                        return ` ${NODE_LABELS[from]} → ${NODE_LABELS[to]}: ${flow}`;
+                        const { from, to, count } = raw as DisplayFlow;
+                        return ` ${NODE_LABELS[baseKey(from)]} → ${NODE_LABELS[baseKey(to)]}: ${count}`;
                     },
                 },
             },
@@ -138,7 +178,7 @@ export default function SankeyChart({ data }: SankeyChartProps) {
     };
 
     return (
-        <div className="relative w-full h-[350px]">
+        <div className="relative w-full h-[400px]">
             <Chart type="sankey" data={chartData} options={options} />
         </div>
     );

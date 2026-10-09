@@ -401,4 +401,45 @@ public class JobApplicationServiceTests
     Assert.Equal("Applied", result.Status);
     Assert.Single(dbContext.JobStatusHistories.Where(h => h.JobApplicationId == application.Id));
   }
+
+  [Fact]
+  public async Task MarkUnansweredAsGhosted_GhostsOnlyLongUnansweredApplications()
+  {
+    // Arrange
+    var dbContext = CreateDbContext();
+    var now = DateTime.UtcNow;
+    JobApplication Add(int no, string status, int daysAgo)
+    {
+      var application = new JobApplication
+      {
+        UserId = 1, Company = $"Co{no}", Role = "Dev", Status = status,
+        DateApplied = now.AddDays(-daysAgo), ApplicationNo = no
+      };
+      dbContext.JobApplications.Add(application);
+      return application;
+    }
+    var old = Add(1, "Applied", AnalyticsService.NoReplyDays + 10);
+    var recent = Add(2, "Applied", AnalyticsService.NoReplyDays - 10);
+    var interviewing = Add(3, "Screening Interview", AnalyticsService.NoReplyDays + 10);
+    var otherUser = new JobApplication
+    {
+      UserId = 2, Company = "Other", Role = "Dev", Status = "Applied",
+      DateApplied = now.AddDays(-(AnalyticsService.NoReplyDays + 10)), ApplicationNo = 1
+    };
+    dbContext.JobApplications.Add(otherUser);
+    dbContext.SaveChanges();
+
+    var service = new JobApplicationService(dbContext);
+
+    // Act
+    var updated = await service.MarkUnansweredAsGhosted(1);
+
+    // Assert
+    Assert.Equal(1, updated);
+    Assert.Equal("Ghosted", old.Status);
+    Assert.Single(dbContext.JobStatusHistories.Where(h => h.JobApplicationId == old.Id && h.Status == "Ghosted"));
+    Assert.Equal("Applied", recent.Status);
+    Assert.Equal("Screening Interview", interviewing.Status);
+    Assert.Equal("Applied", otherUser.Status);
+  }
 }

@@ -1,6 +1,6 @@
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Head from "next/head";
 import { JobApplicationService } from "@/services/api"; 
 import { DashboardAnalytics } from "@/types/types";
@@ -13,11 +13,11 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ArrowUp, ArrowDown, Minus } from "lucide-react";
 
-import HistoricalInterviewsChart from "@/components/charts/HistoricalInterviewsChart";
-import InterviewOutcomesChart from "@/components/charts/InterviewOutcomesChart";
-import InterviewTypesChart from "@/components/charts/InterviewTypesChart";
 import DailyTrendChart from "@/components/charts/DailyTrendChart";
 import SankeyChart from "@/components/charts/SankeyChart";
+import JobBoardChart from "@/components/charts/JobBoardChart";
+import NeedsAttentionList from "@/components/dashboard/NeedsAttentionList";
+import ResponseTimeSummary from "@/components/dashboard/ResponseTimeSummary";
 import { DemoAlert } from "@/components/DemoAlert";
 
 // Fetch Data 
@@ -27,35 +27,37 @@ function useDashboardData() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const fetchData = useCallback(async () => {
+    try {
+      const stats = await JobApplicationService.getDashboardAnalytics();
+      setData(stats);
+      setError(null);
+    } catch (err) {
+      if (err instanceof Error) {
+          setError(err.message);
+      } else {
+          setError("An unknown error occurred while fetching data.");
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     // Only fetch if logged in
     if (isAuthenticated) {
-      const fetchData = async () => {
-        try {
-          const stats = await JobApplicationService.getDashboardAnalytics();
-          setData(stats);
-          
-        } catch (err) {
-          if (err instanceof Error) {
-              setError(err.message);
-          } else {
-              setError("An unknown error occurred while fetching data.");
-          }
-        } finally {
-          setIsLoading(false);
-        }
-      };
       fetchData();
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, fetchData]);
 
-  return { data, isLoading, error };
+  // Re-fetch in the background (e.g. after acting on a "Needs attention" item)
+  return { data, isLoading, error, refresh: fetchData };
 }
 
 export default function DashboardPage() {
     const { isAuthenticated, authLoading } = useAuth();
     const router = useRouter();
-    const { data: stats, isLoading: isDataLoading, error: dataError } = useDashboardData();
+    const { data: stats, isLoading: isDataLoading, error: dataError, refresh } = useDashboardData();
 
     // Redirect if not authenticated
     useEffect(() => {
@@ -99,18 +101,19 @@ export default function DashboardPage() {
     // Compare this month so far against the same days of last month (dates are UTC, like the backend)
     const now = new Date();
     const previousMonthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 1, 1));
-    const daysInPreviousMonth = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 0)).getUTCDate();
-    const comparedDays = Math.min(now.getUTCDate(), daysInPreviousMonth);
+    const comparedDays = stats?.previousMonthToDateDays ?? now.getUTCDate(); // from the backend, which owns "today"
     const comparisonLabel = `${previousMonthStart.toLocaleDateString('en-US', { month: 'short', timeZone: 'UTC' })} 1–${comparedDays}`;
     const previousMonthToDateCount = stats?.previousMonthToDateCount ?? 0;
 
-    // Monthly Increase Calculation 
-    const MonthlyIncrease = previousMonthToDateCount > 0
-        ? ((currentMonthCount - previousMonthToDateCount) / previousMonthToDateCount) * 100
-        : currentMonthCount > 0 ? 100 : 0;
-
-    const MonthlyTrendIcon = MonthlyIncrease > 0 ? ArrowUp : MonthlyIncrease < 0 ? ArrowDown : Minus;
-    const monthlyColor = MonthlyIncrease > 0 ? "text-green-600" : MonthlyIncrease < 0 ? "text-red-600" : "text-muted-foreground";
+    // Month-to-date comparison as a plain difference in applications (percentages swing wildly on small counts)
+    const monthlyDifference = currentMonthCount - previousMonthToDateCount;
+    const MonthlyTrendIcon = monthlyDifference > 0 ? ArrowUp : monthlyDifference < 0 ? ArrowDown : Minus;
+    const monthlyColor = monthlyDifference > 0 ? "text-green-600" : "text-muted-foreground"; // fewer isn't shown as a failure
+    const monthlyComparison = monthlyDifference > 0
+        ? `${monthlyDifference} more than ${comparisonLabel} (${previousMonthToDateCount})`
+        : monthlyDifference < 0
+            ? `${-monthlyDifference} fewer than ${comparisonLabel} (${previousMonthToDateCount})`
+            : `Same as ${comparisonLabel} (${previousMonthToDateCount})`;
     
     return (
         <>
@@ -203,37 +206,50 @@ export default function DashboardPage() {
                                 
                             </div>
                             
-                            {/* Pie Charts Section */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {/* Active Interview Types */}
+                            {/* Applications Flow (Sankey) */}
+                            <div className="grid grid-cols-1">
                                 <Card className="ring-1 ring-primary/40">
                                     <CardHeader>
-                                        <CardTitle className="text-sm sm:text-base text-center sm:text-left">Active Interview Stages Breakdown</CardTitle>
+                                        <CardTitle className="text-sm sm:text-base text-center sm:text-left">Applications Flow</CardTitle>
                                     </CardHeader>
-                                    <CardContent className="h-[250px] sm:h-[300px] flex items-center justify-center">
-                                        <InterviewTypesChart data={stats.interviewTypeBreakdown || []} /> 
+                                    <CardContent>
+                                        <SankeyChart data={stats.applicationFlow} />
+                                    </CardContent>
+                                </Card>
+                            </div>
+
+                            {/* Needs Attention + Job Boards */}
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <Card className="ring-1 ring-primary/40">
+                                    <CardHeader>
+                                        <CardTitle className="text-sm sm:text-base text-center sm:text-left">
+                                            Needs Attention{stats.needsAttention.length > 0 && ` (${stats.needsAttention.length})`}
+                                        </CardTitle>
+                                    </CardHeader>
+                                    <CardContent className="flex-1 min-h-0 flex flex-col">
+                                        <NeedsAttentionList items={stats.needsAttention} onChanged={refresh} />
                                     </CardContent>
                                 </Card>
 
-                                {/* All Interview Types */}
-                                <Card className="ring-1 ring-primary/40">
-                                    <CardHeader>
-                                        <CardTitle className="text-sm sm:text-base text-center sm:text-left">All Interview Rounds</CardTitle>
-                                    </CardHeader>
-                                    <CardContent className="h-[250px] sm:h-[300px] flex items-center justify-center">
-                                        <HistoricalInterviewsChart data={stats.historicalInterviewBreakdown || [] } />
-                                    </CardContent>
-                                </Card>
+                                <div className="flex flex-col gap-6">
+                                    <Card className="ring-1 ring-primary/40">
+                                        <CardHeader>
+                                            <CardTitle className="text-sm sm:text-base text-center sm:text-left">Job Boards</CardTitle>
+                                        </CardHeader>
+                                        <CardContent>
+                                            <JobBoardChart data={stats.sources} />
+                                        </CardContent>
+                                    </Card>
 
-                                {/* Interview Outcomes Chart */}
-                                <Card className="ring-1 ring-primary/40">
-                                    <CardHeader>
-                                        <CardTitle className="text-sm sm:text-base text-center sm:text-left">All Interview Outcomes</CardTitle>
-                                    </CardHeader>
-                                    <CardContent className="h-[250px] sm:h-[300px] flex items-center justify-center">
-                                        <InterviewOutcomesChart data={stats || []} /> 
-                                    </CardContent>
-                                </Card>
+                                    <Card className="ring-1 ring-primary/40">
+                                        <CardHeader>
+                                            <CardTitle className="text-sm sm:text-base text-center sm:text-left">Response Time</CardTitle>
+                                        </CardHeader>
+                                        <CardContent>
+                                            <ResponseTimeSummary data={stats.responseTimes} />
+                                        </CardContent>
+                                    </Card>
+                                </div>
                             </div>
 
                             {/* Daily Trend Chart  */}
@@ -257,11 +273,11 @@ export default function DashboardPage() {
                                                     {currentMonthName} Total: 
                                                     <span className="font-bold text-foreground ml-1">{currentMonthCount}</span> applications
                                                 </p>
-                                                {/* Display the Monthly Increase/Decrease if theres enough data */}
+                                                {/* Difference vs. the same days of last month, if there is any data */}
                                                 {(currentMonthCount > 0 || previousMonthToDateCount > 0) && (
                                                 <p className={`font-semibold flex items-center ${monthlyColor}`}>
                                                     <MonthlyTrendIcon className="w-4 h-4 mr-1" />
-                                                    {MonthlyIncrease.toFixed(0)}% vs. {comparisonLabel}
+                                                    {monthlyComparison}
                                                 </p>
                                                 )}
                                             </div>
@@ -271,18 +287,6 @@ export default function DashboardPage() {
                                                 {previousMonthName} Total: <span className="font-semibold">{previousMonthCount}</span> applications
                                             </p>
                                         </div>
-                                    </CardContent>
-                                </Card>
-                            </div>
-
-                            {/* All Outcomes Sankey Chart */}
-                            <div className="grid grid-cols-1">
-                                <Card className="ring-1 ring-primary/40">
-                                    <CardHeader>
-                                        <CardTitle className="text-sm sm:text-base text-center sm:text-left">Applications Flow</CardTitle>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <SankeyChart data={stats} />
                                     </CardContent>
                                 </Card>
                             </div>

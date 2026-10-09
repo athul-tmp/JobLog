@@ -314,6 +314,16 @@ export const JobApplicationService = {
     }
   },
   
+  // Mark every application with no reply for 30+ days as Ghosted; returns how many were updated
+  markUnansweredAsGhosted: async (): Promise<number> => {
+    try {
+      const response = await apiClient.post<{ updated: number }>("/JobApplication/mark-unanswered-ghosted");
+      return response.data.updated;
+    } catch (error) {
+      return handleApiError(error, "Failed to update applications.");
+    }
+  },
+
   // Undo previous status change
   undoStatusChange: async (jobId: number): Promise<JobApplication> => {
       try {

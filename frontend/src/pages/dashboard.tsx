@@ -148,7 +148,7 @@ export default function DashboardPage() {
                                         <CardTitle className="text-sm sm:text-base">Total Applications</CardTitle>
                                     </CardHeader>
                                     <CardContent>
-                                        <div className="text-xl sm:text-2xl font-bold text-primary">{stats.totalApplications}</div>
+                                        <div className="text-xl sm:text-2xl font-bold text-primary dark:text-purple-400">{stats.totalApplications}</div>
                                         <p className="text-xs text-foreground mt-1">Total jobs applied to</p>
                                     </CardContent>
                                 </Card>

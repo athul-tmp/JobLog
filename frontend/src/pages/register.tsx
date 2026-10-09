@@ -206,7 +206,7 @@ export default function RegisterPage() {
                             <WakingUpMessage isActive={isLoading} />
                             <div className="text-sm text-center text-muted-foreground">
                                 Already have an account?{" "}
-                                <Link href="/login" className="font-semibold text-primary hover:underline">
+                                <Link href="/login" className="font-semibold text-primary dark:text-purple-400 hover:underline">
                                     Log In
                                 </Link>
                             </div>

@@ -65,8 +65,10 @@ export default function DailyTrendChart({ data }: DailyTrendChartProps) {
                 label: 'Applications Sent',
                 data: data.map(item => item.count),
                 borderColor: '#7e22ce',
-                tension: 0.4, 
-                pointRadius: 5,
+                tension: 0.4,
+                cubicInterpolationMode: 'monotone' as const, // smooth without dipping below zero next to empty days
+                pointRadius: 3,
+                pointHoverRadius: 6,
                 pointBackgroundColor: '#7e22ce',
                 fill: true,
             },
@@ -79,11 +81,11 @@ export default function DailyTrendChart({ data }: DailyTrendChartProps) {
         scales: {
             y: {
                 beginAtZero: true,
-                ticks: { stepSize: 1, color: themeColors.textColor, },
+                ticks: { precision: 0, maxTicksLimit: 8, color: themeColors.textColor, }, // whole numbers, readable at any volume
                 grid: { color: themeColors.gridColor, },
             },
             x: {
-                ticks: { color: themeColors.textColor, },
+                ticks: { color: themeColors.textColor, autoSkip: true, maxRotation: 0 },
                 grid: { color: themeColors.gridColor, },
             }
         },

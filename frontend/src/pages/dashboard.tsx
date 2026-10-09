@@ -105,13 +105,15 @@ export default function DashboardPage() {
     const comparisonLabel = `${previousMonthStart.toLocaleDateString('en-US', { month: 'short', timeZone: 'UTC' })} 1–${comparedDays}`;
     const previousMonthToDateCount = stats?.previousMonthToDateCount ?? 0;
 
-    // Monthly Increase Calculation 
-    const MonthlyIncrease = previousMonthToDateCount > 0
-        ? ((currentMonthCount - previousMonthToDateCount) / previousMonthToDateCount) * 100
-        : currentMonthCount > 0 ? 100 : 0;
-
-    const MonthlyTrendIcon = MonthlyIncrease > 0 ? ArrowUp : MonthlyIncrease < 0 ? ArrowDown : Minus;
-    const monthlyColor = MonthlyIncrease > 0 ? "text-green-600" : MonthlyIncrease < 0 ? "text-red-600" : "text-muted-foreground";
+    // Month-to-date comparison as a plain difference in applications (percentages swing wildly on small counts)
+    const monthlyDifference = currentMonthCount - previousMonthToDateCount;
+    const MonthlyTrendIcon = monthlyDifference > 0 ? ArrowUp : monthlyDifference < 0 ? ArrowDown : Minus;
+    const monthlyColor = monthlyDifference > 0 ? "text-green-600" : "text-muted-foreground"; // fewer isn't shown as a failure
+    const monthlyComparison = monthlyDifference > 0
+        ? `${monthlyDifference} more than ${comparisonLabel} (${previousMonthToDateCount})`
+        : monthlyDifference < 0
+            ? `${-monthlyDifference} fewer than ${comparisonLabel} (${previousMonthToDateCount})`
+            : `Same as ${comparisonLabel} (${previousMonthToDateCount})`;
     
     return (
         <>
@@ -271,11 +273,11 @@ export default function DashboardPage() {
                                                     {currentMonthName} Total: 
                                                     <span className="font-bold text-foreground ml-1">{currentMonthCount}</span> applications
                                                 </p>
-                                                {/* Display the Monthly Increase/Decrease if theres enough data */}
+                                                {/* Difference vs. the same days of last month, if there is any data */}
                                                 {(currentMonthCount > 0 || previousMonthToDateCount > 0) && (
                                                 <p className={`font-semibold flex items-center ${monthlyColor}`}>
                                                     <MonthlyTrendIcon className="w-4 h-4 mr-1" />
-                                                    {MonthlyIncrease.toFixed(0)}% vs. {comparisonLabel}
+                                                    {monthlyComparison}
                                                 </p>
                                                 )}
                                             </div>

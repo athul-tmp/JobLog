@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button"; 
 import { ExternalLink } from "lucide-react";
 
-const CHROME_WEB_STORE_LINK = "https://chromewebstore.google.com/detail/mbbminokbdldbonjhceefnjncgadogcj?utm_source=item-share-cb";
+import { CHROME_EXTENSION_URL } from "@/lib/links";
 
 export const ToolsAndIntegrationsTab = () => {
     return (
@@ -24,7 +24,7 @@ export const ToolsAndIntegrationsTab = () => {
                         <div className="mt-4 md:mt-0 flex-shrink-0">
                             <Button asChild>
                                 <a 
-                                    href={CHROME_WEB_STORE_LINK} 
+                                    href={CHROME_EXTENSION_URL} 
                                     target="_blank" 
                                     rel="noopener noreferrer"
                                 >

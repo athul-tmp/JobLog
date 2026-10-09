@@ -18,6 +18,7 @@ import SankeyChart from "@/components/charts/SankeyChart";
 import JobBoardChart from "@/components/charts/JobBoardChart";
 import NeedsAttentionList from "@/components/dashboard/NeedsAttentionList";
 import ResponseTimeSummary from "@/components/dashboard/ResponseTimeSummary";
+import WelcomeCard from "@/components/dashboard/WelcomeCard";
 import { DemoAlert } from "@/components/DemoAlert";
 
 // Fetch Data 
@@ -134,7 +135,10 @@ export default function DashboardPage() {
                     {/* Error Display */}
                     {dataError && <Alert variant="destructive"><AlertDescription>{dataError}</AlertDescription></Alert>}
 
-                    {isReady && (
+                    {/* First-time users: a getting-started card instead of empty stats and charts */}
+                    {isReady && stats.totalApplications === 0 && <WelcomeCard />}
+
+                    {isReady && stats.totalApplications > 0 && (
                         <div className="space-y-8">
                             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
                                 

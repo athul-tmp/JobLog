@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -26,8 +26,10 @@ import * as z from "zod";
 
 import { JobApplicationService } from "@/services/api";
 import { CreateJobApplicationRequest, JobApplication } from "@/types/types";
-import { Loader2, Plus } from 'lucide-react';
+import { AlertTriangle, Loader2, Plus } from 'lucide-react';
 import { toast } from 'sonner'; 
+import { format } from 'date-fns';
+import { findDuplicate } from '@/lib/duplicates';
 
 // Schema for validation
 const formSchema = z.object({
@@ -49,9 +51,10 @@ const formSchema = z.object({
 
 interface AddJobApplicationDialogProps {
     onJobAdded: (newJob: JobApplication) => void;
+    existingApplications: JobApplication[];
 }
 
-export default function AddJobApplicationDialog({ onJobAdded }: AddJobApplicationDialogProps) {
+export default function AddJobApplicationDialog({ onJobAdded, existingApplications }: AddJobApplicationDialogProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -64,6 +67,13 @@ export default function AddJobApplicationDialog({ onJobAdded }: AddJobApplicatio
             notes: "",
         },
     });
+
+    // Warns (without blocking) when the job being entered looks like one already added
+    const [company, role, jobPostingURL] = form.watch(["company", "role", "jobPostingURL"]);
+    const duplicate = useMemo(
+        () => findDuplicate(existingApplications, { company, role, jobPostingURL }),
+        [existingApplications, company, role, jobPostingURL],
+    );
 
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
         setIsLoading(true);
@@ -180,7 +190,16 @@ export default function AddJobApplicationDialog({ onJobAdded }: AddJobApplicatio
                                 </FormItem>
                             )}
                         />
-                        
+
+                        {duplicate && (
+                            <div className="flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300">
+                                <AlertTriangle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                                <span>
+                                    You already added this job on {format(new Date(duplicate.dateApplied), 'd MMM yyyy')} ({duplicate.status}).
+                                </span>
+                            </div>
+                        )}
+
                         <DialogFooter>
                             <Button className="cursor-pointer" type="submit" disabled={isLoading}>
                                 {isLoading ? (

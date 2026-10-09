@@ -504,6 +504,7 @@ async function scrapeAndFillForm() {
 }
 
 // Reduces a job posting URL to a stable key, so the same job matches across search and detail pages
+// Keep in sync with jobKey() in frontend/src/lib/duplicates.ts
 function jobKey(url) {
     try {
         const parsed = new URL(url);

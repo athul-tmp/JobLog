@@ -215,7 +215,7 @@ export default function ApplicationsPage() {
                         <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground text-center sm:text-left">
                             Applications
                         </h1>
-                        <AddJobApplicationDialog onJobAdded={handleJobAdded} /> 
+                        <AddJobApplicationDialog onJobAdded={handleJobAdded} existingApplications={applications} /> 
                     </div>
 
                     {/* Error Display */}

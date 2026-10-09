@@ -4,403 +4,392 @@
     <meta charset="UTF-8">
     <title>JobLog Quick Add</title>
     <style>
-        /* Base Variables */
+        /* Colours match the JobLog web app */
         :root {
-            --background: #252525;
+            --background: #0a0a0a;
             --foreground: #f4f4f4;
-            --primary: #7e22ce; 
+            --muted-foreground: #a1a1a1;
+            --border: #2c2c2c;
+            --input-bg: rgba(255, 255, 255, 0.045);
+            --input-border: rgba(255, 255, 255, 0.15);
+            --hover: rgba(255, 255, 255, 0.08);
+            --primary: #7e22ce;
+            --primary-hover: #6b21a8;
             --primary-foreground: #ffffff;
-            --secondary: #454545;
-            --secondary-foreground: #f4f4f4;
-            --destructive: #cc4545; 
-            --destructive-foreground: #ffffff;
-            --border: #444444; 
-            --input: #3a3a3a; 
-            --success-green: #28a745;
-            --success-bg: #1f4a1f;
-            --error-red: #dc3545;
-            --error-bg: #4a1f1f;
-            --base-font-size: 14px; 
-            --info-background: #666768; 
-            --info-color: #e0e0e0; 
-            --info-border: #4e4e4e;
-            --gradient-start: #7e22ce;
-            --gradient-end: #db2777;
+            --link: #c084fc;
+            --error: #f87171;
+            --success: #4ade80;
+            --warning: #fcd34d;
+            --warning-bg: rgba(245, 158, 11, 0.1);
+            --warning-border: rgba(245, 158, 11, 0.3);
+            --gradient-start: #a855f7;
+            --gradient-end: #ec4899;
         }
-        
-        /* Light Mode Variables */
+
         .light {
             --background: #ffffff;
-            --foreground: #252525;
-            --card-foreground: #252525;
-            --secondary: #f5f5f5;
-            --secondary-foreground: #333333;
-            --muted-foreground: #949494;
-            --destructive: #dc2626;
-            --border: #e8e8e8;
-            --input: #e8e8e8;
-            --primary-foreground: #ffffff;
-            --success-bg: #b2f9b2;
-            --error-bg: #eeabab;
-            --info-background: #e2e8f0;
-            --info-color: #1a202c;
-            --info-border: #cbd5e1;
+            --foreground: #0a0a0a;
+            --muted-foreground: #737373;
+            --border: #e5e5e5;
+            --input-bg: #ffffff;
+            --input-border: #e5e5e5;
+            --hover: #f5f5f5;
+            --link: #7e22ce;
+            --error: #dc2626;
+            --success: #15803d;
+            --warning: #92400e;
+            --warning-bg: #fffbeb;
+            --warning-border: #fde68a;
         }
 
-        /* Body Styling */
-        body { 
-            width: 300px; 
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            padding: 15px; 
+        body {
+            width: 320px;
+            margin: 0;
+            padding: 16px;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 14px;
             background-color: var(--background);
             color: var(--foreground);
-            font-size: var(--base-font-size); 
-            transition: background-color 0.3s;
-        }
-        
-        /* Header Styles */
-        #header-container {
-            display: flex;
-            justify-content: space-between; 
-            align-items: center;
-            margin-bottom: 20px;
-            position: relative;
-        }
-        
-        /* Theme Toggle (Left) */
-        #theme-toggle-btn {
-            position: absolute;
-            left: 0;
-            top: 0;
-            z-index: 10;
         }
 
-        /* Logout (Right) */
-        #header-logout-btn {
-            position: absolute;
-            right: 0;
-            top: 0;
-            z-index: 10;
+        .hidden {
+            display: none !important;
         }
-        
-        #title-group {
-            flex-grow: 1;
-            text-align: center;
-            padding: 0;
-            margin: 0 auto; 
+
+        /* Header */
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 12px;
+            margin-bottom: 14px;
+            border-bottom: 1px solid var(--border);
         }
-        
-        h2 { 
+
+        .brand {
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: 700;
             background-image: linear-gradient(to right, var(--gradient-start), var(--gradient-end));
             -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
             background-clip: text;
             color: transparent;
-            font-size: 1.65em; 
-            font-weight: 700;
-            margin: 0;
-            line-height: 1.2;
-        }
-        
-        h3 { 
-            color: var(--muted-foreground, #a0a0a0); 
-            font-size: 1.1em; 
-            font-weight: 500;
-            margin-top: 2px;
-            margin-bottom: 0; 
         }
 
-        /* Base style for Logout and Theme Toggle */
-        .header-control-btn {
-            background-color: transparent;
-            border: 1px solid var(--border);
-            color: var(--foreground);
-            padding: 5px 6px; 
-            width: auto;
-            transition: background-color 0.2s, border-color 0.2s, color 0.2s;
-            line-height: 1;
-            font-size: 1em; 
-            font-weight: 500;
-            cursor: pointer;
-            border-radius: 6px;
-            display: flex; 
+        .brand-sub {
+            font-size: 12px;
+            color: var(--muted-foreground);
+        }
+
+        .header-actions {
+            display: flex;
             align-items: center;
-            gap: 4px; 
+            gap: 4px;
         }
 
-        .header-control-btn:hover {
-            background-color: var(--secondary); 
-            border-color: var(--border);
+        .icon-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            height: 30px;
+            padding: 0 8px;
+            border: none;
+            border-radius: 6px;
+            background: transparent;
+            color: var(--muted-foreground);
+            font: inherit;
+            font-size: 13px;
+            cursor: pointer;
         }
 
-        /* Styling for the Logout button */
-        #header-logout-btn {
-            color: var(--destructive);
-            border-color: var(--destructive);
-        }
-        
-        #header-logout-btn:hover {
-            background-color: var(--destructive);
-            color: var(--destructive-foreground);
-        }
-        
-        /* Styling for the Theme Toggle button */
-        #theme-toggle-btn {
-            gap: 0;
-            padding: 5px 6px;
+        .icon-btn:hover {
+            background-color: var(--hover);
             color: var(--foreground);
         }
 
-        .header-control-btn svg {
-            width: 14px; 
-            height: 14px;
-            display: block; 
-            stroke: currentColor;
+        .icon-btn svg {
+            width: 16px;
+            height: 16px;
         }
-        
-        /* Form Styles */
-        label { 
-            display: block; 
-            margin-top: 12px; 
-            margin-bottom: 4px;
-            font-weight: 600; 
-            font-size: 1em; 
-            color: var(--foreground);
+
+        /* Form */
+        label {
+            display: block;
+            margin: 12px 0 6px;
+            font-size: 13px;
+            font-weight: 500;
         }
-        
-        input[type="text"], 
-        input[type="password"] { 
+
+        .optional {
+            color: var(--muted-foreground);
+            font-weight: 400;
+        }
+
+        input[type="text"],
+        input[type="password"] {
             width: 100%;
-            box-sizing: border-box; 
-            padding: 10px;
-            border: 1px solid var(--border);
-            border-radius: 6px; 
-            font-size: 1em; 
-            transition: border-color 0.2s, background-color 0.2s;
-            background-color: var(--input);
+            box-sizing: border-box;
+            height: 36px;
+            padding: 0 12px;
+            border: 1px solid var(--input-border);
+            border-radius: 8px;
+            background-color: var(--input-bg);
             color: var(--foreground);
+            font: inherit;
+        }
+
+        input::placeholder {
+            color: var(--muted-foreground);
         }
 
         input:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 2px rgba(126, 34, 206, 0.4); 
+            box-shadow: 0 0 0 3px rgba(126, 34, 206, 0.35);
         }
 
-        /* Button Styles */
-        button {
-            width: 100%;
-            padding: 10px 15px;
-            color: var(--primary-foreground);
-            font-weight: 600;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            margin-top: 15px;
-            transition: background-color 0.2s;
-        }
-        
-        button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
-        /* Button Colors */
-        #loginBtn, #submitBtn { 
-            background-color: var(--primary); 
-        }
-        #loginBtn:hover:not(:disabled), #submitBtn:hover:not(:disabled) { 
-            background-color: #6a1aae;
-        }
-        
-        #initiateBtn { 
-            background-color: var(--gradient-end); 
-        } 
-        #initiateBtn:hover:not(:disabled) { 
-            background-color: #a51d5a;
-        }
-        
-        /* Hidden Class */
-        .hidden { 
-            display: none !important; 
-        }
-        
-        /* Status Styles */
-        .alert {
-            padding: 10px;
-            margin-top: 15px;
-            border-radius: 6px;
-            font-size: 1em; 
-            font-weight: 500;
-            border: 1px solid transparent;
-            word-wrap: break-word; 
-        }
-
-        .alert-error {
-            background-color: var(--error-bg); 
-            color: var(--error-red); 
-            border-color: var(--error-red);
-        }
-
-        .alert-success {
-            background-color: var(--success-bg); 
-            color: var(--success-green); 
-            border-color: var(--success-green);
-        }
-
-        .alert-info {
-            background-color: var(--info-background); 
-            color: var(--info-color); 
-            border-color: var(--info-border);
-        }
-
-        /* Login description */
-        .description { 
-            font-size: 1em; 
-            margin-bottom: 10px;
-            color: var(--muted-foreground, #a0a0a0);
-        }
-
-        /* Custom Input Validation Error */
-        .validation-error {
-            display: block;
-            color: var(--error-red); 
-            font-size: 0.9em; 
-            margin-top: 4px;
-            font-weight: 500;
-        }
-
-        /* Style for Password Field */
-        .input-with-icon-wrapper {
+        .password-wrapper {
             position: relative;
-            width: 100%;
-            margin-bottom: 4px;
         }
 
-        .input-with-icon-wrapper input {
-            width: 100%;
+        .password-wrapper input {
+            padding-right: 40px;
         }
 
-        /* Style for the password toggle button */
         .password-toggle-btn {
             position: absolute;
-            right: 1px; 
-            top: 50%;
-            transform: translateY(-50%);
-            background: transparent;
+            top: 0;
+            right: 0;
+            height: 36px;
+            padding: 0 12px;
             border: none;
-            color: var(--muted-foreground, #a0a0a0); 
-            padding: 0 10px;
-            height: 100%;
-            width: auto;
+            background: transparent;
+            color: var(--muted-foreground);
             cursor: pointer;
-            margin: 0;
         }
 
         .password-toggle-btn:hover {
             color: var(--foreground);
-            background-color: transparent;
         }
 
         .password-toggle-btn svg {
-            width: 18px;
-            height: 18px;
+            width: 16px;
+            height: 16px;
             display: block;
         }
 
-        .input-with-icon-wrapper input[type="text"], 
-        .input-with-icon-wrapper input[type="password"] {
-            padding-right: 40px; 
+        .primary-btn {
+            width: 100%;
+            height: 38px;
+            margin-top: 16px;
+            border: none;
+            border-radius: 8px;
+            background-color: var(--primary);
+            color: var(--primary-foreground);
+            font: inherit;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .primary-btn:hover:not(:disabled) {
+            background-color: var(--primary-hover);
+        }
+
+        .primary-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Text and status */
+        .description {
+            margin: 0 0 4px;
+            color: var(--muted-foreground);
+            line-height: 1.45;
+        }
+
+        .section-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .section-title {
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: var(--muted-foreground);
+        }
+
+        .link-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 0;
+            border: none;
+            background: none;
+            color: var(--link);
+            font: inherit;
+            font-size: 13px;
+            cursor: pointer;
+        }
+
+        .link-btn:hover {
+            text-decoration: underline;
+        }
+
+        .link-btn svg {
+            width: 13px;
+            height: 13px;
+        }
+
+        .status {
+            margin: 10px 0 0;
+            font-size: 13px;
+            line-height: 1.45;
+            color: var(--muted-foreground);
+        }
+
+        .status-error {
+            color: var(--error);
+        }
+
+        .status-success {
+            color: var(--success);
+        }
+
+        .validation-error {
+            display: block;
+            margin-top: 4px;
+            color: var(--error);
+            font-size: 12px;
+        }
+
+        .account-links {
+            margin-top: 14px;
+            text-align: center;
+            font-size: 13px;
+            color: var(--muted-foreground);
+            line-height: 1.8;
+        }
+
+        a {
+            color: var(--link);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        a:hover {
+            text-decoration: underline;
         }
 
         .shortcut-hint {
-            margin-top: 16px;
-            font-size: 0.85em;
-            line-height: 1.4;
-            color: var(--muted-foreground, #a0a0a0);
+            margin: 16px 0 0;
+            padding-top: 12px;
+            border-top: 1px solid var(--border);
+            font-size: 12px;
+            color: var(--muted-foreground);
             text-align: center;
         }
 
         .shortcut-hint kbd {
-            display: inline-block;
             padding: 1px 5px;
             border: 1px solid var(--border);
             border-radius: 4px;
-            background: var(--secondary);
             font-family: inherit;
-            font-size: 0.95em;
+            font-size: 11px;
         }
     </style>
 </head>
- 
-<body class="dark"> 
-    <div id="header-container">
-        <button id="theme-toggle-btn" class="header-control-btn" title="Toggle Theme">
-            <svg id="moon-icon" class="hidden" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-moon"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
-            <svg id="sun-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sun"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
-        </button>
 
-        <div id="title-group">
-            <h2>JobLog</h2>
-            <h3>Quick Add</h3>
+<body class="dark">
+    <header>
+        <div class="brand">
+            <span class="logo">JobLog</span>
+            <span class="brand-sub">Quick Add</span>
         </div>
-        
-        <button id="header-logout-btn" class="header-control-btn hidden" title="Log Out">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-out"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
-            <span>Log Out</span>
-        </button>
-    </div>
+        <div class="header-actions">
+            <button id="theme-toggle-btn" class="icon-btn" title="Toggle theme">
+                <svg id="moon-icon" class="hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+                <svg id="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+            </button>
+            <button id="header-logout-btn" class="icon-btn hidden" title="Log out">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+                Log out
+            </button>
+        </div>
+    </header>
 
     <div id="loginContainer">
-        <form id="loginForm">
-            <p class="description">Log in to seamlessly add job postings from LinkedIn, Seek, and Indeed.</p>
+        <form id="loginForm" novalidate>
+            <p class="description">Log in to add jobs from LinkedIn, Seek and Indeed in one click.</p>
+
             <label for="email">Email</label>
-            <input type="text" id="email" name="email" placeholder="jobseeker@example.com"> <span id="emailError" class="validation-error hidden"></span>
+            <input type="text" id="email" name="email" placeholder="jobseeker@example.com" autocomplete="email">
+            <span id="emailError" class="validation-error hidden"></span>
 
             <label for="password">Password</label>
-            <div class="input-with-icon-wrapper"> 
-                <input type="password" id="password" name="password" placeholder="Enter your password"> 
-                
-                <button type="button" id="password-toggle" class="password-toggle-btn" title="Show Password">
-                    <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-                    <svg id="eye-off-icon" class="hidden" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye-off"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.7 9.7 0 0 0 5.6-1.71"/><line x1="2" x2="22" y1="2" y2="22"/></svg>
+            <div class="password-wrapper">
+                <input type="password" id="password" name="password" placeholder="Enter your password" autocomplete="current-password">
+                <button type="button" id="password-toggle" class="password-toggle-btn" title="Show password">
+                    <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                    <svg id="eye-off-icon" class="hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.7 9.7 0 0 0 5.6-1.71"/><line x1="2" x2="22" y1="2" y2="22"/></svg>
                 </button>
             </div>
             <span id="passwordError" class="validation-error hidden"></span>
 
-            <p id="loginStatus" class="alert hidden"></p>
+            <p id="loginStatus" class="status hidden"></p>
 
-            <button type="submit" id="loginBtn">Log In</button>
+            <button type="submit" id="loginBtn" class="primary-btn">Log In</button>
         </form>
+
+        <div class="account-links">
+            <a href="https://joblog.athulthampan.com/forgot-password" target="_blank" rel="noopener noreferrer">Forgot password?</a><br>
+            Don't have an account?
+            <a href="https://joblog.athulthampan.com/register" target="_blank" rel="noopener noreferrer">Sign up</a>
+        </div>
     </div>
 
     <div id="jobAddContainer" class="hidden">
-        <button id="initiateBtn">Add Job Details</button>
-        <p id="statusMessage" class="alert alert-info"></p>
+        <div class="section-row">
+            <span class="section-title">Job details</span>
+            <button type="button" id="rescanBtn" class="link-btn" title="Read the job details from this page again">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+                Rescan page
+            </button>
+        </div>
+        <p id="statusMessage" class="status"></p>
 
         <div id="jobFormContainer" class="hidden">
-            <form id="jobForm">
+            <form id="jobForm" novalidate>
                 <label for="company">Company</label>
-                <input type="text" id="company" name="company" placeholder="Company Name"> <span id="companyError" class="validation-error hidden"></span>
+                <input type="text" id="company" name="company" placeholder="Company name">
+                <span id="companyError" class="validation-error hidden"></span>
 
-                <label for="role">Role/Title</label>
-                <input type="text" id="role" name="role" placeholder="Job Title"> <span id="roleError" class="validation-error hidden"></span>
+                <label for="role">Role</label>
+                <input type="text" id="role" name="role" placeholder="Job title">
+                <span id="roleError" class="validation-error hidden"></span>
 
-                <label for="link">Job Posting URL (Optional)</label>
-                <input type="text" id="link" name="link" placeholder="https://..">
+                <label for="link">Job posting URL <span class="optional">(optional)</span></label>
+                <input type="text" id="link" name="link" placeholder="https://...">
 
-                <label for="notes">Notes (Optional)</label>
-                <input type="text" id="notes" name="notes" placeholder="Location, salary, or other details (optional)">
-                
-                <button type="submit" id="submitBtn">Save Application</button>
+                <label for="notes">Notes <span class="optional">(optional)</span></label>
+                <input type="text" id="notes" name="notes" placeholder="Location, salary or other details">
+
+                <button type="submit" id="submitBtn" class="primary-btn">Save Application</button>
             </form>
         </div>
     </div>
 
     <p class="shortcut-hint">
-        Shortcuts: <kbd>Ctrl/Cmd+J</kbd> open &amp; scrape · <kbd>Ctrl/Cmd+Shift+J</kbd> save while popup is open
+        <kbd>Ctrl/Cmd+J</kbd> open on a job page · <kbd>Ctrl/Cmd+Enter</kbd> save
     </p>
-    
+
     <script src="popup.js"></script>
 </body>
 </html>

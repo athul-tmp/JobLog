@@ -59,7 +59,7 @@ It is designed to provide clarity, organisation, and insights throughout the job
 * **Seamless Capture:** One-click scraping of job details (Company, Role, URL) from major boards like LinkedIn, Seek, and Indeed.
 * **Secure Integration:** Directly communicates with the JobLog API using stored JWT tokens to log applications immediately, renewing the session whenever the popup opens.
 * **Live Sync:** New applications added via the extension appear on the open Applications page without a manual refresh (SignalR).
-* **User Experience:** Includes theme syncing (Dark/Light Mode) and auto-closing on successful submission.
+* **User Experience:** Styled to match the web app, with dark/light themes, keyboard shortcuts (Ctrl/Cmd+J to open, Ctrl/Cmd+Enter to save), sign-up and password reset links, and auto-closing on successful submission.
 
 ### UI / UX
 * **Modern Design:** Built with **Tailwind CSS** and **shadcn/ui**.

@@ -56,6 +56,28 @@ jobs:
           push: true
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
 
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      # Applies any pending EF Core migrations to the production database before the new image goes live
+      - name: Build Migrations Bundle
+        working-directory: ./backend
+        env:
+          # Placeholders so Program.cs can start while EF reads the model; nothing connects with them
+          Jwt__Key: migrations-bundle-build-placeholder-key
+          ConnectionStrings__DefaultConnection: Host=localhost
+        run: |
+          dotnet tool install --global dotnet-ef --version 8.0.*
+          dotnet ef migrations bundle --output ./efbundle --force
+
+      - name: Apply Database Migrations
+        working-directory: ./backend
+        env:
+          DB_CONNECTION: ${{ secrets.NEON_CONNECTION_STRING }}
+        run: ./efbundle --connection "$DB_CONNECTION"
+
       - name: Login to Azure
         uses: azure/login@v2
         with:

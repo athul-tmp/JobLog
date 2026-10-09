@@ -176,7 +176,7 @@ The extension popup, demonstrating successful data capture and theme responsiven
 * **Frontend:** Hosted on **Vercel**.
 * **Backend:** Containerised and deployed on **Azure Container Apps**.
 * **Database:** **Neon PostgreSQL**.
-* **CI/CD:** Automated deployment via **GitHub Actions**.
+* **CI/CD:** Automated deployment via **GitHub Actions**. Pending EF Core migrations are applied to the production database (as a migrations bundle) before each new backend image goes live.
 * **Domain:** Managed via **Cloudflare** for DNS.
 
 ---

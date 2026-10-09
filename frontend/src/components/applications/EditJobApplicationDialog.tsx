@@ -21,10 +21,10 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { format } from "date-fns";
 import { JobApplicationService } from "@/services/api";
 import { JobApplication, UpdateJobApplicationRequest } from "@/types/types";
 import { Loader2 } from 'lucide-react';
+import StatusTimeline from './StatusTimeline';
 import { toast } from 'sonner';
 
 // Schema for validation
@@ -104,23 +104,20 @@ export default function EditJobApplicationDialog({ job, isOpen, onClose, onJobUp
     };
     
     // Calculate the date applied in a readable format
-    const formattedDateApplied = format(new Date(job.dateApplied), "MMM d, yyyy 'at' h:mm a");
 
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="sm:max-w-[500px]">
+            <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle className="text-xl">Edit Application #{job.applicationNo}</DialogTitle>
                     <DialogDescription>
                         Enter the new details for the job application.
                     </DialogDescription>
                 </DialogHeader>
-                <div className="text-sm text-muted-foreground mb-4 -mt-3">
-                    Applied on: {formattedDateApplied}
-                    <div className="font-semibold text-foreground capitalize">
-                        Status: {job.status}
-                    </div>
+                <div className="-mt-1 mb-2 rounded-lg border p-3">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">Status history</p>
+                    <StatusTimeline history={job.statusHistory} />
                 </div>
                 
                 <Form {...form}>

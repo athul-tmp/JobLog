@@ -4,7 +4,7 @@ import { BellRing, Chrome, Clock, GitBranch, LineChart, ShieldCheck, Workflow } 
 
 const GITHUB_URL = "https://github.com/athul-tmp/JobLog";
 
-const FEATURES = [
+const FEATURES: { icon: typeof Workflow; title: string; text: string; link?: { href: string; label: string } }[] = [
     {
         icon: Workflow,
         title: "See where applications go",
@@ -19,6 +19,7 @@ const FEATURES = [
         icon: Chrome,
         title: "Add jobs in one click",
         text: "The Chrome extension saves jobs from LinkedIn, Seek and Indeed while you browse.",
+        link: { href: "#extension", label: "See the extension" },
     },
     {
         icon: Clock,
@@ -37,57 +38,65 @@ const FEATURES = [
     },
 ];
 
-// Feature overview and the free / open source / private message for the landing page
+// Feature overview for the landing page
 export default function LandingFeatures() {
     return (
-        <>
-            <section className="border-t bg-muted/30">
-                <div className="container mx-auto max-w-6xl px-6 py-16 sm:py-20">
-                    <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-center">
-                        Everything you need to run your job search
-                    </h2>
-                    <p className="mt-3 text-center text-muted-foreground max-w-2xl mx-auto">
-                        JobLog turns a pile of applications into a clear picture of what&apos;s working and what to do next.
-                    </p>
+        <section className="border-t bg-muted/30">
+            <div className="container mx-auto max-w-6xl px-6 py-16 sm:py-20">
+                <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-center">
+                    Everything you need to run your job search
+                </h2>
+                <p className="mt-3 text-center text-muted-foreground max-w-2xl mx-auto">
+                    JobLog turns a pile of applications into a clear picture of what&apos;s working and what to do next.
+                </p>
 
-                    <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                        {FEATURES.map(feature => (
-                            <div key={feature.title} className="rounded-xl border bg-card p-6">
-                                <feature.icon className="h-6 w-6 text-purple-500" />
-                                <h3 className="mt-4 font-semibold text-lg">{feature.title}</h3>
-                                <p className="mt-2 text-sm text-muted-foreground">{feature.text}</p>
-                            </div>
-                        ))}
-                    </div>
+                <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                    {FEATURES.map(feature => (
+                        <div key={feature.title} className="rounded-xl border bg-card p-6">
+                            <feature.icon className="h-6 w-6 text-purple-500" />
+                            <h3 className="mt-4 font-semibold text-lg">{feature.title}</h3>
+                            <p className="mt-2 text-sm text-muted-foreground">{feature.text}</p>
+                            {feature.link && (
+                                <a href={feature.link.href} className="mt-3 inline-block text-sm font-medium text-primary dark:text-purple-400 hover:underline">
+                                    {feature.link.label} &rarr;
+                                </a>
+                            )}
+                        </div>
+                    ))}
                 </div>
-            </section>
+            </div>
+        </section>
+    );
+}
 
-            <section className="border-t">
-                <div className="container mx-auto max-w-4xl px-6 py-14 text-center">
-                    <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">Free, open source and private</h2>
-                    <p className="mt-3 text-muted-foreground">
-                        JobLog is free to use and its code is open source. There are no ads and no tracking, and your data is never sold.
-                    </p>
-                    <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-x-6 gap-y-3 text-sm font-medium">
-                        <a
-                            href={GITHUB_URL}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center text-muted-foreground hover:text-foreground transition-colors"
-                        >
-                            <GitBranch className="mr-2 h-4 w-4 text-purple-500" />
-                            View the code on GitHub
-                        </a>
-                        <Link
-                            href="/privacy&terms"
-                            className="inline-flex items-center text-muted-foreground hover:text-foreground transition-colors"
-                        >
-                            <ShieldCheck className="mr-2 h-4 w-4 text-purple-500" />
-                            Read the privacy policy
-                        </Link>
-                    </div>
+// The free / open source / private message for the landing page
+export function LandingOpenSource() {
+    return (
+        <section className="border-t bg-muted/30">
+            <div className="container mx-auto max-w-4xl px-6 py-14 text-center">
+                <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">Free, open source and private</h2>
+                <p className="mt-3 text-muted-foreground">
+                    JobLog is free to use and its code is open source. There are no ads and no tracking, and your data is never sold.
+                </p>
+                <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-x-6 gap-y-3 text-sm font-medium">
+                    <a
+                        href={GITHUB_URL}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                        <GitBranch className="mr-2 h-4 w-4 text-purple-500" />
+                        View the code on GitHub
+                    </a>
+                    <Link
+                        href="/privacy&terms"
+                        className="inline-flex items-center text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                        <ShieldCheck className="mr-2 h-4 w-4 text-purple-500" />
+                        Read the privacy policy
+                    </Link>
                 </div>
-            </section>
-        </>
+            </div>
+        </section>
     );
 }

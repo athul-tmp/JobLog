@@ -12,7 +12,8 @@ import { toast } from "sonner";
 import { WakingUpMessage } from "@/components/LoadingScreen";
 
 import { CHROME_EXTENSION_URL } from "@/lib/links";
-import LandingFeatures from "@/components/landing/LandingFeatures";
+import LandingFeatures, { LandingOpenSource } from "@/components/landing/LandingFeatures";
+import LandingExtension from "@/components/landing/LandingExtension";
 
 export default function LandingPageContent() {
   const { isAuthenticated, authLoading, startDemo } = useAuth();
@@ -61,9 +62,6 @@ export default function LandingPageContent() {
                       JobLog is a job application tracker with detailed analytics that helps you stay organised and focused while you apply for jobs. 
                       Track every application, stay on top of interviews, and turn your job search into a clear, data-driven journey.
                   </p>
-                  <p className="mt-4 text-lg md:text-xl text-muted-foreground">
-                      Power your search with the official JobLog: Quick Add Chrome Extension.
-                  </p>
                   
                   <div className="mt-8">
                       {/* Primary CTAs */}
@@ -87,15 +85,15 @@ export default function LandingPageContent() {
                       <WakingUpMessage isActive={authLoading} />
 
                       {/* Secondary CTA: Extension Link */}
-                      <div className="pt-2">
+                      <div className="pt-2 flex justify-center md:justify-start">
                         <a 
                             href={CHROME_EXTENSION_URL} 
                             target="_blank" 
                             rel="noopener noreferrer" 
-                            className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                            className="inline-flex items-center rounded-full border border-purple-500/40 bg-purple-500/10 px-4 py-1.5 text-sm font-medium text-foreground hover:bg-purple-500/20 transition-colors"
                         >
-                            <Chrome className="mr-2 h-4 w-4 text-purple-500" />
-                            Install the Free JobLog: Quick Add Extension
+                            <Chrome className="mr-2 h-4 w-4 text-purple-600 dark:text-purple-400" />
+                            Add the Chrome extension, it&apos;s free
                         </a>
                       </div>
                   </div>
@@ -110,9 +108,11 @@ export default function LandingPageContent() {
         </section>
 
         <LandingFeatures />
+        <LandingExtension />
+        <LandingOpenSource />
 
         {/* Final call to action */}
-        <section className="border-t bg-muted/30">
+        <section className="border-t">
           <div className="container mx-auto max-w-3xl px-6 py-16 text-center">
             <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">Ready to get organised?</h2>
             <p className="mt-3 text-muted-foreground">Create a free account, or explore a private demo with sample data first.</p>

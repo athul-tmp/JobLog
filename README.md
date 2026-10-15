@@ -65,7 +65,7 @@ It is designed to provide clarity, organisation, and insights throughout the job
 
 ### UI / UX
 * **Modern Design:** Built with **Tailwind CSS** and **shadcn/ui**.
-* **Experience:** Fully responsive design (wide charts scroll sideways on phones), dark/light mode themes, and a landing page with a screenshot carousel and feature overview.
+* **Experience:** Fully responsive design (wide charts scroll sideways on phones), dark/light mode themes, and a landing page with a screenshot carousel, feature overview and Chrome extension showcase.
 * **Getting Started:** New accounts see a short getting-started guide instead of empty charts.
 * **Accessibility:** Status badges meet WCAG AA colour contrast.
 * **Cold-Start Handling:** The landing page, login page and extension ping a health endpoint on load, so the serverless backend is already waking up by the time you log in.
